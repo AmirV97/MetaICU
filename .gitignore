@@ -1,0 +1,37 @@
+# Python/cache artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Local environments and editor files
+.venv/
+.env
+.env.*
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Generated outputs and logs
+audits/
+outputs/
+logs/
+*.log
+
+# User-provided external/data folders
+AUMC_raw/
+externals/
+amsterdam_external/
+omop_vocab/
+
+# Large model/data artifacts
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.h5
+*.hdf5

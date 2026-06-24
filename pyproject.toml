@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aumc-pipeline"
+version = "0.1.0"
+description = "AmsterdamUMCdb vocabulary preparation and MEDS conversion utilities"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Amir Vahdani", email = "a.m.vahdani@gmail.com" }]
+dependencies = [
+  "hydra-core>=1.3",
+  "omegaconf>=2.3",
+  "pandas>=2.0",
+  "polars>=1.0",
+  "pyarrow>=14.0",
+  "PyYAML>=6.0",
+]
+
+[project.scripts]
+build-amsterdam-vocab = "aumc_pipeline.cli.build_amsterdam_vocab:main"
+retrieve-aumc-externals = "aumc_pipeline.cli.retrieve_externals:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aumc_pipeline = ["configs/*.yaml"]

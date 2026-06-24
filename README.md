@@ -125,3 +125,4 @@ Audit files are written under:
 - The current package builds the supplied vocabulary only.
 - MEDS conversion and tokenizer-facing processing are separate next-stage work.
 - Detailed resource notes are in `docs/amsterdam_vocab_documentation.md`.
+- Vocabulary schema and modeling decisions are in `docs/policy_decisions.md`.

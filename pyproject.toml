@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aumc-pipeline"
 version = "0.1.0"
-description = "AmsterdamUMCdb vocabulary preparation and MEDS conversion utilities"
+description = "AmsterdamUMCdb supplied-vocabulary preparation utilities"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Amir Vahdani", email = "a.m.vahdani@gmail.com" }]

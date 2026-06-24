@@ -21,7 +21,7 @@ mkdir -p /path/to/aumc_workspace
 Clone this repository, or use an existing checkout:
 
 ```bash
-git clone <repo-url> /path/to/AUMC_pipeline
+git clone https://github.com/AmirV97/AUMCdb_pipeline.git /path/to/AUMC_pipeline
 cd /path/to/AUMC_pipeline
 ```
 

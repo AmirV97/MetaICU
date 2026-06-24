@@ -9,7 +9,7 @@ python scripts/retrieve_externals.py \
   --parent-dir /path/to/aumc_workspace
 ```
 
-The OMOP/Athena vocabulary export must be downloaded manually from Athena because it requires a user account and vocabulary/license selection. The user-facing build command then receives both roots explicitly:
+The OMOP/Athena vocabulary export must be downloaded manually from Athena because it requires a user account and vocabulary/license selection. The user-facing build command receives the workspace root:
 
 ```bash
 python scripts/build_amsterdam_vocab.py \
@@ -27,7 +27,7 @@ Expected path placeholders used below:
 
 | Resource family | Upstream source | Expected relative path | Required? | Key files | How it is used |
 |---|---|---|---|---|---|
-| AMSTEL mappings | AMSTEL AmsterdamUMCdb-to-OMOP mapping assets. Repository/source location should be recorded with the downloaded copy. | `{external_root}/AMSTEL/data/mappings/` | Required | `*.usagi.csv`, `source_to_concept_map.csv`, `source_to_value_map.csv`, `local_vocabularies.yaml` | Provides OMOP/standard-concept candidates from USAGI and AMSTEL source-to-concept/value maps. Used for item/value/unit/order-category mapping evidence. |
+| AMSTEL mappings | [AmsterdamUMC/AMSTEL](https://github.com/AmsterdamUMC/AMSTEL) AmsterdamUMCdb-to-OMOP mapping assets. | `{external_root}/AMSTEL/data/mappings/` | Required | `*.usagi.csv`, `source_to_concept_map.csv`, `source_to_value_map.csv`, `local_vocabularies.yaml` | Provides OMOP/standard-concept candidates from USAGI and AMSTEL source-to-concept/value maps. Used for item/value/unit/order-category mapping evidence. |
 | AMSTEL source concepts | AMSTEL source concept tables distributed with the AMSTEL mapping assets. | `{external_root}/AMSTEL/data/source_concepts/` | Required | `drugitems_item.csv`, `drugitems_ordercategory.csv`, `listitems_item.csv`, `listitems_value.csv`, `numericitems_lab.csv`, `numericitems_other.csv`, `numericitems_tag.csv`, `numericitems_unit.csv`, `freetextitems_item.csv`, `freetextitems_values.csv`, `processitems_item.csv`, `procedureorderitems_item.csv` | Provides Amsterdam source vocabulary metadata, source codes, labels, approved/unmatched status, ATC/source-code evidence, and table-specific context. |
 | Official AmsterdamUMCdb current dictionary | [AmsterdamUMC/AmsterdamUMCdb](https://github.com/AmsterdamUMC/AmsterdamUMCdb). Equivalent in purpose to `amsterdamumcdb.get_dictionary(legacy=False)`. | `{external_root}/AmsterdamUMCdb/amsterdamumcdb/dictionary/dictionary.csv` | Required | `dictionary.csv` | Provides official Amsterdam source concepts mapped to OHDSI vocabularies where available, including concept IDs, names, vocabulary IDs, mapping status, and equivalence. |
 | Official AmsterdamUMCdb legacy dictionary | [AmsterdamUMC/AmsterdamUMCdb](https://github.com/AmsterdamUMC/AmsterdamUMCdb). Equivalent in purpose to `amsterdamumcdb.get_dictionary(legacy=True)`. | `{external_root}/AmsterdamUMCdb/amsterdamumcdb/dictionary/legacy/dictionary.csv` | Required | `dictionary.csv` | Provides legacy/raw-table item, value, and unit metadata, English labels, categories, expected ranges, and source-table context. |

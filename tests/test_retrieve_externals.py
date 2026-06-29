@@ -15,7 +15,7 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.cli.retrieve_externals import ATHENA_REQUIRED_FILES, ATHENA_VOCABULARIES, EXTERNAL_REPOS
+from aumc_pipeline.cli.retrieve_externals import ATHENA_REQUIRED_FILES, ATHENA_VOCABULARIES, EXTERNAL_REPOS, write_external_versions
 
 
 class RetrieveExternalsTests(unittest.TestCase):
@@ -67,6 +67,31 @@ class RetrieveExternalsTests(unittest.TestCase):
                 self.assertIn(vocab, text)
             for filename in ATHENA_REQUIRED_FILES:
                 self.assertIn(filename, text)
+
+    def test_external_versions_records_git_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            external_root = Path(tmpdir) / "externals"
+            repo_dir = external_root / "AMSTEL"
+            repo_dir.mkdir(parents=True)
+            subprocess.run(["git", "init"], cwd=repo_dir, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.email", "fixture@example.com"], cwd=repo_dir, check=True)
+            subprocess.run(["git", "config", "user.name", "Fixture"], cwd=repo_dir, check=True)
+            (repo_dir / "README.md").write_text("fixture\n")
+            subprocess.run(["git", "add", "README.md"], cwd=repo_dir, check=True)
+            subprocess.run(["git", "commit", "-m", "fixture"], cwd=repo_dir, check=True, capture_output=True, text=True)
+
+            repo = next(repo for repo in EXTERNAL_REPOS if repo.name == "AMSTEL")
+            versions = write_external_versions(
+                external_root,
+                [repo],
+                [{"name": "AMSTEL", "path": str(repo_dir), "status": "exists", "url": repo.url}],
+            )
+            payload = json.loads(versions.read_text())
+            record = payload["repositories"][0]
+            self.assertEqual(record["name"], "AMSTEL")
+            self.assertTrue(record["is_git_repo"])
+            self.assertTrue(record["commit"])
+            self.assertFalse(record["dirty"])
 
 
 if __name__ == "__main__":

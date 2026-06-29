@@ -138,6 +138,7 @@ def run_build_vocab(cfg: DictConfig) -> dict[str, Path]:
         output_vocab=output_vocab,
         dataset=str(cfg.source_vocab.dataset),
         max_rows_per_table=cfg.source_vocab.max_rows_per_table,
+        overwrite=bool(OmegaConf.select(cfg, "run.overwrite", default=False)),
     )
     return write_build_vocab_outputs(config)
 

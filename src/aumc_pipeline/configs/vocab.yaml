@@ -16,6 +16,9 @@ paths:
   mapping_evidence: audits/vocab_pipeline_mapping_evidence.csv
   candidates: audits/vocab_pipeline_candidates.csv
 
+run:
+  overwrite: false
+
 source_vocab:
   dataset: AmsterdamUMCdb
   input_format: raw

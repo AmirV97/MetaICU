@@ -50,7 +50,8 @@ The vocabulary is source-preserving: every Amsterdam source token is kept, even 
 - Labs are identified by Amsterdam source token prefix `LAB//`, not by LOINC alone. These use `token_role=dynamic_event/lab`.
 - Non-lab LOINC-backed rows, such as fluid-output concepts, are not labeled as labs.
 - Diagnosis/context rows are static clinical context. Runtime should deduplicate repeated diagnosis facts per admission.
-- BPS/GCS component rows are not emitted directly. Runtime may derive total scores when complete component bundles are available.
+- GCS eye/motor/verbal component rows are emitted directly as `dynamic_event/score_component`, following OpenICU-style component concepts. Runtime should not derive a GCS total by default.
+- BPS component rows are not emitted directly; a later runtime stage may derive total BPS when complete component bundles are available.
 - High-frequency numeric streams should be binned before MEDS/tokenization in later runtime stages.
 - All emitted non-medication numeric values should later be converted to train-split quantile tokens.
 

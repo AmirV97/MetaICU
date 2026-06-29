@@ -61,6 +61,8 @@ python /path/to/AUMC_pipeline/scripts/build_amsterdam_vocab.py \
 /path/to/aumc_workspace/externals/
 ```
 
+The script also writes `externals/external_versions.json` with branch and commit metadata for retrieved Git repositories.
+
 The script does not download the Athena/OMOP export. Download it manually from:
 
 ```text
@@ -105,7 +107,17 @@ Audit/debug outputs:
 /path/to/aumc_workspace/outputs/audits/
 ```
 
-The build prints progress for the four substeps: source vocabulary extraction, evidence normalization, candidate map construction, and supplied-vocabulary writing.
+Important audit files include:
+
+```text
+run_config.json
+build_vocab_summary.json
+vocab_pipeline_source_vocab.csv
+vocab_pipeline_mapping_evidence.csv
+vocab_pipeline_candidates.csv
+```
+
+The build prints progress for preflight plus the four substeps: source vocabulary extraction, evidence normalization, candidate map construction, and supplied-vocabulary writing. If `aumc_supplied_vocab.csv` already exists, the command stops by default; add `run.overwrite=true` only when you intentionally want to replace it.
 
 ## Tests
 
@@ -119,9 +131,9 @@ python -m unittest discover -s tests -v
 Current expected result:
 
 ```text
-25 tests passed
+27 tests passed
 ```
 
 ## Not Implemented Yet
 
-The runtime path is next-stage work. It will consume `aumc_supplied_vocab.csv` and implement MEDS conversion, high-frequency numeric binning, numeric quantile tokenization, score derivation, D/APACHE diagnosis handling, medication ATC-depth selection, and tokenization QA.
+The runtime path is next-stage work. It will consume `aumc_supplied_vocab.csv` and implement MEDS conversion, high-frequency numeric binning, numeric quantile tokenization, direct GCS component emission, optional BPS total derivation, D/APACHE diagnosis handling, medication ATC-depth selection, and tokenization QA.

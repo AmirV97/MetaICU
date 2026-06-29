@@ -42,6 +42,8 @@ python /path/to/AUMC_pipeline/scripts/retrieve_externals.py \
   --parent-dir /path/to/aumc_workspace
 ```
 
+The command also writes `externals/external_versions.json` with the branch and commit for each retrieved Git repository.
+
 The workspace layout after this step is:
 
 ```text
@@ -114,10 +116,26 @@ The vocabulary is written to:
 /path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv
 ```
 
+If that file already exists, the command stops by default. To intentionally replace it, add:
+
+```bash
+run.overwrite=true
+```
+
 Audit files are written under:
 
 ```text
 /path/to/aumc_workspace/outputs/audits/
+```
+
+Important audit files include:
+
+```text
+run_config.json
+build_vocab_summary.json
+vocab_pipeline_source_vocab.csv
+vocab_pipeline_mapping_evidence.csv
+vocab_pipeline_candidates.csv
 ```
 
 ## Notes

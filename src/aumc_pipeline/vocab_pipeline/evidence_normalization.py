@@ -11,6 +11,7 @@ from typing import Any, Iterable
 
 import pandas as pd
 
+from aumc_pipeline.vocab_pipeline.policy_common import norm_key
 from aumc_pipeline.vocab_pipeline.resources import sniff_delimiter
 
 
@@ -51,18 +52,6 @@ class EvidenceConfig:
     audit_dir: Path
 
 
-def _norm(value: object) -> str:
-    if value is None or pd.isna(value):
-        return ""
-    text = str(value).strip()
-    if text.endswith(".0"):
-        try:
-            return str(int(float(text)))
-        except ValueError:
-            return text
-    return text
-
-
 def _read_table(path: Path, nrows: int | None = None) -> pd.DataFrame:
     delimiter = "\t" if path.parent.name == "omop_vocab" else sniff_delimiter(path)
     return pd.read_csv(path, sep=delimiter or ",", dtype=str, keep_default_na=False, nrows=nrows, engine="python")
@@ -76,7 +65,7 @@ def _source_table_from_name(name: str) -> str:
 
 
 def _parse_source_code(source_code: object, source_table: str, evidence_source: str) -> dict[str, str]:
-    text = _norm(source_code)
+    text = norm_key(source_code)
     parts = text.split("-") if text else []
     out = {
         "source_itemid": "",
@@ -109,7 +98,7 @@ def _parse_source_code(source_code: object, source_table: str, evidence_source: 
 
 def _blank_row(**kwargs: Any) -> dict[str, str]:
     row = {col: "" for col in EVIDENCE_COLUMNS}
-    row.update({k: _norm(v) for k, v in kwargs.items() if k in row})
+    row.update({k: norm_key(v) for k, v in kwargs.items() if k in row})
     return row
 
 
@@ -422,7 +411,7 @@ def _normalize_blendedicu(external_root: Path) -> list[dict[str, str]]:
                     source_value=rec.get("dataset", ""),
                     mapping_status="drugname_context",
                     match_type="label_context",
-                    evidence_text="count=" + _norm(rec.get("count", "")),
+                    evidence_text="count=" + norm_key(rec.get("count", "")),
                     join_key_status="label_only",
                 )
             )

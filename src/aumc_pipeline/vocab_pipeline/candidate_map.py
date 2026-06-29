@@ -14,6 +14,7 @@ from typing import Any
 import pandas as pd
 
 from aumc_pipeline.vocab_pipeline.evidence_normalization import EVIDENCE_COLUMNS
+from aumc_pipeline.vocab_pipeline.policy_common import norm_key, norm_label_key
 from aumc_pipeline.vocab_pipeline.source_vocab import SOURCE_VOCAB_COLUMNS
 
 
@@ -63,28 +64,6 @@ class CandidateMapConfig:
     audit_dir: Path
 
 
-def _norm(value: object) -> str:
-    """Normalize typed source keys for deterministic equality joins."""
-
-    if value is None or pd.isna(value):
-        return ""
-    text = str(value).strip()
-    if text.endswith(".0"):
-        try:
-            return str(int(float(text)))
-        except ValueError:
-            return text
-    if text.lower() in {"nan", "none", "null"}:
-        return ""
-    return text
-
-
-def _label_norm(value: object) -> str:
-    """Normalize labels for exact context matching only."""
-
-    return " ".join(_norm(value).casefold().split())
-
-
 def _read_csv(path: Path, columns: list[str]) -> pd.DataFrame:
     frame = pd.read_csv(path, dtype=str, keep_default_na=False, low_memory=False)
     missing = sorted(set(columns) - set(frame.columns))
@@ -99,9 +78,9 @@ def load_source_vocab(path: Path) -> pd.DataFrame:
     source = _read_csv(path, SOURCE_VOCAB_COLUMNS)
     for col in SOURCE_VOCAB_COLUMNS:
         if col != "row_count":
-            source[col] = source[col].map(_norm)
+            source[col] = source[col].map(norm_key)
     source["row_count"] = pd.to_numeric(source["row_count"], errors="raise").astype("int64")
-    source["_label_key"] = source["source_label"].map(_label_norm)
+    source["_label_key"] = source["source_label"].map(norm_label_key)
     return source
 
 
@@ -110,8 +89,8 @@ def load_mapping_evidence(path: Path) -> pd.DataFrame:
 
     evidence = _read_csv(path, EVIDENCE_COLUMNS)
     for col in EVIDENCE_COLUMNS:
-        evidence[col] = evidence[col].map(_norm)
-    evidence["_label_key"] = evidence["source_label"].map(_label_norm)
+        evidence[col] = evidence[col].map(norm_key)
+    evidence["_label_key"] = evidence["source_label"].map(norm_label_key)
     return evidence
 
 
@@ -119,7 +98,9 @@ def _empty(columns: list[str]) -> pd.DataFrame:
     return pd.DataFrame(columns=columns)
 
 
-def _no_other_keys(evidence: pd.DataFrame, except_keys: set[str]) -> pd.Series:
+def _evidence_has_no_secondary_key(evidence: pd.DataFrame, except_keys: set[str]) -> pd.Series:
+    """Return rows whose value/unit/ordercategory keys are empty except ignored keys."""
+
     mask = pd.Series(True, index=evidence.index)
     for col in ["source_valueid", "source_unitid", "source_ordercategoryid"]:
         if col not in except_keys:
@@ -177,7 +158,7 @@ def _typed_candidate_frames(source: pd.DataFrame, evidence: pd.DataFrame) -> lis
             ev_table.eq("numericitems")
             & evidence["source_itemid"].ne("")
             & evidence["source_unitid"].eq("")
-            & _no_other_keys(evidence, set()),
+            & _evidence_has_no_secondary_key(evidence, set()),
             ["source_table", "source_itemid"],
             "numeric_item",
             70,
@@ -204,7 +185,7 @@ def _typed_candidate_frames(source: pd.DataFrame, evidence: pd.DataFrame) -> lis
             ev_table.eq("listitems")
             & evidence["source_itemid"].ne("")
             & evidence["source_valueid"].eq("")
-            & _no_other_keys(evidence, set()),
+            & _evidence_has_no_secondary_key(evidence, set()),
             ["source_table", "source_itemid"],
             "list_item",
             70,
@@ -233,7 +214,7 @@ def _typed_candidate_frames(source: pd.DataFrame, evidence: pd.DataFrame) -> lis
             ev_table.eq("drugitems")
             & evidence["source_itemid"].ne("")
             & evidence["source_ordercategoryid"].eq("")
-            & _no_other_keys(evidence, set()),
+            & _evidence_has_no_secondary_key(evidence, set()),
             ["source_table", "source_itemid"],
             "drug_item",
             70,
@@ -261,7 +242,7 @@ def _typed_candidate_frames(source: pd.DataFrame, evidence: pd.DataFrame) -> lis
             source,
             evidence,
             table.eq("freetextitems"),
-            ev_table.eq("freetextitems") & evidence["source_itemid"].ne("") & _no_other_keys(evidence, set()),
+            ev_table.eq("freetextitems") & evidence["source_itemid"].ne("") & _evidence_has_no_secondary_key(evidence, set()),
             ["source_table", "source_itemid"],
             "freetext_item",
             70,
@@ -273,7 +254,7 @@ def _typed_candidate_frames(source: pd.DataFrame, evidence: pd.DataFrame) -> lis
             source,
             evidence,
             table.eq("processitems"),
-            ev_table.eq("processitems") & evidence["source_itemid"].ne("") & _no_other_keys(evidence, set()),
+            ev_table.eq("processitems") & evidence["source_itemid"].ne("") & _evidence_has_no_secondary_key(evidence, set()),
             ["source_table", "source_itemid"],
             "process_item",
             70,
@@ -302,7 +283,7 @@ def _typed_candidate_frames(source: pd.DataFrame, evidence: pd.DataFrame) -> lis
             ev_table.eq("procedureorderitems")
             & evidence["source_itemid"].ne("")
             & evidence["source_ordercategoryid"].eq("")
-            & _no_other_keys(evidence, set()),
+            & _evidence_has_no_secondary_key(evidence, set()),
             ["source_table", "source_itemid"],
             "procedure_item",
             70,
@@ -392,12 +373,12 @@ def construct_candidate_map(source_vocab: pd.DataFrame, mapping_evidence: pd.Dat
     evidence = mapping_evidence.copy()
     for col in SOURCE_VOCAB_COLUMNS:
         if col != "row_count":
-            source[col] = source[col].map(_norm)
+            source[col] = source[col].map(norm_key)
     for col in EVIDENCE_COLUMNS:
-        evidence[col] = evidence[col].map(_norm)
+        evidence[col] = evidence[col].map(norm_key)
     source["row_count"] = pd.to_numeric(source["row_count"], errors="raise").astype("int64")
-    source["_label_key"] = source["source_label"].map(_label_norm)
-    evidence["_label_key"] = evidence["source_label"].map(_label_norm)
+    source["_label_key"] = source["source_label"].map(norm_label_key)
+    evidence["_label_key"] = evidence["source_label"].map(norm_label_key)
 
     frames = _typed_candidate_frames(source, evidence)
     frames.append(_label_candidate_frame(source, evidence))

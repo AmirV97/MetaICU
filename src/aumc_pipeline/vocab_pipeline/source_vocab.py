@@ -11,6 +11,7 @@ import pandas as pd
 import polars as pl
 
 from aumc_pipeline.utils.parquet_datasets import parquet_row_count, resolve_table_parquet, scan_parquet
+from aumc_pipeline.vocab_pipeline.policy_common import norm_key
 
 
 SOURCE_VOCAB_COLUMNS = [
@@ -44,6 +45,8 @@ EXPECTED_PREFIXES = {
     "processitems": {"PROCESS_INTERVAL"},
     "procedureorderitems": {"ORDER_INTENT"},
 }
+
+FREETEXT_PSEUDO_VALUE_ID = "1"
 
 
 @dataclass(frozen=True)
@@ -196,6 +199,8 @@ def _drug_vocab(config: SourceVocabConfig) -> pd.DataFrame:
 def _freetext_vocab(config: SourceVocabConfig) -> pd.DataFrame:
     frame = _input_scan(config, "freetextitems")
     grouped = _count_vocab(frame, [pl.col("itemid"), pl.col("item")])
+    # Freetext is grouped at item level only; this stable pseudo-value ID keeps
+    # the token shape compatible with item/value source tokens without using raw text.
     out = grouped.select(
         pl.lit(config.dataset).alias("dataset"),
         pl.lit("freetextitems").alias("source_table"),
@@ -206,7 +211,7 @@ def _freetext_vocab(config: SourceVocabConfig) -> pd.DataFrame:
         _text_expr("item").alias("source_label"),
         _null_text().alias("source_value"),
         _null_text().alias("source_unit"),
-        (pl.lit("FREETEXT//") + _id_expr("itemid") + "//1").alias("source_token"),
+        (pl.lit("FREETEXT//") + _id_expr("itemid") + "//" + pl.lit(FREETEXT_PSEUDO_VALUE_ID)).alias("source_token"),
         pl.col("row_count").cast(pl.Int64),
     )
     return out.to_pandas()
@@ -319,20 +324,11 @@ def validate_source_vocab(vocab: pd.DataFrame, config: SourceVocabConfig) -> dic
     }
 
 
-def _norm(value: object) -> str:
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    if text.endswith(".0"):
-        try:
-            return str(int(float(text)))
-        except ValueError:
-            return text
-    return text
-
-
 def compare_to_reference(extracted: pd.DataFrame, reference: pd.DataFrame) -> pd.DataFrame:
-    """Compare extracted source vocab against a supplied reference vocabulary."""
+    """Compare extracted source vocab against a supplied reference vocabulary.
+
+    This optional regression audit is intentionally simple at current vocab scale.
+    """
 
     compare_columns = SOURCE_VOCAB_COLUMNS
     left = extracted[compare_columns].copy()
@@ -340,7 +336,7 @@ def compare_to_reference(extracted: pd.DataFrame, reference: pd.DataFrame) -> pd
     for frame in [left, right]:
         for col in compare_columns:
             if col != "row_count":
-                frame[col] = frame[col].map(_norm)
+                frame[col] = frame[col].map(norm_key)
         frame["row_count"] = pd.to_numeric(frame["row_count"], errors="coerce").fillna(-1).astype("int64")
     merged = left.merge(right, on="source_token", how="outer", suffixes=("_extracted", "_reference"), indicator=True)
     rows: list[dict[str, Any]] = []

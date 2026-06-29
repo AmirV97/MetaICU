@@ -281,6 +281,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
 
         self.assertTrue((parent_dir / "outputs/aumc_supplied_vocab.csv").exists())
         self.assertTrue((parent_dir / "outputs/audits/build_vocab_summary.json").exists())
+        self.assertTrue((parent_dir / "outputs/audits/run_config.json").exists())
 
     def test_build_vocab_from_outside_checkout_uses_packaged_supplied_vocab(self) -> None:
         raw_dir = self.root / "raw_amsterdam_outside"
@@ -300,6 +301,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
 
         self.assertTrue(output_vocab.exists())
         self.assertTrue((output_vocab.parent / "audits/build_vocab_summary.json").exists())
+        self.assertTrue((output_vocab.parent / "audits/run_config.json").exists())
 
     def test_build_vocab_one_command_writes_vocab_and_audits(self) -> None:
         raw_dir = self.root / "raw_amsterdam"
@@ -324,11 +326,42 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
 
         self.assertTrue(output_vocab.exists())
         self.assertTrue((cli_audit / "build_vocab_summary.json").exists())
+        self.assertTrue((cli_audit / "run_config.json").exists())
+        run_config = json.loads((cli_audit / "run_config.json").read_text())
+        self.assertFalse(run_config["overwrite"])
         self.assertTrue((cli_audit / "vocab_pipeline_source_vocab.csv").exists())
         self.assertTrue((cli_audit / "vocab_pipeline_mapping_evidence.csv").exists())
         self.assertTrue((cli_audit / "vocab_pipeline_candidates.csv").exists())
         copied = pd.read_csv(output_vocab)
         self.assertEqual(copied.iloc[0]["source_token"], "DRUG//START//5//20")
+
+
+    def test_build_vocab_refuses_to_overwrite_existing_output_by_default(self) -> None:
+        raw_dir = self.root / "raw_amsterdam_no_overwrite"
+        self._write_raw_amsterdam_tables(raw_dir)
+        supplied_vocab = self.root / "supplied_vocab_no_overwrite.csv"
+        write_csv(supplied_vocab, [{"source_token": "DRUG//START//5//20", "harmonized_token": "MEDICATION//A", "emit_as_model_token": True}])
+        output_vocab = self.root / "outputs_no_overwrite/aumc_supplied_vocab.csv"
+        output_vocab.parent.mkdir(parents=True, exist_ok=True)
+        output_vocab.write_text("already here\n")
+
+        cmd = [
+            sys.executable,
+            str(PIPELINE_ROOT / "scripts/build_amsterdam_vocab.py"),
+            "step=build_vocab",
+            f"paths.raw_data_dir={raw_dir}",
+            f"paths.external_root={self.external_root}",
+            f"paths.omop_vocab_dir={self.omop_vocab}",
+            f"paths.supplied_vocab={supplied_vocab}",
+            f"paths.output_vocab={output_vocab}",
+        ]
+        failed = subprocess.run(cmd, cwd=PIPELINE_ROOT, capture_output=True, text=True)
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("run.overwrite=true", failed.stderr + failed.stdout)
+
+        overwrite_cmd = [*cmd, "run.overwrite=true"]
+        subprocess.run(overwrite_cmd, cwd=PIPELINE_ROOT, check=True)
+        self.assertIn("DRUG//START//5//20", output_vocab.read_text())
 
     def test_inventory_detects_missing_required_resources(self) -> None:
         empty_external = self.root / "empty_external"

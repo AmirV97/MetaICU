@@ -63,7 +63,7 @@ class SuppliedVocabContractTests(unittest.TestCase):
 
     def test_emitted_rows_have_model_tokens_and_roles(self) -> None:
         emitted = self.vocab[self.emit]
-        self.assertEqual(len(emitted), 4748)
+        self.assertEqual(len(emitted), 4836)
         self.assertTrue(emitted["harmonized_token"].ne("").all())
         self.assertTrue(emitted["token_role"].ne("").all())
 
@@ -88,6 +88,25 @@ class SuppliedVocabContractTests(unittest.TestCase):
         self.assertFalse(rows.empty)
         self.assertTrue(rows["target_vocabulary"].eq("LOINC").any())
         self.assertFalse(rows["token_role"].eq("dynamic_event/lab").any())
+
+    def test_gcs_components_are_emitted_openicu_style(self) -> None:
+        component_ids = {"3016335", "3026019", "3008223", "3026549", "3009094", "3013144"}
+        target = self.vocab["target_concept_id"].str.replace(r"\.0$", "", regex=True)
+        rows = self.vocab[self.vocab["source_table"].eq("listitems") & target.isin(component_ids)]
+        self.assertEqual(len(rows), 88)
+        self.assertEqual(int(rows["row_count_num"].sum()), 877730)
+        self.assertTrue(_is_true(rows["emit_as_model_token"]).all())
+        self.assertTrue(rows["token_role"].eq("dynamic_event/score_component").all())
+
+        ra_verbal = rows[rows["source_label"].eq("RA_Verbal")]
+        self.assertEqual(len(ra_verbal), 3)
+        self.assertTrue(ra_verbal["harmonized_token"].eq("OMOP_CONCEPT//LOINC//3013144").all())
+
+    def test_gos_outcome_rows_remain_non_emitted(self) -> None:
+        gos = self.vocab[self.vocab["source_label"].eq("GOS (Glasgow Outcome Score)")]
+        self.assertEqual(len(gos), 5)
+        self.assertFalse(_is_true(gos["emit_as_model_token"]).any())
+        self.assertTrue(gos["token_role"].eq("metadata_only").all())
 
     def test_freetext_and_procedure_orders_are_not_emitted(self) -> None:
         excluded = self.vocab[self.vocab["source_table"].isin(["freetextitems", "procedureorderitems"])]

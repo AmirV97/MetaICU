@@ -106,6 +106,44 @@ def run_git(args: list[str], cwd: Path | None = None) -> None:
     subprocess.run(["git", *args], cwd=cwd, check=True)
 
 
+def git_output(args: list[str], cwd: Path) -> str:
+    """Return stdout for a git command, or an empty string if it fails."""
+
+    try:
+        result = subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True)
+    except Exception:
+        return ""
+    return result.stdout.strip()
+
+
+def write_external_versions(external_root: Path, repos: list[ExternalRepo], results: list[dict[str, str]]) -> Path:
+    """Write clone/update status plus git branch and commit for retrieved resources."""
+
+    by_name = {record["name"]: record for record in results}
+    records = []
+    for repo in repos:
+        destination = external_root / repo.name
+        clone_record = by_name.get(repo.name, {})
+        is_git = (destination / ".git").exists()
+        records.append(
+            {
+                "name": repo.name,
+                "url": repo.url,
+                "required": repo.required,
+                "purpose": repo.purpose,
+                "path": str(destination),
+                "clone_status": clone_record.get("status", "not_requested"),
+                "is_git_repo": is_git,
+                "branch": git_output(["rev-parse", "--abbrev-ref", "HEAD"], destination) if is_git else "",
+                "commit": git_output(["rev-parse", "HEAD"], destination) if is_git else "",
+                "dirty": bool(git_output(["status", "--short"], destination)) if is_git else False,
+            }
+        )
+    path = external_root / "external_versions.json"
+    path.write_text(json.dumps({"repositories": records}, indent=2, sort_keys=True) + "\n")
+    return path
+
+
 def clone_or_update(repo: ExternalRepo, external_root: Path, update: bool, depth: int | None) -> dict[str, str]:
     """Clone a missing repository, or optionally update an existing clone."""
 
@@ -209,6 +247,7 @@ def main() -> None:
     results = [clone_or_update(repo, paths["external_root"], update=args.update, depth=depth) for repo in repos]
     parent_readme = write_parent_readme(paths)
     external_readme = write_external_readme(paths["external_root"], repos)
+    external_versions = write_external_versions(paths["external_root"], repos, results)
     print(
         json.dumps(
             {
@@ -220,6 +259,7 @@ def main() -> None:
                 "repositories": results,
                 "parent_readme": str(parent_readme),
                 "external_readme": str(external_readme),
+                "external_versions": str(external_versions),
                 "athena_vocabularies_to_select": ATHENA_VOCABULARIES,
                 "athena_required_files": ATHENA_REQUIRED_FILES,
             },

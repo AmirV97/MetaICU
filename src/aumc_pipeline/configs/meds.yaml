@@ -4,7 +4,7 @@
 #   build-aumc-meds paths.parent_dir=/path/to/workspace
 #
 # pre_meds_dir defaults to parent_dir/outputs/pre_meds
-# vocab_path   defaults to parent_dir/mappings/aumc_supplied_vocab.csv
+# vocab_path   defaults to parent_dir/outputs/aumc_supplied_vocab.csv
 # output_dir   defaults to parent_dir/outputs/meds
 # audit_dir    defaults to parent_dir/outputs/audits
 #
@@ -14,7 +14,7 @@
 paths:
   parent_dir: null
   pre_meds_dir: null        # defaults to parent_dir/outputs/pre_meds
-  vocab_path: null          # defaults to parent_dir/mappings/aumc_supplied_vocab.csv
+  vocab_path: null          # defaults to parent_dir/outputs/aumc_supplied_vocab.csv
   output_dir: null          # defaults to parent_dir/outputs/meds
   audit_dir: null           # defaults to parent_dir/outputs/audits
 

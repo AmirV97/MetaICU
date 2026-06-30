@@ -27,9 +27,13 @@ def resolve_table_parquet(pre_meds_dir: Path, table: str) -> Path:
 
 
 def parquet_exists(path: Path) -> bool:
-    """Check whether a single parquet file or partition directory exists."""
+    """Check whether a single parquet file or non-empty partition directory exists."""
 
-    return path.is_file() or path.is_dir()
+    if path.is_file():
+        return True
+    if path.is_dir():
+        return any(path.glob("*.parquet"))
+    return False
 
 
 def scan_parquet(path: Path) -> pl.LazyFrame:

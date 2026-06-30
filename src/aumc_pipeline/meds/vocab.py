@@ -1,6 +1,6 @@
 """Vocabulary loading and typed join-key preparation.
 
-Consumes mappings/aumc_supplied_vocab.csv as the policy source of truth.
+Consumes aumc_supplied_vocab.csv as the policy source of truth.
 """
 
 from __future__ import annotations

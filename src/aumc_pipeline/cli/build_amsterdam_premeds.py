@@ -69,6 +69,14 @@ def _build_config(cfg: DictConfig) -> PreMedsConfig:
     raw_data_dir = _resolve_path(cfg, "raw_data_dir", parent_dir, "AUMC_raw")
     pre_meds_dir = _resolve_path(cfg, "pre_meds_dir", parent_dir, "outputs/pre_meds")
     audit_dir = _resolve_path(cfg, "audit_dir", parent_dir, "outputs/audits")
+    vocab_path = _resolve_path(cfg, "vocab_path", parent_dir, "outputs/aumc_supplied_vocab.csv")
+    metadata_dir = _resolve_path(cfg, "metadata_dir", parent_dir, "outputs/metadata")
+    split_outputs = bool(OmegaConf.select(cfg, "run.split_outputs", default=False))
+    split_path = (
+        _resolve_path(cfg, "split_path", parent_dir, "outputs/metadata/subject_splits.parquet")
+        if split_outputs
+        else _optional_path(OmegaConf.select(cfg, "paths.split_path"))
+    )
 
     epoch_map = dict(OmegaConf.to_container(cfg.pre_meds.epoch_map, resolve=True))
 
@@ -81,6 +89,19 @@ def _build_config(cfg: DictConfig) -> PreMedsConfig:
         partition_rows=int(cfg.run.partition_rows),
         max_rows=_optional_int(OmegaConf.select(cfg, "run.max_rows")),
         num_patients=_optional_int(OmegaConf.select(cfg, "run.num_patients")),
+        split_path=split_path,
+        split_outputs=split_outputs,
+        vocab_path=vocab_path,
+        build_hf_inventory=bool(OmegaConf.select(cfg, "run.build_hf_inventory", default=True)),
+        build_binned_numericitems=bool(OmegaConf.select(cfg, "run.build_binned_numericitems", default=True)),
+        hf_inventory_metadata_dir=metadata_dir,
+        hf_highres_threshold_minutes=float(OmegaConf.select(cfg, "hf_inventory.highres_threshold_minutes", default=45.0)),
+        hf_confidence_level=float(OmegaConf.select(cfg, "hf_inventory.confidence_level", default=0.99)),
+        hf_min_groups=int(OmegaConf.select(cfg, "hf_inventory.min_groups", default=30)),
+        hf_patient_batch_size=int(OmegaConf.select(cfg, "hf_inventory.patient_batch_size", default=500)),
+        hf_candidate_limit=int(OmegaConf.select(cfg, "hf_inventory.candidate_limit", default=0)),
+        hf_seed=int(OmegaConf.select(cfg, "hf_inventory.seed", default=20260601)),
+        binning_window_minutes=int(OmegaConf.select(cfg, "binning.window_minutes", default=60)),
         overwrite=bool(OmegaConf.select(cfg, "run.overwrite", default=False)),
     )
 

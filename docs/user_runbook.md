@@ -1,139 +1,156 @@
 # AUMC Pipeline User Runbook
 
-This runbook expands the short README workflow. The current package builds the AmsterdamUMCdb supplied vocabulary. MEDS conversion and tokenization are not implemented in this repository version.
+This runbook expands the README command sequence. The package currently supports:
 
-## Required Inputs
+- external resource setup
+- supplied vocabulary build/install
+- subject-level train/val/test split creation
+- source-preserving pre-MEDS extraction
+- train-derived high-frequency numeric inventory
+- causal mean-binned `numericitems_binned` outputs
+- MEDS-like QC conversion for a supplied pre-MEDS directory
 
-Use one workspace folder per run:
+Tokenization is not implemented yet.
+
+## Workspace Layout
+
+Use one workspace per run:
 
 ```text
 /path/to/aumc_workspace/
 ├── AUMC_raw/              raw AmsterdamUMCdb CSV files
 ├── externals/             GitHub external resources
 │   └── omop_vocab/        manually downloaded Athena/OMOP CSV export
-└── outputs/               generated vocabulary and audits
+└── outputs/               generated vocab, metadata, pre-MEDS, MEDS, audits
 ```
 
-The active supplied vocabulary also ships with the package at:
-
-```text
-mappings/aumc_supplied_vocab.csv
-```
-
-## Setup
-
-Clone the code:
+## Install
 
 ```bash
 git clone https://github.com/AmirV97/AUMCdb_pipeline.git /path/to/AUMC_pipeline
 cd /path/to/AUMC_pipeline
-```
-
-Optional editable install:
-
-```bash
 python -m pip install -e .
 ```
 
-If the package is installed, the command-line entry points are:
+Main CLI entry points:
 
 ```bash
 retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
 build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
+build-aumc-split paths.parent_dir=/path/to/aumc_workspace
+build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace
+build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
 ```
 
-If the package is not installed, use the checkout wrappers:
+## Inputs
+
+Run external retrieval first:
 
 ```bash
-python /path/to/AUMC_pipeline/scripts/retrieve_externals.py \
-  --parent-dir /path/to/aumc_workspace
-
-python /path/to/AUMC_pipeline/scripts/build_amsterdam_vocab.py \
-  step=build_vocab \
-  paths.parent_dir=/path/to/aumc_workspace
+retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
 ```
 
-## External Resources
-
-`retrieve_externals.py` creates the workspace layout and clones GitHub-hosted resources into:
-
-```text
-/path/to/aumc_workspace/externals/
-```
-
-The script also writes `externals/external_versions.json` with branch and commit metadata for retrieved Git repositories.
-
-The script does not download the Athena/OMOP export. Download it manually from:
-
-```text
-https://athena.ohdsi.org/vocabulary/list
-```
-
-Select the vocabularies listed in `README.md`, then extract the resulting CSV files into:
-
-```text
-/path/to/aumc_workspace/externals/omop_vocab/
-```
-
-## Raw AmsterdamUMCdb Data
-
-Place or symlink the raw AmsterdamUMCdb CSV files into:
+Then place or symlink raw AmsterdamUMCdb CSVs into:
 
 ```text
 /path/to/aumc_workspace/AUMC_raw/
 ```
 
-The vocabulary build expects the raw table CSVs used by AmsterdamUMCdb, including large tables such as `numericitems.csv`, `listitems.csv`, and `drugitems.csv`.
+Download Athena/OMOP manually from:
 
-## Build Output
-
-Run:
-
-```bash
-python /path/to/AUMC_pipeline/scripts/build_amsterdam_vocab.py \
-  step=build_vocab \
-  paths.parent_dir=/path/to/aumc_workspace
+```text
+https://athena.ohdsi.org/vocabulary/list
 ```
 
-Main output:
+Select SNOMED, LOINC, RxNorm, RxNorm Extension, ATC, UCUM, and OMOP Extension. Extract the CSVs into:
+
+```text
+/path/to/aumc_workspace/externals/omop_vocab/
+```
+
+## Vocabulary
+
+```bash
+build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
+```
+
+Output:
 
 ```text
 /path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv
 ```
 
-Audit/debug outputs:
+Audit outputs are under:
 
 ```text
 /path/to/aumc_workspace/outputs/audits/
 ```
 
-Important audit files include:
+## Splits
 
-```text
-run_config.json
-build_vocab_summary.json
-vocab_pipeline_source_vocab.csv
-vocab_pipeline_mapping_evidence.csv
-vocab_pipeline_candidates.csv
+```bash
+build-aumc-split paths.parent_dir=/path/to/aumc_workspace
 ```
 
-The build prints progress for preflight plus the four substeps: source vocabulary extraction, evidence normalization, candidate map construction, and supplied-vocabulary writing. If `aumc_supplied_vocab.csv` already exists, the command stops by default; add `run.overwrite=true` only when you intentionally want to replace it.
+Output:
+
+```text
+/path/to/aumc_workspace/outputs/metadata/subject_splits.parquet
+```
+
+The split is subject-level and deterministic. Defaults are 80/10/10.
+
+## Pre-MEDS
+
+```bash
+build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace
+```
+
+Pre-MEDS writes:
+
+```text
+outputs/pre_meds/                         combined source-preserving pre-MEDS
+outputs/pre_meds/train|val|test/          split-specific pre-MEDS
+outputs/pre_meds/train|val|test/numericitems_binned/
+outputs/metadata/hf_numeric_inventory.csv
+outputs/metadata/hf_numeric_binning_summary.json
+outputs/audits/premeds_summary.json
+```
+
+The high-frequency inventory is fitted on train only. Causal mean-binning is then applied to each split using that frozen inventory. Empty bins are not emitted.
+
+Useful QC run:
+
+```bash
+build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace \
+  run.num_patients=1000 run.max_rows=1000000
+```
+
+## MEDS-Like QC Conversion
+
+Combined pre-MEDS QC:
+
+```bash
+build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
+```
+
+Split-specific QC:
+
+```bash
+build-aumc-meds \
+  paths.pre_meds_dir=/path/to/aumc_workspace/outputs/pre_meds/train \
+  paths.vocab_path=/path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv \
+  paths.output_dir=/path/to/aumc_workspace/outputs/meds/train \
+  paths.audit_dir=/path/to/aumc_workspace/outputs/audits/meds_train
+```
+
+Numeric MEDS conversion uses `numericitems_binned` when present, otherwise raw `numericitems`.
+
+Current MEDS quantile boundaries are fitted on the supplied cohort. Final train-frozen fit/apply boundaries are still pending before tokenization.
 
 ## Tests
-
-From a checkout:
 
 ```bash
 cd /path/to/AUMC_pipeline
 python -m unittest discover -s tests -v
 ```
-
-Current expected result:
-
-```text
-27 tests passed
-```
-
-## Not Implemented Yet
-
-The runtime path is next-stage work. It will consume `aumc_supplied_vocab.csv` and implement MEDS conversion, high-frequency numeric binning, numeric quantile tokenization, direct GCS component emission, optional BPS total derivation, D/APACHE diagnosis handling, medication ATC-depth selection, and tokenization QA.

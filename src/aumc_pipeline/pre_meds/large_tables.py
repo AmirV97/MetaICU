@@ -17,8 +17,8 @@ import pandas as pd
 import polars as pl
 
 from aumc_pipeline.pre_meds.common import (
-    ADMISSION_ANCHOR_COLUMNS,
     LARGE_TABLE_RAW_SCHEMAS,
+    admission_anchor_columns,
     cast_raw_schema,
     interval_time_anomalies,
     measurement_time_anomalies,
@@ -38,6 +38,8 @@ class TableAccumulator:
     rows_emitted: int = 0
     missing_join_rows: int = 0
     partition_count: int = 0
+    split_partition_counts: Counter = field(default_factory=Counter)
+    split_rows_emitted: Counter = field(default_factory=Counter)
     raw_dtypes: dict[str, str] = field(default_factory=dict)
     output_dtypes: dict[str, str] = field(default_factory=dict)
     anomaly_counts: Counter = field(default_factory=Counter)
@@ -49,6 +51,8 @@ class TableAccumulator:
             "output_dataset": str(output_dir / self.table),
             "max_rows": max_rows,
             "partition_count": self.partition_count,
+            "split_partition_counts": dict(self.split_partition_counts),
+            "split_rows_emitted": dict(self.split_rows_emitted),
             "raw_dtypes": self.raw_dtypes,
             "output_dtypes": self.output_dtypes,
             "row_counts": {
@@ -117,6 +121,7 @@ def transform_table(
     max_rows: int | None,
     overwrite: bool,
     admission_ids: set[int] | None = None,
+    split_values: list[str] | None = None,
 ) -> TableAccumulator:
     """Read, transform, and write one large table as a partitioned parquet dataset.
 
@@ -127,10 +132,16 @@ def transform_table(
         raise ValueError(f"Unsupported large table: {table!r}")
 
     # Anchors for bounded mode contain only the selected admissions; for full
-    # mode they contain all admissions. Either way, pass them as-is.
-    bounded_anchors = anchors.select(ADMISSION_ANCHOR_COLUMNS)
+    # mode they contain all admissions. Split-aware runs carry the split label
+    # through the admission join when present.
+    bounded_anchors = anchors.select(admission_anchor_columns(anchors))
 
     table_dir = _prepare_output_dir(output_dir, table, overwrite)
+    split_dirs: dict[str, Path] = {}
+    if split_values:
+        for split in split_values:
+            split_dirs[split] = _prepare_output_dir(output_dir / split, table, overwrite)
+
     acc = TableAccumulator(table=table)
 
     for raw in _read_latin1_csv_batches(table, raw_dir / f"{table}.csv", partition_rows, max_rows):
@@ -166,5 +177,15 @@ def transform_table(
         part_path = table_dir / f"part-{acc.partition_count:05d}.parquet"
         transformed.write_parquet(part_path)
         acc.partition_count += 1
+
+        if split_dirs and "split" in transformed.columns:
+            for split, split_dir in split_dirs.items():
+                split_part = transformed.filter(pl.col("split") == split)
+                if split_part.is_empty():
+                    continue
+                split_part_path = split_dir / f"part-{acc.split_partition_counts[split]:05d}.parquet"
+                split_part.write_parquet(split_part_path)
+                acc.split_partition_counts[split] += 1
+                acc.split_rows_emitted[split] += split_part.height
 
     return acc

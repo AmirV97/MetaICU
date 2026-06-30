@@ -39,7 +39,7 @@ from aumc_pipeline.meds.common import (
     runtime_phase_expr,
 )
 from aumc_pipeline.meds.vocab import table_vocab
-from aumc_pipeline.utils.parquet_datasets import resolve_table_parquet, scan_parquet
+from aumc_pipeline.utils.parquet_datasets import parquet_exists, resolve_table_parquet, scan_parquet
 
 
 def static_context_events(raw: pl.DataFrame) -> tuple[pl.DataFrame, dict]:
@@ -117,10 +117,14 @@ def list_events(
     Rows dropped: unmatched vocab join, non-emitted, out-of-phase, diagnosis dedup.
     Returns (events_df, exclusion_records, static_context_audit_dict).
     """
+    list_path = resolve_table_parquet(pre_meds_dir, "listitems")
+    if not parquet_exists(list_path):
+        return empty_debug_frame(), [], {}
+
     tv = table_vocab(vocab, "listitems", {"_itemid_i64": "itemid", "_valueid_i64": "valueid"})
 
     scan = (
-        scan_parquet(resolve_table_parquet(pre_meds_dir, "listitems"))
+        scan_parquet(list_path)
         .filter(pl.col("admissionid").is_in(list(admission_ids)))
     )
     if max_rows is not None:

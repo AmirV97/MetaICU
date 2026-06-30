@@ -1,6 +1,6 @@
 # AUMC Pipeline
 
-Build the AmsterdamUMCdb supplied vocabulary from raw Amsterdam CSVs plus external reference resources.
+Build AmsterdamUMCdb supplied vocabulary, pre-MEDS parquet, and bounded MEDS-like event outputs.
 
 Main output:
 
@@ -138,9 +138,51 @@ vocab_pipeline_mapping_evidence.csv
 vocab_pipeline_candidates.csv
 ```
 
+## 6. Build Pre-MEDS
+
+Convert raw AmsterdamUMCdb CSVs to source-preserving pre-MEDS parquet:
+
+```bash
+build-aumc-premeds \
+  paths.parent_dir=/path/to/aumc_workspace
+```
+
+For a bounded QC run:
+
+```bash
+build-aumc-premeds \
+  paths.parent_dir=/path/to/aumc_workspace \
+  run.num_patients=1000
+```
+
+Output:
+
+```text
+/path/to/aumc_workspace/outputs/pre_meds/
+```
+
+## 7. Build Bounded MEDS
+
+Convert pre-MEDS to MEDS-like event parquet using the supplied vocabulary:
+
+```bash
+build-aumc-meds \
+  paths.parent_dir=/path/to/aumc_workspace
+```
+
+For a bounded QC run from an already bounded pre-MEDS directory:
+
+```bash
+build-aumc-meds \
+  paths.pre_meds_dir=/path/to/aumc_workspace/outputs/pre_meds_1000 \
+  paths.vocab_path=/path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv \
+  paths.output_dir=/path/to/aumc_workspace/outputs/meds_1000 \
+  paths.audit_dir=/path/to/aumc_workspace/outputs/audits
+```
+
 ## Notes
 
-- The current package builds the supplied vocabulary only.
-- MEDS conversion and tokenizer-facing processing are separate next-stage work.
+- Implemented: vocabulary build, pre-MEDS extraction, bounded MEDS-like conversion.
+- Not yet implemented: subject splits, train-frozen numeric quantile boundaries, high-frequency numeric binning, and tokenization.
 - Detailed resource notes are in `docs/amsterdam_vocab_documentation.md`.
 - Vocabulary schema and modeling decisions are in `docs/policy_decisions.md`.

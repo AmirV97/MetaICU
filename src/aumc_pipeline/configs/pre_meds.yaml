@@ -1,0 +1,37 @@
+# Hydra config for the AmsterdamUMCdb pre-MEDS extraction pipeline.
+# Run from AUMC_pipeline/ or supply absolute paths.
+#
+# Minimal invocation with a workspace root:
+#   build-aumc-premeds paths.parent_dir=/path/to/workspace
+#
+# All Amsterdam CSVs must be in paths.raw_data_dir (defaults to parent_dir/AUMC_raw).
+# Output parquet lands in paths.pre_meds_dir (defaults to parent_dir/outputs/pre_meds).
+# Audit JSON lands in paths.audit_dir (defaults to parent_dir/outputs/audits).
+#
+# Bounded test (1000 patients):
+#   build-aumc-premeds paths.parent_dir=/path/to/workspace run.num_patients=1000
+
+paths:
+  parent_dir: null
+  raw_data_dir: null      # defaults to parent_dir/AUMC_raw
+  pre_meds_dir: null      # defaults to parent_dir/outputs/pre_meds
+  audit_dir: null         # defaults to parent_dir/outputs/audits
+
+run:
+  overwrite: false
+  partition_rows: 5000000
+  max_rows: null          # per-table raw-row cap for smoke tests; null = full table
+  num_patients: null      # deterministic patient subset; null = all patients
+
+pre_meds:
+  dataset: AmsterdamUMCdb
+  epoch_map:
+    "2003-2009": "2003-01-01 00:00:00"
+    "2010-2016": "2010-01-01 00:00:00"
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

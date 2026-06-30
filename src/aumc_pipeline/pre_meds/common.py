@@ -18,6 +18,19 @@ ADMISSION_ANCHOR_COLUMNS = [
     "dischargedattime",
 ]
 
+
+def admission_anchor_columns(anchors: pl.DataFrame) -> list[str]:
+    """Return anchor columns available in this admission frame.
+
+    Split-aware pre-MEDS runs add a small ``split`` column to admissions.
+    The transform functions should carry it through joins when present, while
+    preserving the previous flat-output behavior when it is absent.
+    """
+    columns = list(ADMISSION_ANCHOR_COLUMNS)
+    if "split" in anchors.columns:
+        columns.append("split")
+    return columns
+
 # Explicit Polars dtypes for the three large Amsterdam tables.
 # Applied after pandas reads with latin1 encoding; unknown columns are skipped.
 LARGE_TABLE_RAW_SCHEMAS: dict[str, dict[str, type]] = {

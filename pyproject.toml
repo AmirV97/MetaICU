@@ -19,6 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
+build-aumc-split = "aumc_pipeline.cli.build_amsterdam_split:main"
 build-amsterdam-vocab = "aumc_pipeline.cli.build_amsterdam_vocab:main"
 build-aumc-premeds = "aumc_pipeline.cli.build_amsterdam_premeds:main"
 build-aumc-meds = "aumc_pipeline.cli.build_amsterdam_meds:main"

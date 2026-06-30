@@ -1,50 +1,39 @@
 # AUMC Pipeline
 
-Build AmsterdamUMCdb supplied vocabulary, pre-MEDS parquet, and bounded MEDS-like event outputs.
+Clean AmsterdamUMCdb ICU pipeline for vocabulary construction, split-aware pre-MEDS, and MEDS-like QC outputs.
 
-Main output:
+Current main artifact:
 
 ```text
 <workspace>/outputs/aumc_supplied_vocab.csv
 ```
 
-## 1. Make A Workspace
+## Pipeline
 
-Create an empty folder for one run:
+1. Create a workspace.
+2. Retrieve GitHub externals.
+3. Manually add Athena/OMOP CSVs.
+4. Build the supplied vocabulary.
+5. Build deterministic subject splits.
+6. Build pre-MEDS, including train-derived high-frequency numeric inventory and causal mean-binned numeric outputs.
+7. Build MEDS-like QC outputs.
+
+## 1. Workspace And Code
 
 ```bash
 mkdir -p /path/to/aumc_workspace
-```
-
-## 2. Get The Code
-
-Clone this repository, or use an existing checkout:
-
-```bash
 git clone https://github.com/AmirV97/AUMCdb_pipeline.git /path/to/AUMC_pipeline
 cd /path/to/AUMC_pipeline
-```
-
-Optional editable install:
-
-```bash
 python -m pip install -e .
 ```
 
-If you do not install the package, run scripts by absolute path as shown below.
-
-## 3. Retrieve GitHub Externals
-
-This creates the expected workspace folders and clones the GitHub-hosted references:
+## 2. Retrieve Externals
 
 ```bash
-python /path/to/AUMC_pipeline/scripts/retrieve_externals.py \
-  --parent-dir /path/to/aumc_workspace
+retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
 ```
 
-The command also writes `externals/external_versions.json` with the branch and commit for each retrieved Git repository.
-
-The workspace layout after this step is:
+This creates:
 
 ```text
 /path/to/aumc_workspace/
@@ -60,9 +49,9 @@ Put the raw AmsterdamUMCdb CSV files in:
 /path/to/aumc_workspace/AUMC_raw/
 ```
 
-## 4. Add OMOP/Athena CSVs
+## 3. Add Athena/OMOP CSVs
 
-The OMOP/Athena vocabulary export must be downloaded manually from:
+Download manually from:
 
 ```text
 https://athena.ohdsi.org/vocabulary/list
@@ -80,13 +69,13 @@ UCUM
 OMOP Extension
 ```
 
-Extract the Athena download into:
+Extract the Athena CSVs into:
 
 ```text
 /path/to/aumc_workspace/externals/omop_vocab/
 ```
 
-That folder must contain at least:
+Required files:
 
 ```text
 CONCEPT.csv
@@ -100,89 +89,110 @@ CONCEPT_SYNONYM.csv
 DRUG_STRENGTH.csv
 ```
 
-## 5. Build The Vocabulary
-
-Run:
+## 4. Build Vocabulary
 
 ```bash
-python /path/to/AUMC_pipeline/scripts/build_amsterdam_vocab.py \
-  step=build_vocab \
-  paths.parent_dir=/path/to/aumc_workspace
-```
-
-The vocabulary is written to:
-
-```text
-/path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv
-```
-
-If that file already exists, the command stops by default. To intentionally replace it, add:
-
-```bash
-run.overwrite=true
-```
-
-Audit files are written under:
-
-```text
-/path/to/aumc_workspace/outputs/audits/
-```
-
-Important audit files include:
-
-```text
-run_config.json
-build_vocab_summary.json
-vocab_pipeline_source_vocab.csv
-vocab_pipeline_mapping_evidence.csv
-vocab_pipeline_candidates.csv
-```
-
-## 6. Build Pre-MEDS
-
-Convert raw AmsterdamUMCdb CSVs to source-preserving pre-MEDS parquet:
-
-```bash
-build-aumc-premeds \
-  paths.parent_dir=/path/to/aumc_workspace
-```
-
-For a bounded QC run:
-
-```bash
-build-aumc-premeds \
-  paths.parent_dir=/path/to/aumc_workspace \
-  run.num_patients=1000
+build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
 ```
 
 Output:
 
 ```text
+/path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv
+```
+
+Use `run.overwrite=true` only when intentionally replacing an existing output.
+
+## 5. Build Subject Splits
+
+```bash
+build-aumc-split paths.parent_dir=/path/to/aumc_workspace
+```
+
+Default split is 80/10/10. Override if needed:
+
+```bash
+build-aumc-split paths.parent_dir=/path/to/aumc_workspace \
+  run.train_frac=0.8 run.val_frac=0.1 run.test_frac=0.1
+```
+
+Output:
+
+```text
+/path/to/aumc_workspace/outputs/metadata/subject_splits.parquet
+```
+
+## 6. Build Pre-MEDS
+
+```bash
+build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace
+```
+
+Outputs:
+
+```text
 /path/to/aumc_workspace/outputs/pre_meds/
+/path/to/aumc_workspace/outputs/pre_meds/{train,val,test}/
+/path/to/aumc_workspace/outputs/pre_meds/{train,val,test}/numericitems_binned/
+/path/to/aumc_workspace/outputs/metadata/hf_numeric_inventory.csv
+/path/to/aumc_workspace/outputs/metadata/hf_numeric_binning_summary.json
 ```
 
-## 7. Build Bounded MEDS
+Useful bounded QC run:
 
-Convert pre-MEDS to MEDS-like event parquet using the supplied vocabulary:
+```bash
+build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace \
+  run.num_patients=1000 run.max_rows=1000000
+```
+
+The high-frequency inventory is built from the train split. Causal mean-binning writes `numericitems_binned` and does not modify raw `numericitems`.
+
+## 7. Build MEDS-Like QC Outputs
+
+For a combined pre-MEDS QC run:
+
+```bash
+build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
+```
+
+For split-specific QC using the binned numeric table:
 
 ```bash
 build-aumc-meds \
-  paths.parent_dir=/path/to/aumc_workspace
-```
-
-For a bounded QC run from an already bounded pre-MEDS directory:
-
-```bash
-build-aumc-meds \
-  paths.pre_meds_dir=/path/to/aumc_workspace/outputs/pre_meds_1000 \
+  paths.pre_meds_dir=/path/to/aumc_workspace/outputs/pre_meds/train \
   paths.vocab_path=/path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv \
-  paths.output_dir=/path/to/aumc_workspace/outputs/meds_1000 \
-  paths.audit_dir=/path/to/aumc_workspace/outputs/audits
+  paths.output_dir=/path/to/aumc_workspace/outputs/meds/train \
+  paths.audit_dir=/path/to/aumc_workspace/outputs/audits/meds_train
 ```
 
-## Notes
+MEDS numeric conversion prefers `numericitems_binned` when present, otherwise falls back to raw `numericitems`.
 
-- Implemented: vocabulary build, pre-MEDS extraction, bounded MEDS-like conversion.
-- Not yet implemented: subject splits, train-frozen numeric quantile boundaries, high-frequency numeric binning, and tokenization.
-- Detailed resource notes are in `docs/amsterdam_vocab_documentation.md`.
-- Vocabulary schema and modeling decisions are in `docs/policy_decisions.md`.
+## Current Status
+
+Implemented:
+
+- external retrieval/setup helper
+- supplied vocabulary build/install
+- deterministic subject splits
+- source-preserving pre-MEDS extraction
+- train-derived high-frequency numeric inventory
+- causal mean-binned numeric pre-MEDS outputs
+- bounded/full MEDS-like QC conversion for a supplied pre-MEDS directory
+
+Not final yet:
+
+- train-frozen numeric quantile boundaries across train/val/test
+- one-command split-aware MEDS orchestration
+- final tokenization
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+More detail:
+
+- `docs/user_runbook.md`
+- `docs/policy_decisions.md`
+- `docs/amsterdam_vocab_documentation.md`

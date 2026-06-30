@@ -1,0 +1,29 @@
+# Hydra config for deterministic AmsterdamUMCdb subject-level splits.
+# Run after vocabulary/external setup and before pre-MEDS extraction.
+#
+# Minimal invocation:
+#   build-aumc-split paths.parent_dir=/path/to/workspace
+
+paths:
+  parent_dir: null
+  raw_data_dir: null      # defaults to parent_dir/AUMC_raw
+  metadata_dir: null      # defaults to parent_dir/outputs/metadata
+  split_path: null        # defaults to parent_dir/outputs/metadata/subject_splits.parquet
+
+run:
+  train_frac: 0.8
+  val_frac: 0.1
+  test_frac: 0.1
+  seed: 20260618
+  overwrite: false
+  split_names:
+    train: train
+    val: val
+    test: test
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

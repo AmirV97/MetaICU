@@ -22,7 +22,7 @@ from aumc_pipeline.meds.common import (
     runtime_phase_expr,
 )
 from aumc_pipeline.meds.vocab import table_vocab
-from aumc_pipeline.utils.parquet_datasets import resolve_table_parquet, scan_parquet
+from aumc_pipeline.utils.parquet_datasets import parquet_exists, resolve_table_parquet, scan_parquet
 
 
 def interval_events(
@@ -60,11 +60,15 @@ def interval_events(
     else:
         raise ValueError(f"interval_events only supports drugitems/processitems, got: {table!r}")
 
+    table_path = resolve_table_parquet(pre_meds_dir, table)
+    if not parquet_exists(table_path):
+        return empty_debug_frame(), [], {}
+
     tv = table_vocab(vocab, table, join_key_renames)
     join_keys = list(join_key_renames.values())
 
     raw = (
-        scan_parquet(resolve_table_parquet(pre_meds_dir, table))
+        scan_parquet(table_path)
         .filter(pl.col("admissionid").is_in(list(admission_ids)))
         .join(tv.lazy(), on=join_keys, how="left")
         .with_columns([

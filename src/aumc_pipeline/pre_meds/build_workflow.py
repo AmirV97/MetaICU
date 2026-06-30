@@ -22,7 +22,7 @@ from aumc_pipeline.pre_meds.admissions import (
     write_admissions_outputs,
 )
 from aumc_pipeline.pre_meds.common import (
-    ADMISSION_ANCHOR_COLUMNS,
+    admission_anchor_columns,
     interval_time_anomalies,
     measurement_time_anomalies,
     temporal_phase_counts,
@@ -38,6 +38,9 @@ from aumc_pipeline.pre_meds.measured import (
     transform_listitems,
     transform_numericitems,
 )
+from aumc_pipeline.transforms.binning import CausalMeanBinningConfig, CausalMeanBinningTransform
+from aumc_pipeline.transforms.hf_inventory import HFInventoryBuilder, HFInventoryConfig
+from aumc_pipeline.utils.parquet_datasets import parquet_exists
 
 REQUIRED_RAW_TABLES = [
     "admissions.csv",
@@ -74,6 +77,19 @@ class PreMedsConfig:
     partition_rows: int = 5_000_000
     max_rows: int | None = None
     num_patients: int | None = None
+    split_path: Path | None = None
+    split_outputs: bool = False
+    vocab_path: Path | None = None
+    build_hf_inventory: bool = True
+    build_binned_numericitems: bool = True
+    hf_inventory_metadata_dir: Path | None = None
+    hf_highres_threshold_minutes: float = 45.0
+    hf_confidence_level: float = 0.99
+    hf_min_groups: int = 30
+    hf_patient_batch_size: int = 500
+    hf_candidate_limit: int = 0
+    hf_seed: int = 20260601
+    binning_window_minutes: int = 60
     overwrite: bool = False
 
 
@@ -108,6 +124,23 @@ def _preflight(config: PreMedsConfig) -> None:
         raise ValueError("max_rows must be > 0 when set")
     if config.num_patients is not None and config.num_patients <= 0:
         raise ValueError("num_patients must be > 0 when set")
+    if config.split_outputs:
+        if config.split_path is None:
+            raise ValueError("split_outputs=true requires paths.split_path")
+        if not config.split_path.is_file():
+            raise FileNotFoundError(f"Split manifest not found: {config.split_path}")
+    if config.build_hf_inventory:
+        if not config.split_outputs:
+            raise ValueError("build_hf_inventory=true requires split_outputs=true")
+        if config.vocab_path is None:
+            raise ValueError("build_hf_inventory=true requires paths.vocab_path")
+        if not config.vocab_path.is_file():
+            raise FileNotFoundError(f"Vocab not found for HF inventory: {config.vocab_path}")
+    if config.build_binned_numericitems:
+        if not config.build_hf_inventory:
+            raise ValueError("build_binned_numericitems=true requires build_hf_inventory=true")
+        if config.binning_window_minutes <= 0:
+            raise ValueError("binning_window_minutes must be > 0")
 
 
 def _write_small_table(
@@ -115,6 +148,7 @@ def _write_small_table(
     config: PreMedsConfig,
     anchors: pl.DataFrame,
     admission_ids: set[int] | None,
+    split_values: list[str],
 ) -> dict[str, Any]:
     raw_path = config.raw_data_dir / f"{table}.csv"
     df = pd.read_csv(
@@ -146,31 +180,122 @@ def _write_small_table(
     out_path = config.pre_meds_dir / f"{table}.parquet"
     transformed.write_parquet(out_path)
 
+    split_rows_emitted: dict[str, int] = {}
+    if config.split_outputs and "split" in transformed.columns:
+        for split in split_values:
+            split_dir = config.pre_meds_dir / split
+            split_dir.mkdir(parents=True, exist_ok=True)
+            split_part = transformed.filter(pl.col("split") == split)
+            split_part.write_parquet(split_dir / f"{table}.parquet")
+            split_rows_emitted[split] = split_part.height
+
     return {
         "rows_read": rows_read,
         "rows_after_patient_filter": rows_after_patient_filter,
         "rows_excluded_measuredat_minus_1899": n_excl,
         "rows_emitted": transformed.height,
+        "split_rows_emitted": split_rows_emitted,
         "missing_admission_join_rows": n_miss,
         "time_anomalies": anomalies,
         "temporal_phase_counts": temporal_phase_counts(transformed),
     }
 
 
+def _load_split_manifest(split_path: Path | None) -> pd.DataFrame | None:
+    if split_path is None:
+        return None
+    split_df = pd.read_parquet(split_path)
+    missing = sorted({"subject_id", "split"} - set(split_df.columns))
+    if missing:
+        raise ValueError(f"Split manifest is missing columns: {missing}")
+    return split_df[["subject_id", "split"]].drop_duplicates()
+
+
+def _write_hf_inventory(config: PreMedsConfig, split_values: list[str]) -> dict[str, Any]:
+    """Build train-derived high-frequency numeric inventory after pre-MEDS write."""
+    if not config.build_hf_inventory:
+        return {}
+    if "train" not in split_values:
+        return {"skipped": "train split not present in current bounded pre-MEDS output"}
+
+    metadata_dir = config.hf_inventory_metadata_dir or (config.pre_meds_dir.parent / "metadata")
+    cfg = HFInventoryConfig(
+        input_path=config.pre_meds_dir / "train" / "numericitems",
+        vocab_path=config.vocab_path,  # type: ignore[arg-type]
+        output_csv_path=metadata_dir / "hf_numeric_inventory.csv",
+        output_json_path=metadata_dir / "hf_numeric_highres_items.json",
+        summary_path=metadata_dir / "hf_numeric_inventory_summary.json",
+        highres_threshold_minutes=config.hf_highres_threshold_minutes,
+        confidence_level=config.hf_confidence_level,
+        min_groups=config.hf_min_groups,
+        patient_batch_size=config.hf_patient_batch_size,
+        candidate_limit=config.hf_candidate_limit,
+        seed=config.hf_seed,
+    )
+    return HFInventoryBuilder(cfg).run()
+
+
+def _write_binned_numericitems(config: PreMedsConfig, split_values: list[str]) -> dict[str, Any]:
+    """Apply train-derived high-frequency inventory to split numericitems.
+
+    Raw ``numericitems`` remains source-preserving. Binned output is written as
+    ``numericitems_binned`` beside each split's raw numericitems dataset.
+    """
+    if not config.build_binned_numericitems:
+        return {}
+
+    metadata_dir = config.hf_inventory_metadata_dir or (config.pre_meds_dir.parent / "metadata")
+    inventory_path = metadata_dir / "hf_numeric_inventory.csv"
+    if not inventory_path.is_file():
+        raise FileNotFoundError(f"Missing HF inventory for numeric binning: {inventory_path}")
+
+    summaries: dict[str, Any] = {}
+    for split in split_values:
+        input_path = config.pre_meds_dir / split / "numericitems"
+        if not parquet_exists(input_path):
+            (config.pre_meds_dir / split / "numericitems_binned").mkdir(parents=True, exist_ok=True)
+            summaries[split] = {"skipped": f"no numericitems parquet for split {split}"}
+            continue
+        result = CausalMeanBinningTransform(
+            CausalMeanBinningConfig(
+                input_path=input_path,
+                output_path=config.pre_meds_dir / split / "numericitems_binned",
+                inventory_path=inventory_path,
+                summary_path=metadata_dir / f"hf_numeric_binning_{split}_summary.json",
+                split_name=split,
+                window_minutes=config.binning_window_minutes,
+                overwrite=config.overwrite,
+            )
+        ).run()
+        summaries[split] = result.summary
+
+    manifest = {
+        "inventory_path": str(inventory_path),
+        "window_minutes": config.binning_window_minutes,
+        "splits": summaries,
+    }
+    manifest_path = metadata_dir / "hf_numeric_binning_summary.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True, cls=_JsonEncoder) + "\n")
+    return manifest
+
+
 def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
     """Run the full pre-MEDS extraction and return a dict of output paths."""
 
     total_start = time.perf_counter()
+    total_steps = 3 + int(config.build_hf_inventory) + int(config.build_binned_numericitems)
     _preflight(config)
     config.pre_meds_dir.mkdir(parents=True, exist_ok=True)
     config.audit_dir.mkdir(parents=True, exist_ok=True)
 
     epoch_map = load_epoch_map(config.epoch_map)
+    split_manifest = _load_split_manifest(config.split_path)
 
     # Phase 1: admissions (prerequisite for anchor joins in all subsequent phases).
     step_start = time.perf_counter()
     _log(
-        f"1/3 admissions and patient"
+        f"1/{total_steps} admissions and patient"
         + (f" (bounded to {config.num_patients} patients)" if config.num_patients else " (all patients)")
     )
     adm_paths, adm_counts = write_admissions_outputs(
@@ -178,33 +303,39 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         pre_meds_dir=config.pre_meds_dir,
         epoch_map=epoch_map,
         num_patients=config.num_patients,
+        split_manifest=split_manifest,
+        split_outputs=config.split_outputs,
     )
-    anchors = pl.read_parquet(config.pre_meds_dir / "admissions.parquet").select(
-        ADMISSION_ANCHOR_COLUMNS
+    admissions_for_anchors = pl.read_parquet(config.pre_meds_dir / "admissions.parquet")
+    anchors = admissions_for_anchors.select(admission_anchor_columns(admissions_for_anchors))
+    split_values = (
+        sorted(anchors["split"].drop_nulls().unique().to_list())
+        if config.split_outputs and "split" in anchors.columns
+        else []
     )
     admission_ids: set[int] | None = (
         set(anchors["admissionid"].to_list()) if config.num_patients is not None else None
     )
     _log(
-        f"1/3 admissions done in {_elapsed(step_start)}: "
+        f"1/{total_steps} admissions done in {_elapsed(step_start)}: "
         f"{adm_counts['unique_admissions']} admissions / {adm_counts['unique_patients']} patients"
     )
 
     # Phase 2: small tables (read entirely into memory).
     step_start = time.perf_counter()
-    _log("2/3 small tables: freetextitems, processitems, procedureorderitems")
+    _log(f"2/{total_steps} small tables: freetextitems, processitems, procedureorderitems")
     small_summaries: dict[str, Any] = {}
     for table in _SMALL_TABLES:
         _log(f"  {table} ...")
-        small_summaries[table] = _write_small_table(table, config, anchors, admission_ids)
+        small_summaries[table] = _write_small_table(table, config, anchors, admission_ids, split_values)
         _log(
             f"  {table}: {small_summaries[table]['rows_emitted']:,} rows emitted"
         )
-    _log(f"2/3 small tables done in {_elapsed(step_start)}")
+    _log(f"2/{total_steps} small tables done in {_elapsed(step_start)}")
 
     # Phase 3: large tables (chunked latin1 CSV → partitioned parquet).
     step_start = time.perf_counter()
-    _log("3/3 large tables: numericitems, listitems, drugitems (chunked)")
+    _log(f"3/{total_steps} large tables: numericitems, listitems, drugitems (chunked)")
     large_summaries: dict[str, Any] = {}
     for table in _LARGE_TABLES:
         _log(f"  {table} ...")
@@ -217,12 +348,31 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
             max_rows=config.max_rows,
             overwrite=config.overwrite,
             admission_ids=admission_ids,
+            split_values=split_values if config.split_outputs else None,
         )
         large_summaries[table] = acc.as_summary(config.pre_meds_dir, config.max_rows)
         _log(
             f"  {table}: {acc.rows_emitted:,} rows in {acc.partition_count} partitions"
         )
-    _log(f"3/3 large tables done in {_elapsed(step_start)}")
+    _log(f"3/{total_steps} large tables done in {_elapsed(step_start)}")
+
+    # Optional train-derived high-frequency inventory. This is part of
+    # pre-MEDS finalization because later binning needs a frozen train artifact.
+    step_index = 4
+    hf_inventory_summary: dict[str, Any] = {}
+    if config.build_hf_inventory:
+        step_start = time.perf_counter()
+        _log(f"{step_index}/{total_steps} high-frequency numeric inventory from train split")
+        hf_inventory_summary = _write_hf_inventory(config, split_values)
+        _log(f"{step_index}/{total_steps} high-frequency inventory done in {_elapsed(step_start)}")
+        step_index += 1
+
+    binned_numeric_summary: dict[str, Any] = {}
+    if config.build_binned_numericitems:
+        step_start = time.perf_counter()
+        _log(f"{step_index}/{total_steps} causal mean-binning high-frequency numericitems")
+        binned_numeric_summary = _write_binned_numericitems(config, split_values)
+        _log(f"{step_index}/{total_steps} numeric binning done in {_elapsed(step_start)}")
 
     # Summary artifact.
     summary: dict[str, Any] = {
@@ -230,11 +380,16 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         "raw_data_dir": str(config.raw_data_dir),
         "pre_meds_dir": str(config.pre_meds_dir),
         "num_patients": config.num_patients,
+        "split_path": str(config.split_path) if config.split_path else None,
+        "split_outputs": config.split_outputs,
+        "split_values": split_values,
         "max_rows_per_table": config.max_rows,
         "partition_rows": config.partition_rows,
         "admissions": adm_counts,
         "small_tables": small_summaries,
         "large_tables": large_summaries,
+        "hf_inventory": hf_inventory_summary,
+        "binned_numericitems": binned_numeric_summary,
         "elapsed_seconds": round(time.perf_counter() - total_start, 1),
     }
     summary_path = config.audit_dir / "premeds_summary.json"
@@ -252,4 +407,10 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         outputs[table] = config.pre_meds_dir / f"{table}.parquet"
     for table in _LARGE_TABLES:
         outputs[table] = config.pre_meds_dir / table
+    if config.build_hf_inventory:
+        metadata_dir = config.hf_inventory_metadata_dir or (config.pre_meds_dir.parent / "metadata")
+        outputs["hf_numeric_inventory"] = metadata_dir / "hf_numeric_inventory.csv"
+    if config.build_binned_numericitems:
+        metadata_dir = config.hf_inventory_metadata_dir or (config.pre_meds_dir.parent / "metadata")
+        outputs["hf_numeric_binning_summary"] = metadata_dir / "hf_numeric_binning_summary.json"
     return outputs

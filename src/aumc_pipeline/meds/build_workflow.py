@@ -2,11 +2,12 @@
 
 Consumes:
   <pre_meds_dir>/admissions.parquet
-  <pre_meds_dir>/numericitems/       (partitioned)
+  <pre_meds_dir>/numericitems_binned/ (preferred when present)
+  <pre_meds_dir>/numericitems/        (fallback, partitioned)
   <pre_meds_dir>/listitems/          (partitioned)
   <pre_meds_dir>/drugitems/          (partitioned)
   <pre_meds_dir>/processitems.parquet
-  mappings/aumc_supplied_vocab.csv
+  outputs/aumc_supplied_vocab.csv
 
 Writes:
   <output_dir>/data/0.parquet        (CORE_COLUMNS predictor table)

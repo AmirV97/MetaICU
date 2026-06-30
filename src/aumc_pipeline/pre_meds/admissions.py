@@ -116,24 +116,25 @@ def build_patient_table(admissions: pd.DataFrame) -> pd.DataFrame:
         pd.to_numeric(first["age_years_approx"], errors="coerce") * 365.25, unit="D"
     )
     first["dateofbirth_is_approx"] = first["age_years_approx"].notna()
-    return first[
-        [
-            "subject_id",
-            "patientid",
-            "gender",
-            "agegroup",
-            "age_years_approx",
-            "dateofbirth",
-            "dateofbirth_is_approx",
-            "dateofdeath",
-            "dateofdeathtime",
-            "admissionid",
-            "admissioncount",
-            "admissionyeargroup",
-            "admittedattime",
-            "source_dataset",
-        ]
-    ].rename(
+    columns = [
+        "subject_id",
+        "patientid",
+        "gender",
+        "agegroup",
+        "age_years_approx",
+        "dateofbirth",
+        "dateofbirth_is_approx",
+        "dateofdeath",
+        "dateofdeathtime",
+        "admissionid",
+        "admissioncount",
+        "admissionyeargroup",
+        "admittedattime",
+        "source_dataset",
+    ]
+    if "split" in first.columns:
+        columns.append("split")
+    return first[columns].rename(
         columns={
             "admissionid": "first_admissionid",
             "admissioncount": "first_admissioncount",
@@ -149,18 +150,48 @@ def sample_patients(admissions: pd.DataFrame, num_patients: int) -> pd.DataFrame
     return admissions[admissions["patientid"].isin(set(pids))].copy()
 
 
+def attach_split_manifest(
+    admissions: pd.DataFrame,
+    split_manifest: pd.DataFrame,
+) -> pd.DataFrame:
+    """Attach subject-level split labels to admissions by patientid."""
+    manifest = split_manifest[["subject_id", "split"]].drop_duplicates("subject_id")
+    if manifest["subject_id"].duplicated().any():
+        raise ValueError("split manifest has duplicate subject_id rows")
+    manifest = manifest.rename(columns={"subject_id": "patientid"})
+    manifest["patientid"] = pd.to_numeric(manifest["patientid"], errors="coerce").astype("Int64")
+
+    out = admissions.copy()
+    out["patientid"] = pd.to_numeric(out["patientid"], errors="coerce").astype("Int64")
+    out = out.merge(manifest, on="patientid", how="left", validate="many_to_one")
+    missing = out[out["split"].isna()]["patientid"].drop_duplicates().tolist()
+    if missing:
+        preview = missing[:10]
+        raise ValueError(
+            f"split manifest is missing {len(missing)} selected patientids; "
+            f"first examples: {preview}"
+        )
+    out["split"] = out["split"].astype(str)
+    return out
+
+
 def write_admissions_outputs(
     raw_data_dir: Path,
     pre_meds_dir: Path,
     epoch_map: dict[str, pd.Timestamp],
     num_patients: int | None = None,
+    split_manifest: pd.DataFrame | None = None,
+    split_outputs: bool = False,
 ) -> tuple[dict[str, Path], dict[str, int]]:
-    """Build patient.parquet and admissions.parquet; return paths and row counts."""
+    """Build patient/admission parquet outputs; return paths and row counts."""
     raw = read_admissions(raw_data_dir)
     admissions = build_admissions_table(raw, epoch_map)
 
     if num_patients is not None:
         admissions = sample_patients(admissions, num_patients)
+
+    if split_manifest is not None:
+        admissions = attach_split_manifest(admissions, split_manifest)
 
     patient = build_patient_table(admissions)
 
@@ -170,11 +201,35 @@ def write_admissions_outputs(
     admissions.to_parquet(admissions_path, index=False)
     patient.to_parquet(patient_path, index=False)
 
+    paths = {"admissions": admissions_path, "patient": patient_path}
+    split_counts: dict[str, dict[str, int]] = {}
+    if split_outputs:
+        if "split" not in admissions.columns:
+            raise ValueError("split_outputs=true requires a split manifest")
+        for split in sorted(admissions["split"].dropna().unique()):
+            split_dir = pre_meds_dir / str(split)
+            split_dir.mkdir(parents=True, exist_ok=True)
+            adm_split = admissions[admissions["split"] == split]
+            patient_split = patient[patient["split"] == split]
+            adm_path = split_dir / "admissions.parquet"
+            pat_path = split_dir / "patient.parquet"
+            adm_split.to_parquet(adm_path, index=False)
+            patient_split.to_parquet(pat_path, index=False)
+            paths[f"{split}_admissions"] = adm_path
+            paths[f"{split}_patient"] = pat_path
+            split_counts[str(split)] = {
+                "admissions_rows_emitted": int(len(adm_split)),
+                "patient_rows_emitted": int(len(patient_split)),
+                "unique_patients": int(adm_split["patientid"].nunique()),
+                "unique_admissions": int(adm_split["admissionid"].nunique()),
+            }
+
     counts = {
         "raw_admissions_rows": int(len(raw)),
         "admissions_rows_emitted": int(len(admissions)),
         "patient_rows_emitted": int(len(patient)),
         "unique_patients": int(admissions["patientid"].nunique()),
         "unique_admissions": int(admissions["admissionid"].nunique()),
+        "split_counts": split_counts,
     }
-    return {"admissions": admissions_path, "patient": patient_path}, counts
+    return paths, counts

@@ -15,7 +15,7 @@ Usage examples:
   # Explicit paths (pre-MEDS already bounded):
   build-aumc-meds \\
       paths.pre_meds_dir=/path/to/pre_meds_1000 \\
-      paths.vocab_path=/path/to/mappings/aumc_supplied_vocab.csv \\
+      paths.vocab_path=/path/to/outputs/aumc_supplied_vocab.csv \\
       paths.output_dir=/path/to/outputs/meds_1000 \\
       paths.audit_dir=/path/to/outputs/audits
 """
@@ -61,7 +61,7 @@ def _resolve_path(cfg: DictConfig, key: str, parent_dir: Path | None, default_ch
 def _build_config(cfg: DictConfig) -> MEDSConfig:
     parent_dir = _optional_path(OmegaConf.select(cfg, "paths.parent_dir"))
     pre_meds_dir = _resolve_path(cfg, "pre_meds_dir", parent_dir, "outputs/pre_meds")
-    vocab_path = _resolve_path(cfg, "vocab_path", parent_dir, "mappings/aumc_supplied_vocab.csv")
+    vocab_path = _resolve_path(cfg, "vocab_path", parent_dir, "outputs/aumc_supplied_vocab.csv")
     output_dir = _resolve_path(cfg, "output_dir", parent_dir, "outputs/meds")
     audit_dir = _resolve_path(cfg, "audit_dir", parent_dir, "outputs/audits")
 

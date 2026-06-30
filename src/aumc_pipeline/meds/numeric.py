@@ -1,6 +1,7 @@
 """Numericitems → quantile-coded MEDS events.
 
-Joins pre-MEDS numericitems to the vocab by (itemid, unitid), applies
+Prefers pre-MEDS ``numericitems_binned`` when present, otherwise falls back
+to raw ``numericitems``. Joins numeric rows to the vocab by (itemid, unitid), applies
 temporal phase filtering, and assigns Q1-Q10 quantile bins per
 source_token/unit using the current run's data.
 
@@ -100,7 +101,9 @@ def numeric_events(
       out: debug frame — one row per emitted quantile event; code = harmonized_token//Q{bin}
     Rows dropped: unmatched vocab join, non-emitted (_emit=False), out-of-phase, non-finite value.
     """
-    numeric_path = resolve_table_parquet(pre_meds_dir, "numericitems")
+    numeric_path = resolve_table_parquet(pre_meds_dir, "numericitems_binned")
+    if not parquet_exists(numeric_path):
+        numeric_path = resolve_table_parquet(pre_meds_dir, "numericitems")
     if not parquet_exists(numeric_path):
         return empty_debug_frame(), []
 
@@ -140,6 +143,17 @@ def numeric_events(
             .write_csv(audit_dir / "meds_numeric_quantile_assignments.csv")
         )
 
+    binning_method_expr = (
+        pl.col("binning_method").cast(pl.String).fill_null("raw")
+        if "binning_method" in events.columns
+        else pl.lit("raw")
+    )
+    raw_rows_expr = (
+        pl.col("raw_rows_in_bin").cast(pl.Int64).fill_null(1)
+        if "raw_rows_in_bin" in events.columns
+        else pl.lit(1).cast(pl.Int64)
+    )
+
     return coerce_debug_frame(
         events.with_columns([
             pl.col("measuredattime").alias("time"),
@@ -150,7 +164,7 @@ def numeric_events(
             pl.lit("numericitems").alias("source_table"),
             pl.col("item").cast(pl.String).alias("source_label"),
             pl.col("unit").cast(pl.String).alias("source_unit"),
-            pl.lit("raw").alias("binning_method"),
-            pl.lit(1).cast(pl.Int64).alias("raw_rows_in_bin"),
+            binning_method_expr.alias("binning_method"),
+            raw_rows_expr.alias("raw_rows_in_bin"),
         ])
     ), exclusions

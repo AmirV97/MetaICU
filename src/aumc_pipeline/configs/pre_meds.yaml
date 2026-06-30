@@ -6,6 +6,8 @@
 #
 # All Amsterdam CSVs must be in paths.raw_data_dir (defaults to parent_dir/AUMC_raw).
 # Output parquet lands in paths.pre_meds_dir (defaults to parent_dir/outputs/pre_meds).
+# With split_outputs=true, split folders are also written under pre_meds_dir/train,
+# pre_meds_dir/val, and pre_meds_dir/test based on subject_splits.parquet.
 # Audit JSON lands in paths.audit_dir (defaults to parent_dir/outputs/audits).
 #
 # Bounded test (1000 patients):
@@ -16,12 +18,29 @@ paths:
   raw_data_dir: null      # defaults to parent_dir/AUMC_raw
   pre_meds_dir: null      # defaults to parent_dir/outputs/pre_meds
   audit_dir: null         # defaults to parent_dir/outputs/audits
+  metadata_dir: null      # defaults to parent_dir/outputs/metadata
+  split_path: null        # defaults to parent_dir/outputs/metadata/subject_splits.parquet when split_outputs=true
+  vocab_path: null        # defaults to parent_dir/outputs/aumc_supplied_vocab.csv
 
 run:
   overwrite: false
   partition_rows: 5000000
   max_rows: null          # per-table raw-row cap for smoke tests; null = full table
   num_patients: null      # deterministic patient subset; null = all patients
+  split_outputs: true     # write train/val/test folders from subject_splits.parquet
+  build_hf_inventory: true # train-derived high-frequency inventory substage
+  build_binned_numericitems: true # write split-level numericitems_binned using the train inventory
+
+hf_inventory:
+  highres_threshold_minutes: 45.0
+  confidence_level: 0.99
+  min_groups: 30
+  patient_batch_size: 500
+  candidate_limit: 0       # 0 = all emitted numeric source itemids from vocab
+  seed: 20260601
+
+binning:
+  window_minutes: 60       # causal mean window; emitted at bin_end, no empty-bin imputation
 
 pre_meds:
   dataset: AmsterdamUMCdb

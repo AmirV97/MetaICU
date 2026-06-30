@@ -52,7 +52,7 @@ The vocabulary is source-preserving: every Amsterdam source token is kept, even 
 - Diagnosis/context rows are static clinical context. Runtime should deduplicate repeated diagnosis facts per admission.
 - GCS eye/motor/verbal component rows are emitted directly as `dynamic_event/score_component`, following OpenICU-style component concepts. Runtime should not derive a GCS total by default.
 - BPS component rows are not emitted directly; a later runtime stage may derive total BPS when complete component bundles are available.
-- High-frequency numeric streams should be binned before MEDS/tokenization in later runtime stages.
+- High-frequency numeric streams are identified from the train split during pre-MEDS and written as causal mean-binned `numericitems_binned` datasets for each split. Empty windows are not emitted.
 - All emitted non-medication numeric values should later be converted to train-split quantile tokens.
 
 ## Runtime Notes
@@ -66,4 +66,4 @@ Runtime code should:
 3. emit static context once per admission/stay;
 4. emit dynamic events at source timestamps;
 5. compute temporal phase at runtime;
-6. apply numeric quantiles and high-frequency binning before final tokenization.
+6. consume `numericitems_binned` when present, fall back to raw `numericitems` otherwise, and apply train-frozen numeric quantiles before final tokenization.

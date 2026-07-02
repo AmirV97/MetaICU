@@ -6,9 +6,9 @@
 
 paths:
   parent_dir: null
-  raw_data_dir: null      # defaults to parent_dir/AUMC_raw
-  metadata_dir: null      # defaults to parent_dir/outputs/metadata
-  split_path: null        # defaults to parent_dir/outputs/metadata/subject_splits.parquet
+  raw_data_dir: null      # defaults to parent_dir/data/raw
+  metadata_dir: null      # defaults to parent_dir/data/metadata
+  split_path: null        # defaults to parent_dir/data/metadata/subject_splits.parquet
 
 run:
   train_frac: 0.8

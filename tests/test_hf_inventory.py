@@ -26,9 +26,9 @@ class HFInventoryTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        self.numeric_dir = self.root / "outputs/pre_meds/train/numericitems"
-        self.vocab_path = self.root / "outputs/aumc_supplied_vocab.csv"
-        self.metadata = self.root / "outputs/metadata"
+        self.numeric_dir = self.root / "data/pre-MEDS/train/numericitems"
+        self.vocab_path = self.root / "vocab/aumc_supplied_vocab.csv"
+        self.metadata = self.root / "data/metadata"
         self._write_fixture()
 
     def tearDown(self) -> None:

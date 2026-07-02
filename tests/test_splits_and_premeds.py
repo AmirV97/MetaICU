@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -35,11 +36,12 @@ class SplitAndPreMedsTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        self.raw = self.root / "AUMC_raw"
-        self.metadata = self.root / "outputs/metadata"
-        self.pre_meds = self.root / "outputs/pre_meds"
-        self.audits = self.root / "outputs/audits"
-        self.vocab_path = self.root / "outputs/aumc_supplied_vocab.csv"
+        self.raw = self.root / "data/raw"
+        self.raw_shards = self.root / "data/raw_shards"
+        self.metadata = self.root / "data/metadata"
+        self.pre_meds = self.root / "data/pre-MEDS"
+        self.audits = self.root / "audits"
+        self.vocab_path = self.root / "vocab/aumc_supplied_vocab.csv"
         self._write_raw_tables()
         self._write_vocab()
 
@@ -318,6 +320,40 @@ class SplitAndPreMedsTests(unittest.TestCase):
         self.assertEqual(out.height, 4)
         self.assertEqual(out.select("subject_id").n_unique(), 4)
 
+    def test_premeds_creates_split_manifest_when_missing(self) -> None:
+        split_path = self.metadata / "subject_splits.parquet"
+        self.assertFalse(split_path.exists())
+
+        outputs = write_premeds_outputs(
+            PreMedsConfig(
+                raw_data_dir=self.raw,
+                raw_shards_dir=self.raw_shards,
+                pre_meds_dir=self.pre_meds,
+                audit_dir=self.audits,
+                epoch_map={"2003-2009": "2003-01-01 00:00:00"},
+                partition_rows=1,
+                split_path=split_path,
+                split_outputs=True,
+                split_train_frac=0.5,
+                split_val_frac=0.25,
+                split_test_frac=0.25,
+                split_seed=11,
+                vocab_path=self.vocab_path,
+                build_hf_inventory=False,
+                build_binned_numericitems=False,
+                overwrite=False,
+            )
+        )
+
+        self.assertTrue(split_path.exists())
+        self.assertEqual(outputs["subject_splits"], split_path)
+        split_df = pl.read_parquet(split_path)
+        self.assertEqual(split_df.height, 4)
+        self.assertEqual(set(split_df["split"].to_list()), {"train", "val", "test"})
+        self.assertTrue((self.pre_meds / "train/admissions.parquet").exists())
+        self.assertTrue((self.pre_meds / "val/admissions.parquet").exists())
+        self.assertTrue((self.pre_meds / "test/admissions.parquet").exists())
+
     def test_premeds_writes_combined_and_split_outputs(self) -> None:
         split_df = pd.DataFrame(
             [
@@ -334,6 +370,7 @@ class SplitAndPreMedsTests(unittest.TestCase):
         outputs = write_premeds_outputs(
             PreMedsConfig(
                 raw_data_dir=self.raw,
+                raw_shards_dir=self.raw_shards,
                 pre_meds_dir=self.pre_meds,
                 audit_dir=self.audits,
                 epoch_map={"2003-2009": "2003-01-01 00:00:00"},
@@ -350,6 +387,7 @@ class SplitAndPreMedsTests(unittest.TestCase):
             )
         )
         self.assertTrue(outputs["admissions"].exists())
+        self.assertTrue((self.raw_shards / "numericitems/part-00000.parquet").exists())
         self.assertTrue(outputs["hf_numeric_inventory"].exists())
         self.assertTrue((self.metadata / "hf_numeric_inventory_summary.json").exists())
         self.assertTrue(outputs["hf_numeric_binning_summary"].exists())
@@ -373,6 +411,85 @@ class SplitAndPreMedsTests(unittest.TestCase):
         self.assertEqual(set(train_num["patientid"].to_list()), {1})
         self.assertEqual(set(test_num["patientid"].to_list()), {3})
         self.assertIn("split", train_num.columns)
+
+        summary = json.loads((self.audits / "premeds_summary.json").read_text())
+        self.assertEqual(summary["raw_shards"]["numericitems"]["action"], "built")
+        self.assertEqual(summary["large_tables"]["numericitems"]["input_mode"], "raw_parquet_shards")
+
+    def test_premeds_can_fallback_to_csv_chunks_when_raw_shards_disabled(self) -> None:
+        split_path = self.metadata / "subject_splits.parquet"
+        split_path.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(
+            [
+                {"subject_id": 1, "split": "train"},
+                {"subject_id": 2, "split": "val"},
+                {"subject_id": 3, "split": "test"},
+                {"subject_id": 4, "split": "test"},
+            ]
+        ).to_parquet(split_path, index=False)
+
+        write_premeds_outputs(
+            PreMedsConfig(
+                raw_data_dir=self.raw,
+                pre_meds_dir=self.pre_meds,
+                audit_dir=self.audits,
+                epoch_map={"2003-2009": "2003-01-01 00:00:00"},
+                partition_rows=1,
+                split_path=split_path,
+                split_outputs=True,
+                vocab_path=self.vocab_path,
+                build_raw_shards=False,
+                build_hf_inventory=False,
+                build_binned_numericitems=False,
+                overwrite=True,
+            )
+        )
+
+        self.assertFalse((self.raw_shards / "numericitems").exists())
+        summary = json.loads((self.audits / "premeds_summary.json").read_text())
+        self.assertEqual(summary["raw_shards"]["skipped"], "run.build_raw_shards=false")
+        self.assertEqual(summary["large_tables"]["numericitems"]["input_mode"], "raw_csv_chunks")
+
+    def test_premeds_reuses_existing_raw_shards_by_default(self) -> None:
+        split_path = self.metadata / "subject_splits.parquet"
+        split_path.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(
+            [
+                {"subject_id": 1, "split": "train"},
+                {"subject_id": 2, "split": "val"},
+                {"subject_id": 3, "split": "test"},
+                {"subject_id": 4, "split": "test"},
+            ]
+        ).to_parquet(split_path, index=False)
+
+        base_kwargs = dict(
+            raw_data_dir=self.raw,
+            raw_shards_dir=self.raw_shards,
+            pre_meds_dir=self.pre_meds,
+            audit_dir=self.audits,
+            epoch_map={"2003-2009": "2003-01-01 00:00:00"},
+            partition_rows=1,
+            split_path=split_path,
+            split_outputs=True,
+            vocab_path=self.vocab_path,
+            build_hf_inventory=False,
+            build_binned_numericitems=False,
+            overwrite=True,
+        )
+        write_premeds_outputs(PreMedsConfig(**base_kwargs))
+        write_premeds_outputs(
+            PreMedsConfig(
+                **{
+                    **base_kwargs,
+                    "pre_meds_dir": self.root / "data/pre-MEDS-second",
+                    "audit_dir": self.root / "audits-second",
+                }
+            )
+        )
+
+        summary = json.loads((self.root / "audits-second/premeds_summary.json").read_text())
+        self.assertEqual(summary["raw_shards"]["numericitems"]["action"], "reused")
+        self.assertEqual(summary["large_tables"]["numericitems"]["input_mode"], "raw_parquet_shards")
 
 
 if __name__ == "__main__":

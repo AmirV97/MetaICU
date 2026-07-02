@@ -42,13 +42,13 @@ def _resolve_path(cfg: DictConfig, key: str, parent_dir: Path | None, default_ch
 
 def _build_config(cfg: DictConfig) -> SplitConfig:
     parent_dir = _optional_path(OmegaConf.select(cfg, "paths.parent_dir"))
-    raw_data_dir = _resolve_path(cfg, "raw_data_dir", parent_dir, "AUMC_raw")
-    metadata_dir = _resolve_path(cfg, "metadata_dir", parent_dir, "outputs/metadata")
+    raw_data_dir = _resolve_path(cfg, "raw_data_dir", parent_dir, "data/raw")
+    metadata_dir = _resolve_path(cfg, "metadata_dir", parent_dir, "data/metadata")
     split_path = _resolve_path(
         cfg,
         "split_path",
         parent_dir,
-        "outputs/metadata/subject_splits.parquet",
+        "data/metadata/subject_splits.parquet",
     )
 
     return SplitConfig(

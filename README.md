@@ -1,11 +1,11 @@
 # AUMC Pipeline
 
-Clean AmsterdamUMCdb ICU pipeline for vocabulary construction, split-aware pre-MEDS, and MEDS-like QC outputs.
+Clean AmsterdamUMCdb ICU pipeline for vocabulary construction, split-aware pre-MEDS, MEDS-like outputs, and ETHOS-style tokenized timelines.
 
 Current main artifact:
 
 ```text
-<workspace>/outputs/aumc_supplied_vocab.csv
+<workspace>/vocab/aumc_supplied_vocab.csv
 ```
 
 ## Pipeline
@@ -14,9 +14,9 @@ Current main artifact:
 2. Retrieve GitHub externals.
 3. Manually add Athena/OMOP CSVs.
 4. Build the supplied vocabulary.
-5. Build deterministic subject splits.
-6. Build pre-MEDS, including train-derived high-frequency numeric inventory and causal mean-binned numeric outputs.
-7. Build MEDS-like QC outputs.
+5. Build pre-MEDS, including deterministic subject splits, train-derived high-frequency numeric inventory, and causal mean-binned numeric outputs.
+6. Build MEDS-like outputs.
+7. Build tokenized safetensors.
 
 ## 1. Workspace And Code
 
@@ -37,16 +37,23 @@ This creates:
 
 ```text
 /path/to/aumc_workspace/
-├── AUMC_raw/
+├── data/
+│   ├── raw/
+│   ├── raw_shards/
+│   ├── pre-MEDS/
+│   ├── MEDS/
+│   ├── tokenized/
+│   └── metadata/
 ├── externals/
 │   └── omop_vocab/
-└── outputs/
+├── vocab/
+└── audits/
 ```
 
 Put the raw AmsterdamUMCdb CSV files in:
 
 ```text
-/path/to/aumc_workspace/AUMC_raw/
+/path/to/aumc_workspace/data/raw/
 ```
 
 ## 3. Add Athena/OMOP CSVs
@@ -98,44 +105,46 @@ build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
 Output:
 
 ```text
-/path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv
+/path/to/aumc_workspace/vocab/aumc_supplied_vocab.csv
 ```
 
 Use `run.overwrite=true` only when intentionally replacing an existing output.
 
-## 5. Build Subject Splits
-
-```bash
-build-aumc-split paths.parent_dir=/path/to/aumc_workspace
-```
-
-Default split is 80/10/10. Override if needed:
-
-```bash
-build-aumc-split paths.parent_dir=/path/to/aumc_workspace \
-  run.train_frac=0.8 run.val_frac=0.1 run.test_frac=0.1
-```
-
-Output:
-
-```text
-/path/to/aumc_workspace/outputs/metadata/subject_splits.parquet
-```
-
-## 6. Build Pre-MEDS
+## 5. Build Pre-MEDS
 
 ```bash
 build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace
 ```
 
+This creates or reuses the deterministic 80/10/10 subject split at:
+
+```text
+/path/to/aumc_workspace/data/metadata/subject_splits.parquet
+```
+
+It also creates or reuses schema-cast parquet caches for large raw tables under:
+
+```text
+/path/to/aumc_workspace/data/raw_shards/
+```
+
+These raw shards are an internal pre-MEDS cache. They preserve source rows and make later bounded/split pre-MEDS runs avoid rescanning the large raw CSVs.
+
+Override split fractions if needed:
+
+```bash
+build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace \
+  split.train_frac=0.8 split.val_frac=0.1 split.test_frac=0.1
+```
+
 Outputs:
 
 ```text
-/path/to/aumc_workspace/outputs/pre_meds/
-/path/to/aumc_workspace/outputs/pre_meds/{train,val,test}/
-/path/to/aumc_workspace/outputs/pre_meds/{train,val,test}/numericitems_binned/
-/path/to/aumc_workspace/outputs/metadata/hf_numeric_inventory.csv
-/path/to/aumc_workspace/outputs/metadata/hf_numeric_binning_summary.json
+/path/to/aumc_workspace/data/pre-MEDS/
+/path/to/aumc_workspace/data/pre-MEDS/{train,val,test}/
+/path/to/aumc_workspace/data/pre-MEDS/{train,val,test}/numericitems_binned/
+/path/to/aumc_workspace/data/metadata/hf_numeric_inventory.csv
+/path/to/aumc_workspace/data/metadata/hf_numeric_binning_summary.json
 ```
 
 Useful bounded QC run:
@@ -147,25 +156,39 @@ build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace \
 
 The high-frequency inventory is built from the train split. Causal mean-binning writes `numericitems_binned` and does not modify raw `numericitems`.
 
-## 7. Build MEDS-Like QC Outputs
-
-For a combined pre-MEDS QC run:
+## 6. Build MEDS-Like Outputs
 
 ```bash
 build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
 ```
 
-For split-specific QC using the binned numeric table:
+If `data/pre-MEDS/train`, `val`, and `test` exist, this writes split outputs under `data/MEDS/{train,val,test}/`. Numeric quantile boundaries are fit on train only and saved to `data/metadata/numeric_quantile_boundaries.parquet`, then reused for all splits.
+
+For one-cohort QC instead:
 
 ```bash
-build-aumc-meds \
-  paths.pre_meds_dir=/path/to/aumc_workspace/outputs/pre_meds/train \
-  paths.vocab_path=/path/to/aumc_workspace/outputs/aumc_supplied_vocab.csv \
-  paths.output_dir=/path/to/aumc_workspace/outputs/meds/train \
-  paths.audit_dir=/path/to/aumc_workspace/outputs/audits/meds_train
+build-aumc-meds paths.parent_dir=/path/to/aumc_workspace run.split_outputs=false
 ```
 
 MEDS numeric conversion prefers `numericitems_binned` when present, otherwise falls back to raw `numericitems`.
+
+## 7. Build Tokenized Outputs
+
+```bash
+build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace
+```
+
+The token vocabulary is built from `data/MEDS/train` only, then applied unchanged to `train`, `val`, and `test`.
+Codes seen only in `val` or `test` are mapped to the frozen `UNK` token and audited.
+
+Outputs:
+
+```text
+/path/to/aumc_workspace/data/tokenized/{train,val,test}/
+/path/to/aumc_workspace/data/tokenized/metadata/timeline_index.parquet
+```
+
+Each tokenized timeline is one ICU admission/stay. Patient and admission identity remain recoverable through `patient_ids`, `hadm_id`, `icustay_id`, and `timeline_index.parquet`.
 
 ## Current Status
 
@@ -173,17 +196,14 @@ Implemented:
 
 - external retrieval/setup helper
 - supplied vocabulary build/install
-- deterministic subject splits
+- deterministic subject splits as a pre-MEDS substage
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory
 - causal mean-binned numeric pre-MEDS outputs
-- bounded/full MEDS-like QC conversion for a supplied pre-MEDS directory
-
-Not final yet:
-
+- bounded/full MEDS-like conversion for a supplied pre-MEDS directory
+- split-aware MEDS conversion for train/val/test
 - train-frozen numeric quantile boundaries across train/val/test
-- one-command split-aware MEDS orchestration
-- final tokenization
+- train-frozen token vocabulary and tokenized safetensor outputs
 
 ## Tests
 

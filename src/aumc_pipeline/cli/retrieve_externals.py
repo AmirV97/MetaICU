@@ -75,19 +75,19 @@ def workspace_paths(parent_dir: Path | None, external_root: Path | None) -> dict
     if parent_dir is not None:
         return {
             "parent_dir": parent_dir,
-            "raw_data_dir": parent_dir / "AUMC_raw",
+            "raw_data_dir": parent_dir / "data/raw",
             "external_root": parent_dir / "externals",
             "omop_vocab_dir": parent_dir / "externals/omop_vocab",
-            "output_dir": parent_dir / "outputs",
+            "output_dir": parent_dir / "vocab",
         }
     if external_root is None:
         external_root = Path("amsterdam_external")
     return {
         "parent_dir": external_root.parent,
-        "raw_data_dir": external_root.parent / "AUMC_raw",
+        "raw_data_dir": external_root.parent / "data/raw",
         "external_root": external_root,
         "omop_vocab_dir": external_root / "omop_vocab",
-        "output_dir": external_root.parent / "outputs",
+        "output_dir": external_root.parent / "vocab",
     }
 
 
@@ -98,6 +98,11 @@ def create_workspace_dirs(paths: dict[str, Path]) -> None:
     paths["external_root"].mkdir(parents=True, exist_ok=True)
     paths["omop_vocab_dir"].mkdir(parents=True, exist_ok=True)
     paths["output_dir"].mkdir(parents=True, exist_ok=True)
+    (paths["parent_dir"] / "data/raw_shards").mkdir(parents=True, exist_ok=True)
+    (paths["parent_dir"] / "data/pre-MEDS").mkdir(parents=True, exist_ok=True)
+    (paths["parent_dir"] / "data/MEDS").mkdir(parents=True, exist_ok=True)
+    (paths["parent_dir"] / "data/metadata").mkdir(parents=True, exist_ok=True)
+    (paths["parent_dir"] / "audits").mkdir(parents=True, exist_ok=True)
 
 
 def run_git(args: list[str], cwd: Path | None = None) -> None:
@@ -180,7 +185,46 @@ def write_parent_readme(paths: dict[str, Path]) -> Path:
 
     parent = paths["parent_dir"]
     parent.mkdir(parents=True, exist_ok=True)
-    text = f"""# AUMC Pipeline Workspace\n\nThis folder is structured for the AUMC_pipeline vocabulary workflow.\n\nExpected layout:\n\n```text\n{parent}/\n├── AUMC_raw/\n├── externals/\n│   └── omop_vocab/\n└── outputs/\n```\n\n## What to place here\n\n- Put the raw AmsterdamUMCdb CSV files in `AUMC_raw/`. Required examples include `numericitems.csv`, `listitems.csv`, `drugitems.csv`, `freetextitems.csv`, `processitems.csv`, and `procedureorderitems.csv`.\n- GitHub-hosted external repositories are cloned into `externals/` by `retrieve_externals.py`.\n- Download the Athena/OMOP export manually and extract its CSV files into `externals/omop_vocab/`.\n\n## Build command\n\n```bash\npython /path/to/AUMC_pipeline/scripts/build_amsterdam_vocab.py \\\n  step=build_vocab \\\n  paths.parent_dir={parent}\n```\n\nThe main output will be:\n\n```text\n{paths['output_dir']}/aumc_supplied_vocab.csv\n```\n"""
+    text = f"""# AUMC Pipeline Workspace
+
+This folder is structured for the AUMC_pipeline workflow.
+
+Expected layout:
+
+```text
+{parent}/
+├── data/
+│   ├── raw/
+│   ├── raw_shards/
+│   ├── pre-MEDS/
+│   ├── MEDS/
+│   └── metadata/
+├── externals/
+│   └── omop_vocab/
+├── vocab/
+└── audits/
+```
+
+## What to place here
+
+- Put the raw AmsterdamUMCdb CSV files in `data/raw/`. Required examples include `numericitems.csv`, `listitems.csv`, `drugitems.csv`, `freetextitems.csv`, `processitems.csv`, and `procedureorderitems.csv`.
+- GitHub-hosted external repositories are cloned into `externals/` by `retrieve_externals.py`.
+- Download the Athena/OMOP export manually and extract its CSV files into `externals/omop_vocab/`.
+
+## Build command
+
+```bash
+python /path/to/AUMC_pipeline/scripts/build_amsterdam_vocab.py \
+  step=build_vocab \
+  paths.parent_dir={parent}
+```
+
+The vocabulary output will be:
+
+```text
+{paths['output_dir']}/aumc_supplied_vocab.csv
+```
+"""
     readme = parent / "README.md"
     readme.write_text(text)
     return readme
@@ -202,7 +246,7 @@ def write_external_readme(external_root: Path, repos: list[ExternalRepo]) -> Pat
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Retrieve GitHub-hosted external resources for AUMC_pipeline.")
-    parser.add_argument("--parent-dir", type=Path, help="Workspace root. Creates AUMC_raw/, externals/, externals/omop_vocab/, and outputs/.")
+    parser.add_argument("--parent-dir", type=Path, help="Workspace root. Creates data/raw/, externals/, externals/omop_vocab/, vocab/, data/pre-MEDS/, data/MEDS/, data/metadata/, and audits/.")
     parser.add_argument("--external-root", default=None, type=Path, help="Advanced: directory where GitHub resources will be cloned. Prefer --parent-dir.")
     parser.add_argument("--required-only", action="store_true", help="Clone only resources required for the current vocabulary workflow.")
     parser.add_argument("--update", action="store_true", help="Run git pull --ff-only in repositories that already exist.")

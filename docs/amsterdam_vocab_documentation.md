@@ -19,7 +19,7 @@ python scripts/build_amsterdam_vocab.py \
 
 Expected path placeholders used below:
 
-- `{parent_dir}`: user workspace containing `AUMC_raw/`, `externals/`, and `outputs/`.
+- `{parent_dir}`: user workspace containing `data/raw/`, `externals/`, `vocab/`, `data/pre-MEDS/`, `data/MEDS/`, `data/metadata/`, and `audits/`.
 - `{external_root}`: usually `{parent_dir}/externals`, containing cloned/copied Amsterdam-related external repositories and resources.
 - `{omop_vocab_dir}`: usually `{parent_dir}/externals/omop_vocab`, containing a local Athena/OMOP vocabulary export.
 

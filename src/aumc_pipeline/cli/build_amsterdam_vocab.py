@@ -126,11 +126,11 @@ def run_build_vocab(cfg: DictConfig) -> dict[str, Path]:
 
     parent_dir = _optional_path(OmegaConf.select(cfg, "paths.parent_dir"))
     output_vocab = _optional_path(OmegaConf.select(cfg, "paths.output_vocab")) or _configured_or_parent(
-        cfg, "output_vocab", parent_dir, "outputs/aumc_supplied_vocab.csv"
+        cfg, "output_vocab", parent_dir, "vocab/aumc_supplied_vocab.csv"
     )
-    audit_dir = _optional_path(OmegaConf.select(cfg, "paths.audit_dir")) or _default_audit_dir(output_vocab)
+    audit_dir = _optional_path(OmegaConf.select(cfg, "paths.audit_dir")) or (parent_dir / "audits/vocab" if parent_dir is not None else _default_audit_dir(output_vocab))
     config = BuildVocabConfig(
-        raw_data_dir=_configured_or_parent(cfg, "raw_data_dir", parent_dir, "AUMC_raw"),
+        raw_data_dir=_configured_or_parent(cfg, "raw_data_dir", parent_dir, "data/raw"),
         external_root=_configured_or_parent(cfg, "external_root", parent_dir, "externals"),
         omop_vocab_dir=_configured_or_parent(cfg, "omop_vocab_dir", parent_dir, "externals/omop_vocab"),
         audit_dir=audit_dir,

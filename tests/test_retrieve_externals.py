@@ -35,10 +35,10 @@ class RetrieveExternalsTests(unittest.TestCase):
         self.assertIn("AmsterdamUMCdb", repo_names)
         self.assertIn("BlendedICU", repo_names)
         self.assertNotIn("odyssey", repo_names)
-        self.assertEqual(plan["raw_data_dir"], "/tmp/aumc_workspace_fixture/AUMC_raw")
+        self.assertEqual(plan["raw_data_dir"], "/tmp/aumc_workspace_fixture/data/raw")
         self.assertEqual(plan["external_root"], "/tmp/aumc_workspace_fixture/externals")
         self.assertEqual(plan["omop_vocab_dir"], "/tmp/aumc_workspace_fixture/externals/omop_vocab")
-        self.assertEqual(plan["output_dir"], "/tmp/aumc_workspace_fixture/outputs")
+        self.assertEqual(plan["output_dir"], "/tmp/aumc_workspace_fixture/vocab")
         self.assertEqual(plan["athena_vocabularies"], ATHENA_VOCABULARIES)
         self.assertEqual(plan["athena_required_files"], ATHENA_REQUIRED_FILES)
 
@@ -53,9 +53,14 @@ class RetrieveExternalsTests(unittest.TestCase):
                 "--write-readme-only",
             ]
             subprocess.run(cmd, cwd=PIPELINE_ROOT, check=True, capture_output=True, text=True)
-            self.assertTrue((parent_dir / "AUMC_raw").exists())
+            self.assertTrue((parent_dir / "data/raw").exists())
+            self.assertTrue((parent_dir / "data/raw_shards").exists())
             self.assertTrue((parent_dir / "externals/omop_vocab").exists())
-            self.assertTrue((parent_dir / "outputs").exists())
+            self.assertTrue((parent_dir / "vocab").exists())
+            self.assertTrue((parent_dir / "data/pre-MEDS").exists())
+            self.assertTrue((parent_dir / "data/MEDS").exists())
+            self.assertTrue((parent_dir / "data/metadata").exists())
+            self.assertTrue((parent_dir / "audits").exists())
             self.assertTrue((parent_dir / "README.md").exists())
             readme = parent_dir / "externals/README.md"
             self.assertTrue(readme.exists())

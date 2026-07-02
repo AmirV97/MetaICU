@@ -49,11 +49,16 @@ The vocabulary is source-preserving: every Amsterdam source token is kept, even 
 - Workflow, contact/social/admin, discharge/outcome metadata, care targets, bed type, tube size, and similar low-value metadata are dropped from model input.
 - Labs are identified by Amsterdam source token prefix `LAB//`, not by LOINC alone. These use `token_role=dynamic_event/lab`.
 - Non-lab LOINC-backed rows, such as fluid-output concepts, are not labeled as labs.
+- Standard concept tokens use `OMOP_CONCEPT//{vocabulary_id}//{concept_id}` where the OMOP vocabulary metadata is available, e.g. `OMOP_CONCEPT//LOINC//...` or `OMOP_CONCEPT//SNOMED//...`.
 - Diagnosis/context rows are static clinical context. Runtime should deduplicate repeated diagnosis facts per admission.
 - GCS eye/motor/verbal component rows are emitted directly as `dynamic_event/score_component`, following OpenICU-style component concepts. Runtime should not derive a GCS total by default.
 - BPS component rows are not emitted directly; a later runtime stage may derive total BPS when complete component bundles are available.
 - High-frequency numeric streams are identified from the train split during pre-MEDS and written as causal mean-binned `numericitems_binned` datasets for each split. Empty windows are not emitted.
-- All emitted non-medication numeric values should later be converted to train-split quantile tokens.
+- All emitted non-medication numeric values are converted to train-frozen Q1-Q10 tokens during split-aware MEDS conversion.
+- Quantile-coded numeric events carry the numeric information in the `code` suffix (`//Q1` through `//Q10`); the MEDS `numeric_value` column is intentionally null in the current tokenizer-facing output.
+- Tokenization builds the integer token vocabulary from `data/MEDS/train` only. Validation/test codes not present in train are mapped to `UNK` and audited, not added as new vocabulary entries.
+- Tokenized timelines are ICU admission/stay level, keyed by `(subject_id, hadm_id)`. Patient/admission identity is preserved in the safetensor ID arrays and `timeline_index.parquet`.
+- Medication ATC tokens are stored at the most detailed level in the supplied vocab, but can be truncated at tokenization time, e.g. `MEDICATION//C07//A//B02` -> `MEDICATION//C07//A`.
 
 ## Runtime Notes
 
@@ -66,4 +71,5 @@ Runtime code should:
 3. emit static context once per admission/stay;
 4. emit dynamic events at source timestamps;
 5. compute temporal phase at runtime;
-6. consume `numericitems_binned` when present, fall back to raw `numericitems` otherwise, and apply train-frozen numeric quantiles before final tokenization.
+6. consume `numericitems_binned` when present, fall back to raw `numericitems` otherwise, and apply train-frozen numeric quantiles during MEDS conversion.
+7. tokenize MEDS with train-frozen token IDs and admission-level timeline boundaries.

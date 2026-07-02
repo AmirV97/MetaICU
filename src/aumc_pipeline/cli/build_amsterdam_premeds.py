@@ -14,8 +14,8 @@ Usage examples:
   # Debug smoke with explicit paths and 50 k-row cap per table:
   build-aumc-premeds \\
       paths.raw_data_dir=/data/AmsterdamUMCdb \\
-      paths.pre_meds_dir=/workspace/outputs/pre_meds \\
-      paths.audit_dir=/workspace/outputs/audits \\
+      paths.pre_meds_dir=/workspace/data/pre-MEDS \\
+      paths.audit_dir=/workspace/audits/pre-MEDS \\
       run.max_rows=50000
 """
 
@@ -66,14 +66,15 @@ def _resolve_path(
 
 def _build_config(cfg: DictConfig) -> PreMedsConfig:
     parent_dir = _optional_path(OmegaConf.select(cfg, "paths.parent_dir"))
-    raw_data_dir = _resolve_path(cfg, "raw_data_dir", parent_dir, "AUMC_raw")
-    pre_meds_dir = _resolve_path(cfg, "pre_meds_dir", parent_dir, "outputs/pre_meds")
-    audit_dir = _resolve_path(cfg, "audit_dir", parent_dir, "outputs/audits")
-    vocab_path = _resolve_path(cfg, "vocab_path", parent_dir, "outputs/aumc_supplied_vocab.csv")
-    metadata_dir = _resolve_path(cfg, "metadata_dir", parent_dir, "outputs/metadata")
+    raw_data_dir = _resolve_path(cfg, "raw_data_dir", parent_dir, "data/raw")
+    raw_shards_dir = _resolve_path(cfg, "raw_shards_dir", parent_dir, "data/raw_shards")
+    pre_meds_dir = _resolve_path(cfg, "pre_meds_dir", parent_dir, "data/pre-MEDS")
+    audit_dir = _resolve_path(cfg, "audit_dir", parent_dir, "audits/pre-MEDS")
+    vocab_path = _resolve_path(cfg, "vocab_path", parent_dir, "vocab/aumc_supplied_vocab.csv")
+    metadata_dir = _resolve_path(cfg, "metadata_dir", parent_dir, "data/metadata")
     split_outputs = bool(OmegaConf.select(cfg, "run.split_outputs", default=False))
     split_path = (
-        _resolve_path(cfg, "split_path", parent_dir, "outputs/metadata/subject_splits.parquet")
+        _resolve_path(cfg, "split_path", parent_dir, "data/metadata/subject_splits.parquet")
         if split_outputs
         else _optional_path(OmegaConf.select(cfg, "paths.split_path"))
     )
@@ -89,8 +90,16 @@ def _build_config(cfg: DictConfig) -> PreMedsConfig:
         partition_rows=int(cfg.run.partition_rows),
         max_rows=_optional_int(OmegaConf.select(cfg, "run.max_rows")),
         num_patients=_optional_int(OmegaConf.select(cfg, "run.num_patients")),
+        raw_shards_dir=raw_shards_dir,
+        build_raw_shards=bool(OmegaConf.select(cfg, "run.build_raw_shards", default=True)),
+        rebuild_raw_shards=bool(OmegaConf.select(cfg, "run.rebuild_raw_shards", default=False)),
+        raw_shard_rows=_optional_int(OmegaConf.select(cfg, "run.raw_shard_rows")),
         split_path=split_path,
         split_outputs=split_outputs,
+        split_train_frac=float(OmegaConf.select(cfg, "split.train_frac", default=0.8)),
+        split_val_frac=float(OmegaConf.select(cfg, "split.val_frac", default=0.1)),
+        split_test_frac=float(OmegaConf.select(cfg, "split.test_frac", default=0.1)),
+        split_seed=int(OmegaConf.select(cfg, "split.seed", default=20260618)),
         vocab_path=vocab_path,
         build_hf_inventory=bool(OmegaConf.select(cfg, "run.build_hf_inventory", default=True)),
         build_binned_numericitems=bool(OmegaConf.select(cfg, "run.build_binned_numericitems", default=True)),

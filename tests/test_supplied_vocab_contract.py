@@ -67,6 +67,15 @@ class SuppliedVocabContractTests(unittest.TestCase):
         self.assertTrue(emitted["harmonized_token"].ne("").all())
         self.assertTrue(emitted["token_role"].ne("").all())
 
+    def test_emitted_rows_use_canonical_omop_concept_namespace(self) -> None:
+        emitted = self.vocab[self.emit]
+        legacy = emitted[emitted["harmonized_token"].str.startswith("OMOP//OMOP_CONCEPT//")]
+        self.assertTrue(legacy.empty)
+
+        unresolved = self.vocab[self.vocab["harmonized_token"].str.startswith("OMOP//OMOP_CONCEPT//")]
+        if not unresolved.empty:
+            self.assertFalse(_is_true(unresolved["emit_as_model_token"]).any())
+
     def test_lab_numericitems_have_lab_role_only_by_source_prefix(self) -> None:
         lab = self.vocab[
             self.vocab["source_table"].eq("numericitems")

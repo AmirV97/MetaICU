@@ -1,0 +1,75 @@
+# Hydra config for AUMC MEDS -> ETHOS-style tokenized safetensors.
+#
+# Minimal invocation:
+#   build-aumc-tokenized paths.parent_dir=/path/to/workspace
+#
+# The token vocabulary is built from data/MEDS/train only and reused unchanged
+# for val/test. Timelines are one ICU admission/stay each, keyed by
+# (subject_id, hadm_id), with a metadata timeline index for recovery.
+
+paths:
+  parent_dir: null
+  meds_dir: null       # defaults to parent_dir/data/MEDS
+  output_dir: null     # defaults to parent_dir/data/tokenized
+  audit_dir: null      # defaults to parent_dir/audits/tokenization
+  metadata_dir: null   # defaults to parent_dir/data/tokenized/metadata
+
+run:
+  overwrite: false
+  max_rows: null
+  max_timelines_per_shard: 1000
+  train_split: train
+  splits:
+    - train
+    - val
+    - test
+  medication_atc_depth: full  # "full" or positive integer, e.g. 1, 2, 3
+  unknown_token: UNK          # val/test codes absent from train vocab are mapped here and audited
+
+time_intervals_spec:
+  5m-15m:
+    minutes: 5
+  15m-45m:
+    minutes: 15
+  45m-1h15m:
+    minutes: 45
+  1h15m-2h:
+    hours: 1
+    minutes: 15
+  2h-3h:
+    hours: 2
+  3h-5h:
+    hours: 3
+  5h-8h:
+    hours: 5
+  8h-12h:
+    hours: 8
+  12h-18h:
+    hours: 12
+  18h-1d:
+    hours: 18
+  1d-2d:
+    days: 1
+  2d-4d:
+    days: 2
+  4d-7d:
+    days: 4
+  7d-12d:
+    days: 7
+  12d-20d:
+    days: 12
+  20d-30d:
+    days: 20
+  30d-2mt:
+    days: 30
+  2mt-6mt:
+    days: 60
+  =6mt:
+    days: 180
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

@@ -32,12 +32,17 @@ from aumc_pipeline.pre_meds.interval_tables import (
     transform_procedureorderitems,
     transform_processitems,
 )
-from aumc_pipeline.pre_meds.large_tables import TableAccumulator, transform_table
+from aumc_pipeline.pre_meds.large_tables import (
+    TableAccumulator,
+    build_raw_shards_for_tables,
+    transform_table,
+)
 from aumc_pipeline.pre_meds.measured import (
     transform_freetextitems,
     transform_listitems,
     transform_numericitems,
 )
+from aumc_pipeline.splits.build_splits import SplitConfig, write_subject_splits
 from aumc_pipeline.transforms.binning import CausalMeanBinningConfig, CausalMeanBinningTransform
 from aumc_pipeline.transforms.hf_inventory import HFInventoryBuilder, HFInventoryConfig
 from aumc_pipeline.utils.parquet_datasets import parquet_exists
@@ -77,8 +82,16 @@ class PreMedsConfig:
     partition_rows: int = 5_000_000
     max_rows: int | None = None
     num_patients: int | None = None
+    raw_shards_dir: Path | None = None
+    build_raw_shards: bool = True
+    rebuild_raw_shards: bool = False
+    raw_shard_rows: int | None = None
     split_path: Path | None = None
     split_outputs: bool = False
+    split_train_frac: float = 0.8
+    split_val_frac: float = 0.1
+    split_test_frac: float = 0.1
+    split_seed: int = 20260618
     vocab_path: Path | None = None
     build_hf_inventory: bool = True
     build_binned_numericitems: bool = True
@@ -108,6 +121,40 @@ def _elapsed(start: float) -> str:
     return f"{time.perf_counter() - start:.1f}s"
 
 
+def _ensure_split_manifest(config: PreMedsConfig) -> dict[str, Path] | None:
+    """Create the subject split manifest for split-aware pre-MEDS runs.
+
+    Split generation is a pre-MEDS substage: downstream pre-MEDS code still
+    consumes the stable ``subject_id, split`` artifact, while normal users do
+    not need to run a separate split command.
+    """
+    if not config.split_outputs:
+        return None
+    if config.split_path is None:
+        raise ValueError("split_outputs=true requires paths.split_path")
+    if config.split_path.exists():
+        _log(f"using existing split manifest: {config.split_path}")
+        return {"subject_splits": config.split_path}
+
+    _log(
+        "creating subject split manifest "
+        f"({config.split_train_frac:.3f}/{config.split_val_frac:.3f}/{config.split_test_frac:.3f}, "
+        f"seed={config.split_seed})"
+    )
+    return write_subject_splits(
+        SplitConfig(
+            raw_data_dir=config.raw_data_dir,
+            metadata_dir=config.split_path.parent,
+            split_path=config.split_path,
+            train_frac=config.split_train_frac,
+            val_frac=config.split_val_frac,
+            test_frac=config.split_test_frac,
+            seed=config.split_seed,
+            overwrite=config.overwrite,
+        )
+    )
+
+
 def _preflight(config: PreMedsConfig) -> None:
     if not config.raw_data_dir.is_dir():
         raise FileNotFoundError(
@@ -120,6 +167,8 @@ def _preflight(config: PreMedsConfig) -> None:
         )
     if config.partition_rows <= 0:
         raise ValueError("partition_rows must be > 0")
+    if config.raw_shard_rows is not None and config.raw_shard_rows <= 0:
+        raise ValueError("raw_shard_rows must be > 0 when set")
     if config.max_rows is not None and config.max_rows <= 0:
         raise ValueError("max_rows must be > 0 when set")
     if config.num_patients is not None and config.num_patients <= 0:
@@ -141,6 +190,23 @@ def _preflight(config: PreMedsConfig) -> None:
             raise ValueError("build_binned_numericitems=true requires build_hf_inventory=true")
         if config.binning_window_minutes <= 0:
             raise ValueError("binning_window_minutes must be > 0")
+
+
+def _write_raw_shards(config: PreMedsConfig) -> dict[str, Any]:
+    """Build or reuse the source-preserving raw parquet cache for large tables."""
+    if not config.build_raw_shards:
+        return {"skipped": "run.build_raw_shards=false"}
+    if config.raw_shards_dir is None:
+        raise ValueError("build_raw_shards=true requires paths.raw_shards_dir")
+
+    return build_raw_shards_for_tables(
+        tables=_LARGE_TABLES,
+        raw_dir=config.raw_data_dir,
+        raw_shards_dir=config.raw_shards_dir,
+        partition_rows=config.raw_shard_rows or config.partition_rows,
+        max_rows=config.max_rows,
+        rebuild=config.rebuild_raw_shards,
+    )
 
 
 def _write_small_table(
@@ -284,10 +350,25 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
     """Run the full pre-MEDS extraction and return a dict of output paths."""
 
     total_start = time.perf_counter()
-    total_steps = 3 + int(config.build_hf_inventory) + int(config.build_binned_numericitems)
+    total_steps = 3 + int(config.build_raw_shards) + int(config.build_hf_inventory) + int(config.build_binned_numericitems)
+    split_manifest_outputs = _ensure_split_manifest(config)
     _preflight(config)
     config.pre_meds_dir.mkdir(parents=True, exist_ok=True)
     config.audit_dir.mkdir(parents=True, exist_ok=True)
+
+    step_index = 1
+    raw_shard_summary: dict[str, Any] = {"skipped": "run.build_raw_shards=false"}
+    if config.build_raw_shards:
+        step_start = time.perf_counter()
+        _log(f"{step_index}/{total_steps} raw shard cache for large tables")
+        raw_shard_summary = _write_raw_shards(config)
+        actions = {
+            table: summary.get("action", "unknown")
+            for table, summary in raw_shard_summary.items()
+            if isinstance(summary, dict)
+        }
+        _log(f"{step_index}/{total_steps} raw shard cache done in {_elapsed(step_start)}: {actions}")
+        step_index += 1
 
     epoch_map = load_epoch_map(config.epoch_map)
     split_manifest = _load_split_manifest(config.split_path)
@@ -295,7 +376,7 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
     # Phase 1: admissions (prerequisite for anchor joins in all subsequent phases).
     step_start = time.perf_counter()
     _log(
-        f"1/{total_steps} admissions and patient"
+        f"{step_index}/{total_steps} admissions and patient"
         + (f" (bounded to {config.num_patients} patients)" if config.num_patients else " (all patients)")
     )
     adm_paths, adm_counts = write_admissions_outputs(
@@ -317,13 +398,14 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         set(anchors["admissionid"].to_list()) if config.num_patients is not None else None
     )
     _log(
-        f"1/{total_steps} admissions done in {_elapsed(step_start)}: "
+        f"{step_index}/{total_steps} admissions done in {_elapsed(step_start)}: "
         f"{adm_counts['unique_admissions']} admissions / {adm_counts['unique_patients']} patients"
     )
+    step_index += 1
 
     # Phase 2: small tables (read entirely into memory).
     step_start = time.perf_counter()
-    _log(f"2/{total_steps} small tables: freetextitems, processitems, procedureorderitems")
+    _log(f"{step_index}/{total_steps} small tables: freetextitems, processitems, procedureorderitems")
     small_summaries: dict[str, Any] = {}
     for table in _SMALL_TABLES:
         _log(f"  {table} ...")
@@ -331,11 +413,12 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         _log(
             f"  {table}: {small_summaries[table]['rows_emitted']:,} rows emitted"
         )
-    _log(f"2/{total_steps} small tables done in {_elapsed(step_start)}")
+    _log(f"{step_index}/{total_steps} small tables done in {_elapsed(step_start)}")
+    step_index += 1
 
     # Phase 3: large tables (chunked latin1 CSV → partitioned parquet).
     step_start = time.perf_counter()
-    _log(f"3/{total_steps} large tables: numericitems, listitems, drugitems (chunked)")
+    _log(f"{step_index}/{total_steps} large tables: numericitems, listitems, drugitems")
     large_summaries: dict[str, Any] = {}
     for table in _LARGE_TABLES:
         _log(f"  {table} ...")
@@ -349,16 +432,17 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
             overwrite=config.overwrite,
             admission_ids=admission_ids,
             split_values=split_values if config.split_outputs else None,
+            raw_shards_dir=config.raw_shards_dir,
         )
         large_summaries[table] = acc.as_summary(config.pre_meds_dir, config.max_rows)
         _log(
             f"  {table}: {acc.rows_emitted:,} rows in {acc.partition_count} partitions"
         )
-    _log(f"3/{total_steps} large tables done in {_elapsed(step_start)}")
+    _log(f"{step_index}/{total_steps} large tables done in {_elapsed(step_start)}")
+    step_index += 1
 
     # Optional train-derived high-frequency inventory. This is part of
     # pre-MEDS finalization because later binning needs a frozen train artifact.
-    step_index = 4
     hf_inventory_summary: dict[str, Any] = {}
     if config.build_hf_inventory:
         step_start = time.perf_counter()
@@ -382,9 +466,12 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         "num_patients": config.num_patients,
         "split_path": str(config.split_path) if config.split_path else None,
         "split_outputs": config.split_outputs,
+        "split_manifest_outputs": split_manifest_outputs,
         "split_values": split_values,
         "max_rows_per_table": config.max_rows,
         "partition_rows": config.partition_rows,
+        "raw_shards_dir": str(config.raw_shards_dir) if config.raw_shards_dir else None,
+        "raw_shards": raw_shard_summary,
         "admissions": adm_counts,
         "small_tables": small_summaries,
         "large_tables": large_summaries,
@@ -403,6 +490,8 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         "patient": adm_paths["patient"],
         "summary": summary_path,
     }
+    if split_manifest_outputs:
+        outputs.update(split_manifest_outputs)
     for table in _SMALL_TABLES:
         outputs[table] = config.pre_meds_dir / f"{table}.parquet"
     for table in _LARGE_TABLES:

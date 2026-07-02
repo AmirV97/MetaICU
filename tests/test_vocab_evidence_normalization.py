@@ -262,7 +262,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
 
     def test_build_vocab_parent_dir_uses_default_subfolders(self) -> None:
         parent_dir = self.root / "parent_workspace"
-        raw_dir = parent_dir / "AUMC_raw"
+        raw_dir = parent_dir / "data/raw"
         externals = parent_dir / "externals"
         omop = externals / "omop_vocab"
         self._write_raw_amsterdam_tables(raw_dir)
@@ -279,14 +279,14 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
         ]
         subprocess.run(cmd, cwd=self.root, check=True)
 
-        self.assertTrue((parent_dir / "outputs/aumc_supplied_vocab.csv").exists())
-        self.assertTrue((parent_dir / "outputs/audits/build_vocab_summary.json").exists())
-        self.assertTrue((parent_dir / "outputs/audits/run_config.json").exists())
+        self.assertTrue((parent_dir / "vocab/aumc_supplied_vocab.csv").exists())
+        self.assertTrue((parent_dir / "audits/vocab/build_vocab_summary.json").exists())
+        self.assertTrue((parent_dir / "audits/vocab/run_config.json").exists())
 
     def test_build_vocab_from_outside_checkout_uses_packaged_supplied_vocab(self) -> None:
         raw_dir = self.root / "raw_amsterdam_outside"
         self._write_raw_amsterdam_tables(raw_dir)
-        output_vocab = self.root / "outside_outputs/aumc_supplied_vocab.csv"
+        output_vocab = self.root / "outside_vocab/aumc_supplied_vocab.csv"
 
         cmd = [
             sys.executable,
@@ -308,7 +308,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
         self._write_raw_amsterdam_tables(raw_dir)
         supplied_vocab = self.root / "supplied_vocab.csv"
         write_csv(supplied_vocab, [{"source_token": "DRUG//START//5//20", "harmonized_token": "MEDICATION//A", "emit_as_model_token": True}])
-        output_vocab = self.root / "outputs/aumc_supplied_vocab.csv"
+        output_vocab = self.root / "vocab/aumc_supplied_vocab.csv"
         cli_audit = self.root / "build_audits"
 
         cmd = [

@@ -1,44 +1,42 @@
-# Hydra config for the AmsterdamUMCdb MEDS conversion pipeline.
+# Hydra config for AmsterdamUMCdb pre-MEDS -> MEDS conversion.
 #
 # Minimal invocation with a workspace root:
 #   build-aumc-meds paths.parent_dir=/path/to/workspace
 #
-# pre_meds_dir defaults to parent_dir/outputs/pre_meds
-# vocab_path   defaults to parent_dir/outputs/aumc_supplied_vocab.csv
-# output_dir   defaults to parent_dir/outputs/meds
-# audit_dir    defaults to parent_dir/outputs/audits
-#
-# Bounded secondary sample (e.g. testing within 1000-patient pre-MEDS):
-#   build-aumc-meds paths.parent_dir=/path/to/workspace run.mode=bounded run.num_patients=100
+# If data/pre-MEDS/train, val, and test exist, split-aware mode is used by
+# default. Numeric quantile boundaries are fit on train and saved to
+# data/metadata/numeric_quantile_boundaries.parquet before applying to all
+# splits. Set run.split_outputs=false for one-cohort QC conversion.
 
 paths:
   parent_dir: null
-  pre_meds_dir: null        # defaults to parent_dir/outputs/pre_meds
-  vocab_path: null          # defaults to parent_dir/outputs/aumc_supplied_vocab.csv
-  output_dir: null          # defaults to parent_dir/outputs/meds
-  audit_dir: null           # defaults to parent_dir/outputs/audits
+  pre_meds_dir: null        # defaults to parent_dir/data/pre-MEDS
+  vocab_path: null          # defaults to parent_dir/vocab/aumc_supplied_vocab.csv
+  output_dir: null          # defaults to parent_dir/data/MEDS
+  audit_dir: null           # defaults to parent_dir/audits
+  metadata_dir: null        # defaults to parent_dir/data/metadata
 
 run:
-  mode: full                # "full" = all pre-MEDS subjects; "bounded" = random subsample
+  mode: full                # "full" = all pre-MEDS subjects; "bounded" = random subsample per split/cohort
   num_patients: null        # secondary subsample size; null = use all pre-MEDS subjects
   seed: 20260618
   max_rows: null            # per-table raw-row cap for smoke tests; null = full table
   overwrite: false
   write_debug: true
+  split_outputs: null       # null = auto-detect train/val/test folders; true/false = explicit
+  splits:
+    - train
+    - val
+    - test
 
 meds:
   include_temporal_phases:
     - preadmission
     - admission
   # postadmission excluded by default to prevent leakage.
-  # Outcome tokens (ICU_DISCHARGE, MEDS_DEATH) are always written to debug/
-  # with temporal_phase='outcome' and must be excluded by training code when
-  # used as labels.
+  # Outcome tokens (ICU_DISCHARGE, MEDS_DEATH) are written with
+  # temporal_phase='outcome' and must be excluded by training code when used as labels.
   quantile_bins: 10
-  # Train-split quantile fitting is not implemented in this port.
-  # Current behavior: boundaries fitted on the supplied cohort (OK for QC).
-  # Freeze-on-train / reuse-for-val-test is a hard requirement before
-  # final tokenization — implement as a separate fit/apply step.
 
 hydra:
   job:

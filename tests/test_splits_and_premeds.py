@@ -450,6 +450,70 @@ class SplitAndPreMedsTests(unittest.TestCase):
         self.assertEqual(summary["raw_shards"]["skipped"], "run.build_raw_shards=false")
         self.assertEqual(summary["large_tables"]["numericitems"]["input_mode"], "raw_csv_chunks")
 
+    def test_premeds_state_change_deduplicates_configured_listitems(self) -> None:
+        write_csv(
+            self.raw / "listitems.csv",
+            [
+                {
+                    "admissionid": 10,
+                    "itemid": 9,
+                    "item": "Ventilatie Mode (Set)",
+                    "valueid": valueid,
+                    "value": value,
+                    "measuredat": measuredat,
+                    "registeredat": measuredat,
+                    "registeredby": "",
+                    "updatedat": measuredat,
+                    "updatedby": "",
+                    "islabresult": 0,
+                }
+                for measuredat, valueid, value in [
+                    (1000, 1, "PS/CPAP"),
+                    (2000, 1, "PS/CPAP"),
+                    (3000, 2, "PC"),
+                    (4000, 2, "PC"),
+                    (5000, 1, "PS/CPAP"),
+                ]
+            ],
+        )
+        split_path = self.metadata / "subject_splits.parquet"
+        split_path.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(
+            [
+                {"subject_id": 1, "split": "train"},
+                {"subject_id": 2, "split": "val"},
+                {"subject_id": 3, "split": "test"},
+                {"subject_id": 4, "split": "test"},
+            ]
+        ).to_parquet(split_path, index=False)
+
+        write_premeds_outputs(
+            PreMedsConfig(
+                raw_data_dir=self.raw,
+                raw_shards_dir=self.raw_shards,
+                pre_meds_dir=self.pre_meds,
+                audit_dir=self.audits,
+                epoch_map={"2003-2009": "2003-01-01 00:00:00"},
+                partition_rows=2,
+                split_path=split_path,
+                split_outputs=True,
+                vocab_path=self.vocab_path,
+                build_hf_inventory=False,
+                build_binned_numericitems=False,
+                overwrite=True,
+            )
+        )
+
+        train_list = pl.scan_parquet(str(self.pre_meds / "train/listitems/*.parquet")).collect()
+        vent = train_list.filter(pl.col("item") == "Ventilatie Mode (Set)").sort("measuredat")
+        self.assertEqual(vent["valueid"].to_list(), [1, 2, 1])
+
+        summary = json.loads((self.audits / "premeds_summary.json").read_text())
+        dedup = summary["large_tables"]["listitems"]["state_change_dedup"]["combined"]
+        self.assertEqual(dedup["rows_before"], 5)
+        self.assertEqual(dedup["rows_after"], 3)
+        self.assertEqual(dedup["rows_removed"], 2)
+
     def test_premeds_reuses_existing_raw_shards_by_default(self) -> None:
         split_path = self.metadata / "subject_splits.parquet"
         split_path.parent.mkdir(parents=True, exist_ok=True)

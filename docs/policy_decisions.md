@@ -54,11 +54,17 @@ The vocabulary is source-preserving: every Amsterdam source token is kept, even 
 - GCS eye/motor/verbal component rows are emitted directly as `dynamic_event/score_component`, following OpenICU-style component concepts. Runtime should not derive a GCS total by default.
 - BPS component rows are not emitted directly; a later runtime stage may derive total BPS when complete component bundles are available.
 - High-frequency numeric streams are identified from the train split during pre-MEDS and written as causal mean-binned `numericitems_binned` datasets for each split. Empty windows are not emitted.
+- Rare-but-dense numeric streams are also binned when they have high row burden and the observed frequency CI is above the high-resolution threshold, even if they appear in fewer admissions than the usual inventory `min_groups` gate. The default rare-dense gate is 2 sampled admission/item groups, which catches CRRT settings/limits that are dense only among CRRT patients.
+- Selected categorical state streams are state-change deduplicated in pre-MEDS. Defaults include ventilation mode, CRRT modality, rhythm, oxygen/admin route, NIV program status, sputum state, pupil state, selected score components/final scores, ectopy, chest-drain state, and EVD state. The policy keeps the first value and later value changes per admission/item.
 - All emitted non-medication numeric values are converted to train-frozen Q1-Q10 tokens during split-aware MEDS conversion.
 - Quantile-coded numeric events carry the numeric information in the `code` suffix (`//Q1` through `//Q10`); the MEDS `numeric_value` column is intentionally null in the current tokenizer-facing output.
 - Tokenization builds the integer token vocabulary from `data/MEDS/train` only. Validation/test codes not present in train are mapped to `UNK` and audited, not added as new vocabulary entries.
-- Tokenized timelines are ICU admission/stay level, keyed by `(subject_id, hadm_id)`. Patient/admission identity is preserved in the safetensor ID arrays and `timeline_index.parquet`.
+- Tokenized timelines are ICU admission/stay level by default, keyed by `(subject_id, hadm_id)`. The tokenizer also supports subject-level timelines via `run.analysis_unit=subject`. Patient/admission identity is preserved in the safetensor ID arrays and `timeline_index.parquet`.
 - Medication ATC tokens are stored at the most detailed level in the supplied vocab, but can be truncated at tokenization time, e.g. `MEDICATION//C07//A//B02` -> `MEDICATION//C07//A`.
+
+## Open Runtime Decisions
+
+- Re-run bounded QC after the aggressive rare-dense binning default and inspect any remaining super-long admission/stay timelines before full-scale training.
 
 ## Runtime Notes
 
@@ -72,4 +78,4 @@ Runtime code should:
 4. emit dynamic events at source timestamps;
 5. compute temporal phase at runtime;
 6. consume `numericitems_binned` when present, fall back to raw `numericitems` otherwise, and apply train-frozen numeric quantiles during MEDS conversion.
-7. tokenize MEDS with train-frozen token IDs and admission-level timeline boundaries.
+7. tokenize MEDS with train-frozen token IDs and configurable timeline boundaries: admission/stay-level by default, subject-level when `run.analysis_unit=subject`.

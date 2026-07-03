@@ -2,7 +2,7 @@
 
 The semantic vocabulary is already resolved before MEDS. This module builds the
 model token vocabulary from train MEDS only, applies it unchanged to all splits,
-and writes safetensors with one timeline per ICU admission/stay.
+and writes safetensors with one timeline per configured analysis unit.
 """
 
 from __future__ import annotations
@@ -64,6 +64,7 @@ class TokenizationConfig:
     max_rows: int | None = None
     max_timelines_per_shard: int = 1000
     medication_atc_depth: str = "full"
+    analysis_unit: str = "stay"
     unknown_token: str = DEFAULT_UNKNOWN_TOKEN
     overwrite: bool = False
     time_intervals_spec: dict[str, dict[str, int]] = field(default_factory=lambda: DEFAULT_TIME_INTERVALS_SPEC.copy())
@@ -107,6 +108,30 @@ def _meds_split_data_files(meds_dir: Path, split: str) -> list[Path]:
     return files
 
 
+def _timeline_group_columns(config: TokenizationConfig) -> list[str]:
+    """Return the columns defining one tokenized timeline."""
+    if config.analysis_unit == "stay":
+        return ["subject_id", "hadm_id"]
+    if config.analysis_unit == "subject":
+        return ["subject_id"]
+    raise ValueError("analysis_unit must be 'stay' or 'subject'")
+
+
+def _event_sort_columns(config: TokenizationConfig) -> list[str]:
+    """Return deterministic event ordering for the chosen analysis unit."""
+    if config.analysis_unit == "stay":
+        return ["subject_id", "hadm_id", "time", "code"]
+    if config.analysis_unit == "subject":
+        return ["subject_id", "time", "hadm_id", "code"]
+    raise ValueError("analysis_unit must be 'stay' or 'subject'")
+
+
+def _within_timeline_sort_columns(config: TokenizationConfig) -> list[str]:
+    if config.analysis_unit == "stay":
+        return ["time", "code"]
+    return ["time", "hadm_id", "code"]
+
+
 def _load_split_events(config: TokenizationConfig, split: str) -> pl.DataFrame:
     files = _meds_split_data_files(config.meds_dir, split)
     scan = pl.scan_parquet(files).select(CORE_INPUT_COLUMNS)
@@ -121,7 +146,7 @@ def _load_split_events(config: TokenizationConfig, split: str) -> pl.DataFrame:
             pl.col("time").cast(pl.Datetime("us")),
             pl.col("code").cast(pl.String),
         ])
-        .sort(["subject_id", "hadm_id", "time", "code"])
+        .sort(_event_sort_columns(config))
         .collect(engine="streaming")
     )
 
@@ -173,8 +198,10 @@ def _expand_events(df: pl.DataFrame, config: TokenizationConfig) -> ExpandedEven
     rows: list[dict[str, Any]] = []
     interval_durations: dict[str, list[int]] = defaultdict(list)
 
-    for _, stay in df.partition_by(["subject_id", "hadm_id"], as_dict=True, maintain_order=True).items():
-        stay = stay.sort(["time", "code"])
+    group_cols = _timeline_group_columns(config)
+    sort_cols = _within_timeline_sort_columns(config)
+    for _, stay in df.partition_by(group_cols, as_dict=True, maintain_order=True).items():
+        stay = stay.sort(sort_cols)
         previous_time_us: int | None = None
         stay_rows = stay.select(["subject_id", "hadm_id", "icustay_id", "time", "code"]).iter_rows(named=True)
         buffered = list(stay_rows)
@@ -265,9 +292,42 @@ def _prepare_outputs(config: TokenizationConfig) -> None:
     config.metadata_dir.mkdir(parents=True, exist_ok=True)
 
 
-def _timeline_groups(df: pl.DataFrame) -> Iterable[pl.DataFrame]:
-    for _, group in df.partition_by(["subject_id", "hadm_id"], as_dict=True, maintain_order=True).items():
-        yield group.sort(["time", "code"])
+def _timeline_groups(df: pl.DataFrame, config: TokenizationConfig) -> Iterable[pl.DataFrame]:
+    group_cols = _timeline_group_columns(config)
+    sort_cols = _within_timeline_sort_columns(config)
+    for _, group in df.partition_by(group_cols, as_dict=True, maintain_order=True).items():
+        yield group.sort(sort_cols)
+
+
+def _timeline_metadata(group: pl.DataFrame, split: str, shard_idx: int, timeline_idx: int, token_start: int, token_end: int, config: TokenizationConfig) -> dict[str, Any]:
+    """Build one row of timeline metadata for stay- or subject-level outputs."""
+    subject_id = int(group["subject_id"][0])
+    hadm_ids = sorted({int(v) for v in group["hadm_id"].drop_nulls().to_list()})
+    icustay_ids = sorted({int(v) for v in group["icustay_id"].drop_nulls().to_list()})
+    if config.analysis_unit == "stay":
+        hadm_id = hadm_ids[0] if hadm_ids else -1
+        icustay_id = icustay_ids[0] if icustay_ids else -1
+    else:
+        hadm_id = -1
+        icustay_id = -1
+    return {
+        "split": split,
+        "analysis_unit": config.analysis_unit,
+        "shard": shard_idx,
+        "timeline_idx": timeline_idx,
+        "subject_id": subject_id,
+        "hadm_id": hadm_id,
+        "icustay_id": icustay_id,
+        "hadm_ids": hadm_ids,
+        "icustay_ids": icustay_ids,
+        "hadm_ids_text": ",".join(str(v) for v in hadm_ids),
+        "icustay_ids_text": ",".join(str(v) for v in icustay_ids),
+        "n_admissions": len(hadm_ids),
+        "token_start": token_start,
+        "token_end": token_end,
+        "start_time": group["time"][0],
+        "end_time": group["time"][-1],
+    }
 
 
 def _write_split_safetensors(
@@ -312,25 +372,22 @@ def _write_split_safetensors(
         for local_idx, group in enumerate(shard_groups):
             offsets.append(token_offset)
             subject_id = int(group["subject_id"][0])
-            hadm_id = int(group["hadm_id"][0])
-            icustay_id = int(group["icustay_id"][0]) if group["icustay_id"][0] is not None else -1
             patient_ids.append(subject_id)
             token_start = token_offset
             for row in group.iter_rows(named=True):
                 rows.append(row)
                 token_offset += 1
-            timeline_records.append({
-                "split": split,
-                "shard": shard_idx,
-                "timeline_idx": len(timeline_records),
-                "subject_id": subject_id,
-                "hadm_id": hadm_id,
-                "icustay_id": icustay_id,
-                "token_start": token_start,
-                "token_end": token_offset,
-                "start_time": group["time"][0],
-                "end_time": group["time"][-1],
-            })
+            timeline_records.append(
+                _timeline_metadata(
+                    group=group,
+                    split=split,
+                    shard_idx=shard_idx,
+                    timeline_idx=len(timeline_records),
+                    token_start=token_start,
+                    token_end=token_offset,
+                    config=config,
+                )
+            )
 
         out_df = pl.DataFrame(rows)
         tensors = {
@@ -347,7 +404,7 @@ def _write_split_safetensors(
         shard_idx += 1
         shard_groups = []
 
-    for group in _timeline_groups(kept):
+    for group in _timeline_groups(kept, config):
         shard_groups.append(group)
         if len(shard_groups) >= config.max_timelines_per_shard:
             flush()
@@ -387,21 +444,29 @@ def _write_audits(
     token_counts: list[dict[str, Any]],
 ) -> Path:
     audit = config.audit_dir
-    pl.DataFrame(timeline_rows).write_parquet(config.metadata_dir / "timeline_index.parquet")
-    pl.DataFrame(timeline_rows).write_csv(audit / "tokenization_timeline_index.csv")
+    timeline_df = pl.DataFrame(timeline_rows)
+    timeline_df.write_parquet(config.metadata_dir / "timeline_index.parquet")
+    timeline_df.drop(["hadm_ids", "icustay_ids"], strict=False).write_csv(audit / "tokenization_timeline_index.csv")
     pl.DataFrame(unknown_rows).write_csv(audit / "tokenization_unknown_codes.csv")
     pl.DataFrame(token_counts).write_csv(audit / "tokenization_code_counts_by_split.csv")
 
     seq_df = pl.DataFrame(timeline_rows)
     if not seq_df.is_empty():
         seq_df = seq_df.with_columns((pl.col("token_end") - pl.col("token_start")).alias("token_count"))
-        seq_df.select(["split", "subject_id", "hadm_id", "token_count"]).write_csv(
+        seq_df.select(["split", "analysis_unit", "subject_id", "hadm_id", "n_admissions", "token_count"]).write_csv(
             audit / "tokenization_sequence_lengths.csv"
         )
     else:
-        pl.DataFrame(schema={"split": pl.String, "subject_id": pl.Int64, "hadm_id": pl.Int64, "token_count": pl.Int64}).write_csv(
-            audit / "tokenization_sequence_lengths.csv"
-        )
+        pl.DataFrame(
+            schema={
+                "split": pl.String,
+                "analysis_unit": pl.String,
+                "subject_id": pl.Int64,
+                "hadm_id": pl.Int64,
+                "n_admissions": pl.Int64,
+                "token_count": pl.Int64,
+            }
+        ).write_csv(audit / "tokenization_sequence_lengths.csv")
 
     summary = {
         "splits": list(config.splits),
@@ -410,6 +475,7 @@ def _write_audits(
         "metadata_dir": str(config.metadata_dir),
         "meds_dir": str(config.meds_dir),
         "medication_atc_depth": config.medication_atc_depth,
+        "analysis_unit": config.analysis_unit,
         "max_timelines_per_shard": config.max_timelines_per_shard,
         "split_summaries": split_summaries,
     }
@@ -430,6 +496,8 @@ def write_tokenized_outputs(config: TokenizationConfig) -> dict[str, Path]:
             raise ValueError("medication_atc_depth must be 'full' or a positive integer")
     if config.max_timelines_per_shard < 1:
         raise ValueError("max_timelines_per_shard must be >= 1")
+    if config.analysis_unit not in {"stay", "subject"}:
+        raise ValueError("analysis_unit must be 'stay' or 'subject'")
 
     _prepare_outputs(config)
     _log("1/4 building train-frozen token vocabulary")

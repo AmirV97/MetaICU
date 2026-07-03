@@ -47,6 +47,14 @@ def _optional_int(value: Any) -> int | None:
     return int(value)
 
 
+def _string_tuple(value: Any) -> tuple[str, ...]:
+    if value in (None, "", "null", "None"):
+        return ()
+    if isinstance(value, str):
+        return (value,)
+    return tuple(str(v) for v in value)
+
+
 def _resolve_path(
     cfg: DictConfig,
     key: str,
@@ -107,10 +115,15 @@ def _build_config(cfg: DictConfig) -> PreMedsConfig:
         hf_highres_threshold_minutes=float(OmegaConf.select(cfg, "hf_inventory.highres_threshold_minutes", default=45.0)),
         hf_confidence_level=float(OmegaConf.select(cfg, "hf_inventory.confidence_level", default=0.99)),
         hf_min_groups=int(OmegaConf.select(cfg, "hf_inventory.min_groups", default=30)),
+        hf_rare_dense_min_groups=int(OmegaConf.select(cfg, "hf_inventory.rare_dense_min_groups", default=2)),
+        hf_rare_dense_min_row_count=int(OmegaConf.select(cfg, "hf_inventory.rare_dense_min_row_count", default=500_000)),
         hf_patient_batch_size=int(OmegaConf.select(cfg, "hf_inventory.patient_batch_size", default=500)),
         hf_candidate_limit=int(OmegaConf.select(cfg, "hf_inventory.candidate_limit", default=0)),
         hf_seed=int(OmegaConf.select(cfg, "hf_inventory.seed", default=20260601)),
         binning_window_minutes=int(OmegaConf.select(cfg, "binning.window_minutes", default=60)),
+        listitems_state_change_dedup_labels=_string_tuple(
+            OmegaConf.select(cfg, "listitems.state_change_dedup_labels", default=())
+        ),
         overwrite=bool(OmegaConf.select(cfg, "run.overwrite", default=False)),
     )
 

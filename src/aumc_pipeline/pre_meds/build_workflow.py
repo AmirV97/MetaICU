@@ -9,8 +9,9 @@ Three phases run in order:
 from __future__ import annotations
 
 import json
+import shutil
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -57,6 +58,35 @@ REQUIRED_RAW_TABLES = [
     "procedureorderitems.csv",
 ]
 
+DEFAULT_LISTITEM_STATE_CHANGE_LABELS = (
+    "Ventilatie Mode (Set)",
+    "MFT_Behandeling",
+    "Hartritme",
+    "Toedieningsweg",
+    "NIV Program Status (Set)",
+    "Kleur Sputum",
+    "Hoeveelheid Sputum",
+    "Hoestprikkel",
+    "Pupil Links Grootte",
+    "Pupil Rechts Grootte",
+    "Pupil Links Reactie",
+    "Pupil Rechts Reactie",
+    "Aspect Sputum",
+    "Ramsay score",
+    "Actief openen van de ogen",
+    "Beste verbale reactie",
+    "Beste motore reactie van de armen",
+    "Ectopie",
+    "Thoraxdrain1 Zuigkracht",
+    "Thoraxdrain1 Plaats",
+    "Thoraxdrain1 Transport",
+    "Thoraxdrain1 Luchtlekkage",
+    "Thoraxdrain1 Aspect",
+    "VAS score",
+    "RASS score",
+    "EVD-Open/Dicht",
+)
+
 # Small tables read entirely into memory; large tables use chunked reads.
 _SMALL_TABLES = ["freetextitems", "processitems", "procedureorderitems"]
 _LARGE_TABLES = ["numericitems", "listitems", "drugitems"]
@@ -99,10 +129,15 @@ class PreMedsConfig:
     hf_highres_threshold_minutes: float = 45.0
     hf_confidence_level: float = 0.99
     hf_min_groups: int = 30
+    hf_rare_dense_min_groups: int = 2
+    hf_rare_dense_min_row_count: int = 500_000
     hf_patient_batch_size: int = 500
     hf_candidate_limit: int = 0
     hf_seed: int = 20260601
     binning_window_minutes: int = 60
+    listitems_state_change_dedup_labels: tuple[str, ...] = field(
+        default_factory=lambda: DEFAULT_LISTITEM_STATE_CHANGE_LABELS
+    )
     overwrite: bool = False
 
 
@@ -294,6 +329,8 @@ def _write_hf_inventory(config: PreMedsConfig, split_values: list[str]) -> dict[
         highres_threshold_minutes=config.hf_highres_threshold_minutes,
         confidence_level=config.hf_confidence_level,
         min_groups=config.hf_min_groups,
+        rare_dense_min_groups=config.hf_rare_dense_min_groups,
+        rare_dense_min_row_count=config.hf_rare_dense_min_row_count,
         patient_batch_size=config.hf_patient_batch_size,
         candidate_limit=config.hf_candidate_limit,
         seed=config.hf_seed,
@@ -344,6 +381,109 @@ def _write_binned_numericitems(config: PreMedsConfig, split_values: list[str]) -
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True, cls=_JsonEncoder) + "\n")
     return manifest
+
+
+def _rewrite_partitioned_parquet(df: pl.DataFrame, output_path: Path, partition_rows: int) -> int:
+    """Replace a parquet dataset path with row-partitioned parquet files."""
+    tmp_path = output_path.with_name(f"{output_path.name}.__tmp_state_change_dedup")
+    if tmp_path.exists():
+        shutil.rmtree(tmp_path)
+    tmp_path.mkdir(parents=True, exist_ok=True)
+
+    partition_count = 0
+    if not df.is_empty():
+        for start in range(0, df.height, partition_rows):
+            df.slice(start, partition_rows).write_parquet(tmp_path / f"part-{partition_count:05d}.parquet")
+            partition_count += 1
+
+    if output_path.exists():
+        shutil.rmtree(output_path)
+    tmp_path.rename(output_path)
+    return partition_count
+
+
+def _state_change_dedup_listitems_dataset(
+    dataset_path: Path,
+    labels: tuple[str, ...],
+    partition_rows: int,
+) -> dict[str, Any]:
+    """Keep only listitem value changes for selected categorical state streams."""
+    if not labels:
+        return {"skipped": "no listitem state-change labels configured"}
+    if not parquet_exists(dataset_path):
+        return {"skipped": f"missing parquet dataset: {dataset_path}"}
+
+    df = pl.scan_parquet(str(dataset_path / "*.parquet")).collect()
+    rows_before = df.height
+    if df.is_empty():
+        return {
+            "dataset": str(dataset_path),
+            "rows_before": 0,
+            "rows_after": 0,
+            "rows_removed": 0,
+            "labels": list(labels),
+            "partition_count": _rewrite_partitioned_parquet(df, dataset_path, partition_rows),
+        }
+
+    required = {"admissionid", "itemid", "valueid", "item", "admission_relative_ms"}
+    missing = sorted(required - set(df.columns))
+    if missing:
+        raise ValueError(f"Cannot state-change deduplicate listitems; missing columns: {missing}")
+
+    row_order_col = "__state_change_original_order"
+    prev_value_col = "__state_change_previous_valueid"
+    is_target = pl.col("item").cast(pl.String).is_in(labels)
+    deduped = (
+        df.with_row_index(row_order_col)
+        .sort(["admissionid", "itemid", "admission_relative_ms", "valueid", row_order_col])
+        .with_columns(
+            pl.col("valueid")
+            .shift(1)
+            .over(["admissionid", "itemid"])
+            .alias(prev_value_col)
+        )
+        .filter(~is_target | pl.col(prev_value_col).is_null() | (pl.col("valueid") != pl.col(prev_value_col)))
+        .sort(row_order_col)
+        .drop([row_order_col, prev_value_col])
+    )
+    partition_count = _rewrite_partitioned_parquet(deduped, dataset_path, partition_rows)
+    return {
+        "dataset": str(dataset_path),
+        "rows_before": rows_before,
+        "rows_after": deduped.height,
+        "rows_removed": rows_before - deduped.height,
+        "labels": list(labels),
+        "partition_count": partition_count,
+    }
+
+
+def _state_change_dedup_listitems_outputs(
+    config: PreMedsConfig,
+    split_values: list[str],
+) -> dict[str, Any]:
+    """Apply state-change deduplication to combined and split listitems outputs."""
+    labels = tuple(config.listitems_state_change_dedup_labels)
+    if not labels:
+        return {"skipped": "no listitem state-change labels configured"}
+
+    summary: dict[str, Any] = {
+        "policy": "keep first value and later value changes per admissionid/itemid",
+        "labels": list(labels),
+        "combined": _state_change_dedup_listitems_dataset(
+            config.pre_meds_dir / "listitems",
+            labels,
+            config.partition_rows,
+        ),
+        "splits": {},
+    }
+    if config.split_outputs:
+        for split in split_values:
+            summary["splits"][split] = _state_change_dedup_listitems_dataset(
+                config.pre_meds_dir / split / "listitems",
+                labels,
+                config.partition_rows,
+            )
+    return summary
 
 
 def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
@@ -438,6 +578,26 @@ def write_premeds_outputs(config: PreMedsConfig) -> dict[str, Path]:
         _log(
             f"  {table}: {acc.rows_emitted:,} rows in {acc.partition_count} partitions"
         )
+        if table == "listitems" and config.listitems_state_change_dedup_labels:
+            _log("  listitems state-change dedup ...")
+            dedup_summary = _state_change_dedup_listitems_outputs(config, split_values)
+            large_summaries["listitems"]["state_change_dedup"] = dedup_summary
+            combined = dedup_summary.get("combined", {})
+            if isinstance(combined, dict) and "rows_after" in combined:
+                previous_rows = large_summaries["listitems"]["row_counts"]["rows_emitted"]
+                large_summaries["listitems"]["row_counts"]["rows_emitted_before_state_change_dedup"] = previous_rows
+                large_summaries["listitems"]["row_counts"]["rows_emitted"] = combined["rows_after"]
+                large_summaries["listitems"]["partition_count"] = combined["partition_count"]
+            split_summaries = dedup_summary.get("splits", {})
+            if isinstance(split_summaries, dict):
+                for split, split_summary in split_summaries.items():
+                    if isinstance(split_summary, dict) and "rows_after" in split_summary:
+                        large_summaries["listitems"]["split_rows_emitted"][split] = split_summary["rows_after"]
+                        large_summaries["listitems"]["split_partition_counts"][split] = split_summary["partition_count"]
+            _log(
+                "  listitems state-change dedup removed "
+                f"{combined.get('rows_removed', 0) if isinstance(combined, dict) else 0:,} combined rows"
+            )
     _log(f"{step_index}/{total_steps} large tables done in {_elapsed(step_start)}")
     step_index += 1
 

@@ -47,12 +47,43 @@ hf_inventory:
   highres_threshold_minutes: 45.0
   confidence_level: 0.99
   min_groups: 30
+  rare_dense_min_groups: 2
+  rare_dense_min_row_count: 500000
   patient_batch_size: 500
   candidate_limit: 0       # 0 = all emitted numeric source itemids from vocab
   seed: 20260601
 
 binning:
   window_minutes: 60       # causal mean window; emitted at bin_end, no empty-bin imputation
+
+listitems:
+  state_change_dedup_labels:
+    - "Ventilatie Mode (Set)"
+    - "MFT_Behandeling"
+    - "Hartritme"
+    - "Toedieningsweg"
+    - "NIV Program Status (Set)"
+    - "Kleur Sputum"
+    - "Hoeveelheid Sputum"
+    - "Hoestprikkel"
+    - "Pupil Links Grootte"
+    - "Pupil Rechts Grootte"
+    - "Pupil Links Reactie"
+    - "Pupil Rechts Reactie"
+    - "Aspect Sputum"
+    - "Ramsay score"
+    - "Actief openen van de ogen"
+    - "Beste verbale reactie"
+    - "Beste motore reactie van de armen"
+    - "Ectopie"
+    - "Thoraxdrain1 Zuigkracht"
+    - "Thoraxdrain1 Plaats"
+    - "Thoraxdrain1 Transport"
+    - "Thoraxdrain1 Luchtlekkage"
+    - "Thoraxdrain1 Aspect"
+    - "VAS score"
+    - "RASS score"
+    - "EVD-Open/Dicht"
 
 pre_meds:
   dataset: AmsterdamUMCdb

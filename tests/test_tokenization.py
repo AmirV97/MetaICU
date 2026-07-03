@@ -114,6 +114,50 @@ class TokenizationTests(unittest.TestCase):
             self.assertEqual(val_summary["unknown_mapped_rows"], 1)
             self.assertEqual(val_summary["unknown_dropped_rows"], 0)
 
+    def test_subject_analysis_unit_concatenates_admissions_but_keeps_token_hadm_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_meds_split(root, "train", [
+                event(1, 10, 0, "ICU_ADMISSION"),
+                event(1, 10, 30, "VITAL//HEART_RATE//Q5"),
+                event(1, 10, 60, "ICU_DISCHARGE"),
+                event(1, 11, 120, "ICU_ADMISSION"),
+                event(1, 11, 150, "VITAL//HEART_RATE//Q6"),
+                event(1, 11, 180, "ICU_DISCHARGE"),
+            ])
+            write_meds_split(root, "val", [event(2, 20, 0, "ICU_ADMISSION")])
+            write_meds_split(root, "test", [event(3, 30, 0, "ICU_ADMISSION")])
+
+            outputs = write_tokenized_outputs(
+                TokenizationConfig(
+                    meds_dir=root / "data/MEDS",
+                    output_dir=root / "data/tokenized",
+                    audit_dir=root / "audits/tokenization",
+                    metadata_dir=root / "data/tokenized/metadata",
+                    analysis_unit="subject",
+                    max_timelines_per_shard=10,
+                    overwrite=True,
+                )
+            )
+
+            timeline_index = pl.read_parquet(outputs["timeline_index"])
+            train_idx = timeline_index.filter(pl.col("split") == "train")
+            self.assertEqual(train_idx.height, 1)
+            self.assertEqual(train_idx["analysis_unit"].to_list(), ["subject"])
+            self.assertEqual(train_idx["subject_id"].to_list(), [1])
+            self.assertEqual(train_idx["hadm_id"].to_list(), [-1])
+            self.assertEqual(train_idx["n_admissions"].to_list(), [2])
+            self.assertEqual(train_idx["hadm_ids"].to_list(), [[10, 11]])
+
+            shard = load_file(str(root / "data/tokenized/train/0.safetensors"))
+            self.assertEqual(shard["patient_ids"].tolist(), [1])
+            self.assertEqual(set(shard["hadm_id"].tolist()), {10, 11})
+
+            summary = json.loads(outputs["summary"].read_text())
+            self.assertEqual(summary["analysis_unit"], "subject")
+            train_summary = next(row for row in summary["split_summaries"] if row["split"] == "train")
+            self.assertEqual(train_summary["timelines"], 1)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

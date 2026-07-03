@@ -4,7 +4,7 @@
 #   build-aumc-tokenized paths.parent_dir=/path/to/workspace
 #
 # The token vocabulary is built from data/MEDS/train only and reused unchanged
-# for val/test. Timelines are one ICU admission/stay each, keyed by
+# for val/test. By default, timelines are one ICU admission/stay each, keyed by
 # (subject_id, hadm_id), with a metadata timeline index for recovery.
 
 paths:
@@ -19,6 +19,7 @@ run:
   max_rows: null
   max_timelines_per_shard: 1000
   train_split: train
+  analysis_unit: stay        # stay | subject
   splits:
     - train
     - val

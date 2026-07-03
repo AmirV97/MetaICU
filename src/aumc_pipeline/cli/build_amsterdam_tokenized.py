@@ -55,6 +55,7 @@ def _build_config(cfg: DictConfig) -> TokenizationConfig:
         max_rows=_optional_int(OmegaConf.select(cfg, "run.max_rows")),
         max_timelines_per_shard=int(cfg.run.max_timelines_per_shard),
         medication_atc_depth=str(cfg.run.medication_atc_depth),
+        analysis_unit=str(OmegaConf.select(cfg, "run.analysis_unit", default="stay")),
         unknown_token=str(cfg.run.unknown_token),
         overwrite=bool(cfg.run.overwrite),
         time_intervals_spec=time_intervals_spec,

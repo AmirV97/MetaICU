@@ -110,7 +110,9 @@ data/metadata/hf_numeric_binning_summary.json
 audits/pre-MEDS/premeds_summary.json
 ```
 
-The raw shard cache is source-preserving and internal to pre-MEDS: no patient filtering, vocab decisions, sentinel drops, or time transforms are applied there. The high-frequency inventory is fitted on train only. Causal mean-binning is then applied to each split using that frozen inventory. Empty bins are not emitted.
+The raw shard cache is source-preserving and internal to pre-MEDS: no patient filtering, vocab decisions, sentinel drops, or time transforms are applied there. The high-frequency inventory is fitted on train only. Causal mean-binning is then applied to each split using that frozen inventory. Rare-but-dense numeric variables, such as CRRT settings that appear in few stays but are very dense when present, are also flagged for binning; the default rare-dense gate requires 2 sampled admission/item groups plus a high row burden and a high-frequency CI above the threshold. Empty bins are not emitted.
+
+Selected repeated categorical state streams are state-change deduplicated in pre-MEDS. Defaults include ventilation mode, CRRT modality, rhythm, oxygen/admin route, NIV program status, sputum state, pupil state, selected score components/final scores, ectopy, chest-drain state, and EVD state. The policy keeps the first value and later value changes per admission/item.
 
 Useful QC run:
 
@@ -161,6 +163,15 @@ audits/tokenization/tokenization_summary.json
 
 Each tokenized timeline is one ICU admission/stay, keyed by `(subject_id, hadm_id)`. Multi-admission patients therefore produce multiple timelines, but patient/admission identity is preserved through `patient_ids`, `hadm_id`, `icustay_id`, and `timeline_index.parquet`.
 
+The tokenized unit of analysis is configurable:
+
+```bash
+build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.analysis_unit=stay
+build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.analysis_unit=subject
+```
+
+`stay` is the default and writes one timeline per ICU admission/stay. `subject` writes one timeline per patient, concatenating that patient's admissions chronologically. Per-token `hadm_id` and `icustay_id` are still stored, so admission identity remains recoverable.
+
 Medication ATC detail can be coarsened at tokenization time:
 
 ```bash
@@ -173,3 +184,8 @@ build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.medication_atc
 cd /path/to/AUMC_pipeline
 python -m unittest discover -s tests -v
 ```
+
+## Next Development Tasks
+
+- Re-run bounded pre-MEDS -> MEDS -> tokenization QC after the aggressive rare-dense binning default. Confirm whether CRRT dilution/flow streams are now binned rather than raw-passthrough.
+- Decide the policy for any remaining super-long ICU stays before full tokenization runs. Some stays are genuinely long, e.g. 37-95 ICU days, so hourly data alone can still produce long sequences.

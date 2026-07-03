@@ -63,6 +63,8 @@ class HFInventoryConfig:
     highres_threshold_minutes: float = 45.0
     confidence_level: float = 0.99
     min_groups: int = 30
+    rare_dense_min_groups: int = 2
+    rare_dense_min_row_count: int = 500_000
     patient_batch_size: int = 500
     candidate_limit: int = 0
     seed: int = 20260601
@@ -140,10 +142,18 @@ class HFInventoryBuilder:
                     decision_batches[signal_id] = batches_processed
                     decision_patients[signal_id] = patients_checked
 
+        candidate_by_id = {row[cfg.signal_column]: row for row in candidates}
         for signal_id in candidate_ids:
             if status[signal_id] == "pending":
-                status[signal_id] = "skipped_inconclusive"
-                reason[signal_id] = "patient sampling ended before CI crossed threshold"
+                if self._is_rare_but_dense(candidate_by_id[signal_id], states[signal_id]):
+                    status[signal_id] = "high_resolution_rare_but_dense"
+                    reason[signal_id] = (
+                        "rare-but-dense signal: CI lower bound exceeds 1/highres_threshold_minutes "
+                        "despite sampled groups below min_groups"
+                    )
+                else:
+                    status[signal_id] = "skipped_inconclusive"
+                    reason[signal_id] = "patient sampling ended before CI crossed threshold"
                 decision_batches[signal_id] = batches_processed
                 decision_patients[signal_id] = patients_checked
 
@@ -170,6 +180,8 @@ class HFInventoryBuilder:
             "confidence_level": cfg.confidence_level,
             "confidence_z": self.confidence_z,
             "min_groups": cfg.min_groups,
+            "rare_dense_min_groups": cfg.rare_dense_min_groups,
+            "rare_dense_min_row_count": cfg.rare_dense_min_row_count,
             "patient_batch_size": cfg.patient_batch_size,
             "candidate_limit": cfg.candidate_limit,
             "patients_checked": patients_checked,
@@ -289,6 +301,22 @@ class HFInventoryBuilder:
         elif lower is not None and upper is not None and lower < self.threshold_frequency and upper < self.threshold_frequency:
             status[signal_id] = "skipped_low_frequency_confident"
             reason[signal_id] = "both CI bounds are below 1/highres_threshold_minutes"
+
+    def _is_rare_but_dense(self, candidate: dict[str, Any], state: RunningNormalCI) -> bool:
+        """Return True for rare therapies that are dense when present.
+
+        CRRT-like variables can have very high within-stay frequency while
+        appearing in too few admissions to satisfy the normal ``min_groups``
+        gate. This policy keeps the CI requirement but allows a smaller group
+        count when the source-token row burden is large.
+        """
+        cfg = self.config
+        if state.n < cfg.rare_dense_min_groups:
+            return False
+        if int(candidate.get("row_count") or 0) < cfg.rare_dense_min_row_count:
+            return False
+        lower, _upper = state.ci(self.confidence_z)
+        return lower is not None and lower > self.threshold_frequency
 
     def _result_row(
         self,

@@ -154,7 +154,7 @@ build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace \
   run.num_patients=1000 run.max_rows=1000000
 ```
 
-The high-frequency inventory is built from the train split. Causal mean-binning writes `numericitems_binned` and does not modify raw `numericitems`.
+The high-frequency inventory is built from the train split. Causal mean-binning writes `numericitems_binned` and does not modify raw `numericitems`. Rare-but-dense numeric streams, such as CRRT settings that appear in few stays but are dense when present, are also binned when supported by the train-derived inventory.
 
 ## 6. Build MEDS-Like Outputs
 
@@ -190,6 +190,15 @@ Outputs:
 
 Each tokenized timeline is one ICU admission/stay. Patient and admission identity remain recoverable through `patient_ids`, `hadm_id`, `icustay_id`, and `timeline_index.parquet`.
 
+The unit of analysis is configurable:
+
+```bash
+build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.analysis_unit=stay
+build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.analysis_unit=subject
+```
+
+`stay` is the default. `subject` concatenates a patient's admissions chronologically while preserving per-token `hadm_id` and `icustay_id`.
+
 ## Current Status
 
 Implemented:
@@ -199,6 +208,7 @@ Implemented:
 - deterministic subject splits as a pre-MEDS substage
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory
+- rare-but-dense numeric binning for sparse CRRT-like dense streams
 - causal mean-binned numeric pre-MEDS outputs
 - bounded/full MEDS-like conversion for a supplied pre-MEDS directory
 - split-aware MEDS conversion for train/val/test

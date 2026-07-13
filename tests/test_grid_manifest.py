@@ -18,7 +18,7 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.grid.manifest import GridManifestConfig, build_feature_manifest, load_feature_seed, write_grid_manifest_outputs
+from metaicu.aumcdb.grid.manifest import GridManifestConfig, build_feature_manifest, load_feature_seed, write_grid_manifest_outputs
 
 
 def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
@@ -204,7 +204,7 @@ class GridManifestTests(unittest.TestCase):
         cmd = [
             sys.executable,
             "-m",
-            "metaicu.cli.grid_build_manifest",
+            "metaicu.aumcdb.grid.cli.grid_build_manifest",
             f"paths.parent_dir={self.workspace}",
             f"paths.source_vocab={self.source_vocab}",
             f"paths.supplied_vocab={self.supplied_vocab}",

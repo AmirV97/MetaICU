@@ -17,7 +17,7 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.meds.build_workflow import SplitMEDSConfig, write_split_meds_outputs
+from metaicu.aumcdb.tokenized.meds.build_workflow import SplitMEDSConfig, write_split_meds_outputs
 
 
 def admission_row(patientid: int, admissionid: int) -> dict[str, object]:

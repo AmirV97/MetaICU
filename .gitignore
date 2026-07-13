@@ -22,6 +22,9 @@ outputs/
 logs/
 *.log
 
+# SLURM submission scripts -- user-local infra, not library code
+*.sh
+
 # User-provided external/data folders
 AUMC_raw/
 externals/

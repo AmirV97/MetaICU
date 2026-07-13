@@ -17,7 +17,7 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.transforms.binning import CausalMeanBinningConfig, CausalMeanBinningTransform
+from metaicu.aumcdb.tokenized.transforms.binning import CausalMeanBinningConfig, CausalMeanBinningTransform
 
 
 def fixture_numericitems() -> pl.DataFrame:

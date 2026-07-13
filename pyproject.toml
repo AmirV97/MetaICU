@@ -21,15 +21,16 @@ dependencies = [
 ]
 
 [project.scripts]
-build-amsterdam-vocab = "metaicu.cli.build_amsterdam_vocab:main"
-build-aumc-premeds = "metaicu.cli.build_amsterdam_premeds:main"
-build-aumc-meds = "metaicu.cli.build_amsterdam_meds:main"
-build-aumc-tokenized = "metaicu.cli.build_amsterdam_tokenized:main"
-retrieve-aumc-externals = "metaicu.cli.retrieve_externals:main"
-grid_build_manifest = "metaicu.cli.grid_build_manifest:main"
+build-amsterdam-vocab = "metaicu.aumcdb.tokenized.cli.build_amsterdam_vocab:main"
+build-aumc-premeds = "metaicu.aumcdb.tokenized.cli.build_amsterdam_premeds:main"
+build-aumc-meds = "metaicu.aumcdb.tokenized.cli.build_amsterdam_meds:main"
+build-aumc-tokenized = "metaicu.aumcdb.tokenized.cli.build_amsterdam_tokenized:main"
+retrieve-aumc-externals = "metaicu.aumcdb.tokenized.cli.retrieve_externals:main"
+grid_build_manifest = "metaicu.aumcdb.grid.cli.grid_build_manifest:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-metaicu = ["configs/*.yaml", "grid/data/*.csv"]
+"metaicu.aumcdb.tokenized" = ["configs/*.yaml"]
+"metaicu.aumcdb.grid" = ["data/*.csv"]

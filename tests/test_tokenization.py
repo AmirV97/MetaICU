@@ -18,7 +18,7 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.tokenization.build_workflow import TokenizationConfig, write_tokenized_outputs
+from metaicu.aumcdb.tokenized.tokenization.build_workflow import TokenizationConfig, write_tokenized_outputs
 
 
 def event(

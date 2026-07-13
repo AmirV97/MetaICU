@@ -15,7 +15,7 @@ SRC_ROOT = REPO_ROOT / "MetaICU/src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.vocab_pipeline.candidate_map import (
+from metaicu.aumcdb.tokenized.vocab_pipeline.candidate_map import (
     CANDIDATE_COLUMNS,
     CandidateMapConfig,
     construct_candidate_map,
@@ -25,8 +25,8 @@ from metaicu.vocab_pipeline.candidate_map import (
     unmatched_source_tokens,
     write_candidate_map_outputs,
 )
-from metaicu.vocab_pipeline.evidence_normalization import EVIDENCE_COLUMNS
-from metaicu.vocab_pipeline.source_vocab import SOURCE_VOCAB_COLUMNS
+from metaicu.aumcdb.tokenized.vocab_pipeline.evidence_normalization import EVIDENCE_COLUMNS
+from metaicu.aumcdb.tokenized.vocab_pipeline.source_vocab import SOURCE_VOCAB_COLUMNS
 
 
 PIPELINE_ROOT = REPO_ROOT / "MetaICU"

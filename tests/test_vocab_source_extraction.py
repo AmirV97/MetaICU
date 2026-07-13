@@ -16,7 +16,7 @@ SRC_ROOT = REPO_ROOT / "MetaICU/src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.vocab_pipeline.source_vocab import (
+from metaicu.aumcdb.tokenized.vocab_pipeline.source_vocab import (
     SOURCE_VOCAB_COLUMNS,
     SourceVocabConfig,
     compare_to_reference,

@@ -9,7 +9,7 @@ from pathlib import Path
 import pandas as pd
 import polars as pl
 
-from metaicu.transforms.hf_inventory import HFInventoryBuilder, HFInventoryConfig
+from metaicu.aumcdb.tokenized.transforms.hf_inventory import HFInventoryBuilder, HFInventoryConfig
 
 
 def write_parquet(path: Path, rows: list[dict[str, object]]) -> None:

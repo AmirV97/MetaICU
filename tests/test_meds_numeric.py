@@ -17,8 +17,8 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.meds.numeric import fit_numeric_quantile_boundaries, numeric_events
-from metaicu.meds.vocab import load_vocab
+from metaicu.aumcdb.tokenized.meds.numeric import fit_numeric_quantile_boundaries, numeric_events
+from metaicu.aumcdb.tokenized.meds.vocab import load_vocab
 
 
 def admission_row(patientid: int, admissionid: int) -> dict[str, object]:

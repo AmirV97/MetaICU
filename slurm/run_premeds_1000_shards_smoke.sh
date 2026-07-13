@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=aumc_premeds_1000
-#SBATCH --output=/msc/home/avahda55/dataset_EDA/AUMC_pipeline/slurm/logs/premeds_1000_shards_%j.out
+#SBATCH --output=/msc/home/avahda55/dataset_EDA/MetaICU/slurm/logs/premeds_1000_shards_%j.out
 #SBATCH --time=08:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=250G
 
 set -euo pipefail
 
-PIPELINE_ROOT="${PIPELINE_ROOT:-/msc/home/avahda55/dataset_EDA/AUMC_pipeline}"
+PIPELINE_ROOT="${PIPELINE_ROOT:-/msc/home/avahda55/dataset_EDA/MetaICU}"
 PYTHON="${PYTHON:-/msc/home/avahda55/.venvs/ethos/.venv/bin/python}"
 RAW_DATA_DIR="${RAW_DATA_DIR:-/msc/home/avahda55/Datasets/AmsterdamUMCdb}"
 VOCAB_PATH="${VOCAB_PATH:-${PIPELINE_ROOT}/mappings/aumc_supplied_vocab.csv}"
@@ -82,7 +82,7 @@ print("[setup] split counts:", split["split"].value_counts().sort_index().to_dic
 PYSETUP
 
 echo "[premeds] starting bounded pre-MEDS with internal raw shard cache"
-"${PYTHON}" -m aumc_pipeline.cli.build_amsterdam_premeds \
+"${PYTHON}" -m metaicu.cli.build_amsterdam_premeds \
   paths.parent_dir="${WORKSPACE}" \
   run.num_patients="${N_PATIENTS}" \
   run.overwrite=true

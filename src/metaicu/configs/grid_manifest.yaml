@@ -1,0 +1,23 @@
+# Hydra config for iCareFM-style grid feature-manifest construction.
+#
+# Minimal invocation:
+#   grid_build_manifest paths.parent_dir=/path/to/workspace
+#
+# This stage does not scan raw Amsterdam rows. It reads the iCareFM seed feature
+# list plus vocabulary/source mapping artifacts and writes a candidate manifest.
+
+paths:
+  parent_dir: null
+  output_manifest: null    # defaults to parent_dir/grid/aumc_grid_feature_manifest.csv
+  audit_dir: null          # defaults to parent_dir/audits/grid_manifest
+  feature_list: null       # defaults to packaged iCareFM Table S3 seed CSV
+  source_vocab: null       # defaults to parent_dir/audits/vocab/vocab_pipeline_source_vocab.csv
+  supplied_vocab: null     # defaults to parent_dir/vocab/aumc_supplied_vocab.csv
+  openicu_root: null       # defaults to parent_dir/externals/OpenICU
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

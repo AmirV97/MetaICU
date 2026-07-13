@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=aumc_meds_ws
-#SBATCH --output=/msc/home/avahda55/dataset_EDA/AUMC_pipeline/slurm/logs/meds_workspace_%j.out
+#SBATCH --output=/msc/home/avahda55/dataset_EDA/MetaICU/slurm/logs/meds_workspace_%j.out
 #SBATCH --time=04:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=180G
 
 set -euo pipefail
 
-PIPELINE_ROOT="${PIPELINE_ROOT:-/msc/home/avahda55/dataset_EDA/AUMC_pipeline}"
+PIPELINE_ROOT="${PIPELINE_ROOT:-/msc/home/avahda55/dataset_EDA/MetaICU}"
 PYTHON="${PYTHON:-/msc/home/avahda55/.venvs/ethos/.venv/bin/python}"
 WORKSPACE="${WORKSPACE:?Set WORKSPACE to an AUMC workspace containing data/pre-MEDS and vocab/aumc_supplied_vocab.csv}"
 
@@ -15,7 +15,7 @@ mkdir -p "${PIPELINE_ROOT}/slurm/logs"
 export PYTHONPATH="${PIPELINE_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
 
 echo "[meds] workspace=${WORKSPACE}"
-"${PYTHON}" -m aumc_pipeline.cli.build_amsterdam_meds \
+"${PYTHON}" -m metaicu.cli.build_amsterdam_meds \
   paths.parent_dir="${WORKSPACE}" \
   run.overwrite=true
 

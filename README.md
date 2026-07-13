@@ -1,4 +1,4 @@
-# AUMC Pipeline
+# MetaICU
 
 Clean AmsterdamUMCdb ICU pipeline for vocabulary construction, split-aware pre-MEDS, MEDS-like outputs, and ETHOS-style tokenized timelines.
 
@@ -14,16 +14,17 @@ Current main artifact:
 2. Retrieve GitHub externals.
 3. Manually add Athena/OMOP CSVs.
 4. Build the supplied vocabulary.
-5. Build pre-MEDS, including deterministic subject splits, train-derived high-frequency numeric inventory, and causal mean-binned numeric outputs.
-6. Build MEDS-like outputs.
-7. Build tokenized safetensors.
+5. Optionally build the iCareFM-style grid feature manifest.
+6. Build pre-MEDS, including deterministic subject splits, train-derived high-frequency numeric inventory, and causal mean-binned numeric outputs.
+7. Build MEDS-like outputs.
+8. Build tokenized safetensors.
 
 ## 1. Workspace And Code
 
 ```bash
 mkdir -p /path/to/aumc_workspace
-git clone https://github.com/AmirV97/AUMCdb_pipeline.git /path/to/AUMC_pipeline
-cd /path/to/AUMC_pipeline
+git clone https://github.com/AmirV97/MetaICU.git /path/to/MetaICU
+cd /path/to/MetaICU
 python -m pip install -e .
 ```
 
@@ -110,7 +111,22 @@ Output:
 
 Use `run.overwrite=true` only when intentionally replacing an existing output.
 
-## 5. Build Pre-MEDS
+## 5. Optional Grid Feature Manifest
+
+```bash
+grid_build_manifest paths.parent_dir=/path/to/aumc_workspace
+```
+
+Output:
+
+```text
+/path/to/aumc_workspace/grid/aumc_grid_feature_manifest.csv
+/path/to/aumc_workspace/audits/grid_manifest/
+```
+
+This is stage 1 of the iCareFM-style hourly-grid fork. It uses the packaged 129-row Table S3 feature seed, the source/supplied vocabulary artifacts, and OpenICU mappings when available. It does not scan raw AUMC rows or build the hourly grid dataset.
+
+## 6. Build Pre-MEDS
 
 ```bash
 build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace
@@ -156,7 +172,7 @@ build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace \
 
 The high-frequency inventory is built from the train split. Causal mean-binning writes `numericitems_binned` and does not modify raw `numericitems`. Rare-but-dense numeric streams, such as CRRT settings that appear in few stays but are dense when present, are also binned when supported by the train-derived inventory.
 
-## 6. Build MEDS-Like Outputs
+## 7. Build MEDS-Like Outputs
 
 ```bash
 build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
@@ -172,7 +188,7 @@ build-aumc-meds paths.parent_dir=/path/to/aumc_workspace run.split_outputs=false
 
 MEDS numeric conversion prefers `numericitems_binned` when present, otherwise falls back to raw `numericitems`.
 
-## 7. Build Tokenized Outputs
+## 8. Build Tokenized Outputs
 
 ```bash
 build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace
@@ -205,6 +221,7 @@ Implemented:
 
 - external retrieval/setup helper
 - supplied vocabulary build/install
+- iCareFM-style grid feature manifest
 - deterministic subject splits as a pre-MEDS substage
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory

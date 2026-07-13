@@ -11,7 +11,7 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.cli.build_amsterdam_vocab import main  # noqa: E402
+from metaicu.cli.build_amsterdam_vocab import main  # noqa: E402
 
 
 if __name__ == "__main__":

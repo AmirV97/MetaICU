@@ -1,0 +1,99 @@
+# Hydra config for the AmsterdamUMCdb pre-MEDS extraction pipeline.
+# Run from MetaICU/ or supply absolute paths.
+#
+# Minimal invocation with a workspace root:
+#   build-aumc-premeds paths.parent_dir=/path/to/workspace
+#
+# All Amsterdam CSVs must be in paths.raw_data_dir (defaults to parent_dir/data/raw).
+# Large raw tables are cached internally as schema-cast parquet shards
+# (defaults to parent_dir/data/raw_shards) and reused by later pre-MEDS runs.
+# Output parquet lands in paths.pre_meds_dir (defaults to parent_dir/data/pre-MEDS).
+# With split_outputs=true, pre-MEDS creates/reuses subject_splits.parquet and
+# writes split folders under pre_meds_dir/train, pre_meds_dir/val, and pre_meds_dir/test.
+# Audit JSON lands in paths.audit_dir (defaults to parent_dir/audits/pre-MEDS).
+#
+# Bounded test (1000 patients):
+#   build-aumc-premeds paths.parent_dir=/path/to/workspace run.num_patients=1000
+
+paths:
+  parent_dir: null
+  raw_data_dir: null      # defaults to parent_dir/data/raw
+  raw_shards_dir: null    # defaults to parent_dir/data/raw_shards
+  pre_meds_dir: null      # defaults to parent_dir/data/pre-MEDS
+  audit_dir: null         # defaults to parent_dir/audits
+  metadata_dir: null      # defaults to parent_dir/data/metadata
+  split_path: null        # defaults to parent_dir/data/metadata/subject_splits.parquet when split_outputs=true
+  vocab_path: null        # defaults to parent_dir/vocab/aumc_supplied_vocab.csv
+
+split:
+  train_frac: 0.8
+  val_frac: 0.1
+  test_frac: 0.1
+  seed: 20260618
+
+run:
+  overwrite: false
+  partition_rows: 5000000
+  build_raw_shards: true  # internal large-table raw CSV -> parquet cache substage
+  rebuild_raw_shards: false
+  raw_shard_rows: null    # defaults to partition_rows
+  max_rows: null          # per-table raw-row cap for smoke tests; null = full table
+  num_patients: null      # deterministic patient subset; null = all patients
+  split_outputs: true     # write train/val/test folders from subject_splits.parquet
+  build_hf_inventory: true # train-derived high-frequency inventory substage
+  build_binned_numericitems: true # write split-level numericitems_binned using the train inventory
+
+hf_inventory:
+  highres_threshold_minutes: 45.0
+  confidence_level: 0.99
+  min_groups: 30
+  rare_dense_min_groups: 2
+  rare_dense_min_row_count: 500000
+  patient_batch_size: 500
+  candidate_limit: 0       # 0 = all emitted numeric source itemids from vocab
+  seed: 20260601
+
+binning:
+  window_minutes: 60       # causal mean window; emitted at bin_end, no empty-bin imputation
+
+listitems:
+  state_change_dedup_labels:
+    - "Ventilatie Mode (Set)"
+    - "MFT_Behandeling"
+    - "Hartritme"
+    - "Toedieningsweg"
+    - "NIV Program Status (Set)"
+    - "Kleur Sputum"
+    - "Hoeveelheid Sputum"
+    - "Hoestprikkel"
+    - "Pupil Links Grootte"
+    - "Pupil Rechts Grootte"
+    - "Pupil Links Reactie"
+    - "Pupil Rechts Reactie"
+    - "Aspect Sputum"
+    - "Ramsay score"
+    - "Actief openen van de ogen"
+    - "Beste verbale reactie"
+    - "Beste motore reactie van de armen"
+    - "Ectopie"
+    - "Thoraxdrain1 Zuigkracht"
+    - "Thoraxdrain1 Plaats"
+    - "Thoraxdrain1 Transport"
+    - "Thoraxdrain1 Luchtlekkage"
+    - "Thoraxdrain1 Aspect"
+    - "VAS score"
+    - "RASS score"
+    - "EVD-Open/Dicht"
+
+pre_meds:
+  dataset: AmsterdamUMCdb
+  epoch_map:
+    "2003-2009": "2003-01-01 00:00:00"
+    "2010-2016": "2010-01-01 00:00:00"
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

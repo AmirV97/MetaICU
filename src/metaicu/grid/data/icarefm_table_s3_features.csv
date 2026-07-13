@@ -1,0 +1,130 @@
+tag,name,type,organ_system,target_unit
+map,Mean Arterial Blood Pressure,observation,circulatory,mmHg
+lact,Lactate,observation,circulatory,mmol/L
+age,Age,demographic,,years
+weight,Weight,demographic,,kg
+sex,Sex,demographic,,categorical
+height,Height,demographic,,cm
+hr,Heart Rate,observation,circulatory,bpm
+fio2,FiO2,observation,respiratory,%
+resp,Respiratory Rate,observation,respiratory,insp/min
+temp,Temperature,observation,infection,C
+crea,Creatinine,observation,metabolic_renal,mg/dL
+urine_rate,Urine Rate Per Hour,observation,metabolic_renal,mL/h
+po2,Partial Pressure Of Oxygen,observation,respiratory,mmHg
+ethnic,Ethnic Group,demographic,,categorical
+alb,Albumin,observation,gastrointestinal,g/dL
+alp,Alkaline Phosphatase,observation,gastrointestinal,IU/L
+alt,Alanine Aminotransferase,observation,gastrointestinal,IU/L
+ast,Aspartate Aminotransferase,observation,gastrointestinal,IU/L
+be,Base Excess,observation,metabolic_renal,mmol/l
+bicar,Bicarbonate,observation,metabolic_renal,mmol/l
+bili,Total Bilirubin,observation,gastrointestinal,mg/dL
+bili_dir,Bilirubin Direct,observation,gastrointestinal,mg/dL
+bnd,Band Form Neutrophils,observation,infection,%
+bun,Blood Urea Nitrogen,observation,metabolic_renal,mg/dL
+ca,Calcium,observation,metabolic_renal,mg/dL
+cai,Calcium Ionized,observation,metabolic_renal,mmol/L
+ck,Creatine Kinase,observation,circulatory,IU/L
+ckmb,Creatine Kinase MB,observation,circulatory,ng/mL
+cl,Chloride,observation,metabolic_renal,mmol/l
+crp,C-Reactive Protein,observation,infection,mg/L
+dbp,Diastolic Blood Pressure,observation,circulatory,mmHg
+fgn,Fibrinogen,observation,circulatory,mg/dL
+glu,Glucose,observation,metabolic_renal,mg/dL
+hgb,Hemoglobin,observation,circulatory,g/dL
+inr_pt,Prothrombin,observation,circulatory,INR
+k,Potassium,observation,metabolic_renal,mmol/l
+lymph,Lymphocytes,observation,infection,%
+methb,Methemoglobin,observation,circulatory,%
+mg,Magnesium,observation,metabolic_renal,mg/dL
+na,Sodium,observation,metabolic_renal,mmol/l
+neut,Neutrophils,observation,infection,%
+pco2,CO2 Partial Pressure,observation,respiratory,mmHg
+ph,pH Of Blood,observation,metabolic_renal,pH
+phos,Phosphate,observation,metabolic_renal,mg/dL
+plt,Platelet Count,observation,circulatory,G/l
+ptt,Partial Thromboplastin Time,observation,circulatory,sec
+sbp,Systolic Blood Pressure,observation,circulatory,mmHg
+tnt,Troponin T,observation,circulatory,ng/mL
+wbc,White Blood Cell Count,observation,infection,G/l
+basos,Basophils,observation,infection,%
+eos,Eosinophils,observation,infection,%
+mgcs,Glasgow Coma Scale Motor,observation,neuro,categorical
+tgcs,Glasgow Coma Scale Total,observation,neuro,categorical
+vgcs,Glasgow Coma Scale Verbal,observation,neuro,categorical
+egcs,Glasgow Coma Scale Eye,observation,neuro,categorical
+hct,Hematocrit,observation,circulatory,%
+rbc,Red Blood Cell Count,observation,circulatory,m/uL
+tri,Troponin I,observation,circulatory,ng/mL
+etco2,Endtidal CO2,observation,respiratory,mmHg
+rass,Richmond Agitation Sedation Scale,observation,neuro,categorical
+hbco,Carboxyhemoglobin,observation,circulatory,%
+esr,Erythrocyte Sedimentation Rate,observation,infection,mm/hr
+pt,Prothrombine Time,observation,circulatory,sec
+adm,Patient Admission Type,demographic,,categorical
+hba1c,Hemoglobin A1C,observation,metabolic_renal,%
+samp,"Body Fluid Sampling, Detected Bacterial Growth",observation,infection,categorical
+spo2,Pulse Oxymetry Oxygen Saturation,observation,respiratory,%
+sao2,Oxygen Saturation In Arterial Blood,observation,respiratory,%
+icp,Intra Cranial Pressure,observation,neuro,mmHg
+cout,Cardiac Output,observation,circulatory,l/min
+mpap,Mean Pulmonal Arterial Pressure,observation,circulatory,mmHg
+spap,Systolic Pulmonal Arterial Pressure,observation,circulatory,mmHg
+dpap,Diastolic Pulmonal Arterial Pressure,observation,circulatory,mmHg
+cvp,Central Venous Pressure,observation,circulatory,mmHg
+svo2,Mixed Venous Oxygenation,observation,circulatory,%
+pcwp,Pulmonary Capillary Wedge Pressure,observation,circulatory,mmHg
+peep,Positive End Expiratory Pressure - Mechanical Ventilation,observation,respiratory,cmH2O
+peak,Peak Pressure - Mechanical Ventilation,observation,respiratory,cmH2O
+plateau,Plateau Pressure - Mechanical Ventilation,observation,respiratory,cmH2O
+ps,Pressure Support - Mechanical Ventilation,observation,respiratory,cmH2O
+tv,Tidal Volume,observation,respiratory,ml
+airway,Type Of Airway Ventilation,observation,respiratory,categorical
+supp_o2_vent,Supplemental Oxygen From Ventilator,treatment,respiratory,%
+ygt,Gamma GT,observation,gastrointestinal,U/L
+amm,Ammonia,observation,gastrointestinal,umol/L
+amyl,Amylase,observation,gastrointestinal,U/L
+lip,Lipase,observation,gastrointestinal,U/L
+ufilt,Ultrafiltration On Continuous RRT,treatment,metabolic_renal,ml
+ufilt_ind,Ultrafiltration On Continuous RRT Indicator,treatment,metabolic_renal,indicator
+dobu,Dobutamine,treatment,circulatory,mcg/min
+levo,Levosimendan,treatment,circulatory,mcg/min
+norepi,Norepinephrine,treatment,circulatory,mcg/min
+epi,Epinephrine,treatment,circulatory,mcg/min
+milrin,Milrinone,treatment,circulatory,mcg/min
+teophyllin,Theophylline,treatment,circulatory,mg/min
+dopa,Dopamine,treatment,circulatory,mcg/min
+adh,Vasopressin,treatment,circulatory,U/min
+hep,Heparin,treatment,circulatory,U/h
+prop,Propofol,treatment,neuro,mcg/min
+benzdia,Benzodiazepine,treatment,neuro,mg/h
+sed,Other Sedatives,treatment,neuro,indicator
+op_pain,Opiate Painkiller,treatment,neuro,indicator
+nonop_pain,Non-Opioid Analgesic,treatment,neuro,indicator
+paral,Paralytic,treatment,neuro,indicator
+abx,Antibiotics,treatment,infection,indicator
+loop_diur,Loop Diuretic,treatment,metabolic_renal,mg/h
+ins_ind,Insulin,treatment,,indicator
+fluid,Fluid Administration,treatment,,indicator
+inf_rbc,Packed Red Blood Cells,treatment,,indicator
+ffp,Fresh Frozen Plasma,treatment,,indicator
+plat,Platelets,treatment,,indicator
+inf_alb,Albumin Infusion,treatment,,indicator
+anti_delir,Anti Deliriant,treatment,neuro,indicator
+oth_diur,Other Diuretics,treatment,metabolic_renal,indicator
+anti_coag,Other Anticoagulants,treatment,circulatory,indicator
+vasod,Antihypertensive And Vasodilators,treatment,circulatory,indicator
+anti_arrhythm,Antiarrhythmic,treatment,circulatory,indicator
+dobu_ind,Dobutamine Indicator,treatment,circulatory,indicator
+levo_ind,Levosimendan Indicator,treatment,circulatory,indicator
+norepi_ind,Norepinephrine Indicator,treatment,circulatory,indicator
+epi_ind,Epinephrine Indicator,treatment,circulatory,indicator
+milrin_ind,Milrinone Indicator,treatment,circulatory,indicator
+teophyllin_ind,Theophylline Indicator,treatment,circulatory,indicator
+dopa_ind,Dopamine Indicator,treatment,circulatory,indicator
+adh_ind,Vasopressin Indicator,treatment,circulatory,indicator
+hep_ind,Heparin Indicator,treatment,circulatory,indicator
+prop_ind,Propofol Indicator,treatment,neuro,indicator
+benzdia_ind,Benzodiazepine Indicator,treatment,neuro,indicator
+loop_diur_ind,Loop Diuretic Indicator,treatment,metabolic_renal,indicator

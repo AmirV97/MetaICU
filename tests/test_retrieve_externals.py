@@ -10,12 +10,12 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PIPELINE_ROOT = REPO_ROOT / "AUMC_pipeline"
+PIPELINE_ROOT = REPO_ROOT / "MetaICU"
 SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.cli.retrieve_externals import ATHENA_REQUIRED_FILES, ATHENA_VOCABULARIES, EXTERNAL_REPOS, write_external_versions
+from metaicu.cli.retrieve_externals import ATHENA_REQUIRED_FILES, ATHENA_VOCABULARIES, EXTERNAL_REPOS, write_external_versions
 
 
 class RetrieveExternalsTests(unittest.TestCase):

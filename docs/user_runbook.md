@@ -1,9 +1,10 @@
-# AUMC Pipeline User Runbook
+# MetaICU User Runbook
 
 This runbook expands the README command sequence. The package currently supports:
 
 - external resource setup
 - supplied vocabulary build/install
+- iCareFM-style grid feature manifest
 - subject-level train/val/test split creation
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory
@@ -33,8 +34,8 @@ Use one workspace per run:
 ## Install
 
 ```bash
-git clone https://github.com/AmirV97/AUMCdb_pipeline.git /path/to/AUMC_pipeline
-cd /path/to/AUMC_pipeline
+git clone https://github.com/AmirV97/MetaICU.git /path/to/MetaICU
+cd /path/to/MetaICU
 python -m pip install -e .
 ```
 
@@ -43,6 +44,7 @@ Main CLI entry points:
 ```bash
 retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
 build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
+grid_build_manifest paths.parent_dir=/path/to/aumc_workspace
 build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace
 build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
 ```
@@ -90,6 +92,23 @@ Audit outputs are under:
 ```text
 /path/to/aumc_workspace/audits/
 ```
+
+## Grid Feature Manifest
+
+```bash
+grid_build_manifest paths.parent_dir=/path/to/aumc_workspace
+```
+
+This writes:
+
+```text
+grid/aumc_grid_feature_manifest.csv
+audits/grid_manifest/grid_manifest_summary.json
+audits/grid_manifest/grid_manifest_unmatched_features.csv
+audits/grid_manifest/grid_manifest_source_candidate_examples.csv
+```
+
+The manifest is stage 1 of the iCareFM-style hourly-grid fork. It has one row per packaged Table S3 feature tag and records broad source candidates from the source vocab, supplied vocab, and OpenICU AUMC mappings. It does not scan raw AUMC rows, decide unit conversion, or construct the grid dataset.
 
 ## Pre-MEDS
 
@@ -181,7 +200,7 @@ build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.medication_atc
 ## Tests
 
 ```bash
-cd /path/to/AUMC_pipeline
+cd /path/to/MetaICU
 python -m unittest discover -s tests -v
 ```
 

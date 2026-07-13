@@ -9,11 +9,11 @@ from pathlib import Path
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = REPO_ROOT / "AUMC_pipeline/src"
+SRC_ROOT = REPO_ROOT / "MetaICU/src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.vocab_pipeline.policy_common import norm_key, norm_label_key
+from metaicu.vocab_pipeline.policy_common import norm_key, norm_label_key
 
 
 class PolicyCommonTests(unittest.TestCase):

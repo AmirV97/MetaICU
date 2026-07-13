@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aumc-pipeline"
+name = "metaicu"
 version = "0.1.0"
 description = "AmsterdamUMCdb supplied-vocabulary preparation utilities"
 readme = "README.md"
@@ -21,14 +21,15 @@ dependencies = [
 ]
 
 [project.scripts]
-build-amsterdam-vocab = "aumc_pipeline.cli.build_amsterdam_vocab:main"
-build-aumc-premeds = "aumc_pipeline.cli.build_amsterdam_premeds:main"
-build-aumc-meds = "aumc_pipeline.cli.build_amsterdam_meds:main"
-build-aumc-tokenized = "aumc_pipeline.cli.build_amsterdam_tokenized:main"
-retrieve-aumc-externals = "aumc_pipeline.cli.retrieve_externals:main"
+build-amsterdam-vocab = "metaicu.cli.build_amsterdam_vocab:main"
+build-aumc-premeds = "metaicu.cli.build_amsterdam_premeds:main"
+build-aumc-meds = "metaicu.cli.build_amsterdam_meds:main"
+build-aumc-tokenized = "metaicu.cli.build_amsterdam_tokenized:main"
+retrieve-aumc-externals = "metaicu.cli.retrieve_externals:main"
+grid_build_manifest = "metaicu.cli.grid_build_manifest:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-aumc_pipeline = ["configs/*.yaml"]
+metaicu = ["configs/*.yaml", "grid/data/*.csv"]

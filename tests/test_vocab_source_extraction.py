@@ -12,11 +12,11 @@ import pandas as pd
 import polars as pl
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = REPO_ROOT / "AUMC_pipeline/src"
+SRC_ROOT = REPO_ROOT / "MetaICU/src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.vocab_pipeline.source_vocab import (
+from metaicu.vocab_pipeline.source_vocab import (
     SOURCE_VOCAB_COLUMNS,
     SourceVocabConfig,
     compare_to_reference,

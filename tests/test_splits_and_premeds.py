@@ -13,14 +13,14 @@ import pandas as pd
 import polars as pl
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PIPELINE_ROOT = REPO_ROOT / "AUMC_pipeline"
+PIPELINE_ROOT = REPO_ROOT / "MetaICU"
 SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.pre_meds.build_workflow import PreMedsConfig, write_premeds_outputs
-from aumc_pipeline.utils.parquet_datasets import parquet_exists
-from aumc_pipeline.splits.build_splits import (
+from metaicu.pre_meds.build_workflow import PreMedsConfig, write_premeds_outputs
+from metaicu.utils.parquet_datasets import parquet_exists
+from metaicu.splits.build_splits import (
     SplitConfig,
     assign_subject_splits,
     write_subject_splits,

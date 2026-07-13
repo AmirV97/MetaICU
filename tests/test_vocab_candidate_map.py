@@ -11,11 +11,11 @@ from pathlib import Path
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = REPO_ROOT / "AUMC_pipeline/src"
+SRC_ROOT = REPO_ROOT / "MetaICU/src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.vocab_pipeline.candidate_map import (
+from metaicu.vocab_pipeline.candidate_map import (
     CANDIDATE_COLUMNS,
     CandidateMapConfig,
     construct_candidate_map,
@@ -25,11 +25,11 @@ from aumc_pipeline.vocab_pipeline.candidate_map import (
     unmatched_source_tokens,
     write_candidate_map_outputs,
 )
-from aumc_pipeline.vocab_pipeline.evidence_normalization import EVIDENCE_COLUMNS
-from aumc_pipeline.vocab_pipeline.source_vocab import SOURCE_VOCAB_COLUMNS
+from metaicu.vocab_pipeline.evidence_normalization import EVIDENCE_COLUMNS
+from metaicu.vocab_pipeline.source_vocab import SOURCE_VOCAB_COLUMNS
 
 
-PIPELINE_ROOT = REPO_ROOT / "AUMC_pipeline"
+PIPELINE_ROOT = REPO_ROOT / "MetaICU"
 
 
 def source_row(

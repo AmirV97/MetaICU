@@ -13,21 +13,21 @@ import pandas as pd
 import polars as pl
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = REPO_ROOT / "AUMC_pipeline/src"
+SRC_ROOT = REPO_ROOT / "MetaICU/src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from aumc_pipeline.vocab_pipeline.evidence_normalization import (
+from metaicu.vocab_pipeline.evidence_normalization import (
     EVIDENCE_COLUMNS,
     EvidenceConfig,
     normalize_mapping_evidence,
     summarize_evidence,
     write_mapping_evidence,
 )
-from aumc_pipeline.vocab_pipeline.resources import inventory_resources, summarize_inventory, write_resource_inventory
+from metaicu.vocab_pipeline.resources import inventory_resources, summarize_inventory, write_resource_inventory
 
 
-PIPELINE_ROOT = REPO_ROOT / "AUMC_pipeline"
+PIPELINE_ROOT = REPO_ROOT / "MetaICU"
 
 
 def write_text(path: Path, text: str) -> None:

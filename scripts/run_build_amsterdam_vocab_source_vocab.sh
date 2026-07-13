@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run source-vocabulary extraction over raw AmsterdamUMCdb CSV tables.
-# Submit from the AUMC_pipeline project root, or override paths below.
+# Submit from the MetaICU project root, or override paths below.
 
 #SBATCH --job-name=aumc_vocab_source
 #SBATCH --output=aumc_vocab_source_%j.log

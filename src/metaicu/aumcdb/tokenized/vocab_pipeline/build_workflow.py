@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import time
 from dataclasses import dataclass
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,18 @@ REQUIRED_RAW_TABLES = [
     "processitems.csv",
     "procedureorderitems.csv",
 ]
+
+
+def packaged_supplied_vocab() -> Path:
+    """Return the supplied Amsterdam vocabulary bundled with MetaICU."""
+
+    return Path(
+        str(
+            files("metaicu.aumcdb.tokenized").joinpath(
+                "data/aumc_supplied_vocab.csv"
+            )
+        )
+    )
 
 
 @dataclass(frozen=True)

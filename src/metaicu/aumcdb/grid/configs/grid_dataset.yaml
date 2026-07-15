@@ -1,0 +1,37 @@
+# Raw AmsterdamUMCdb to iCareFM-style hourly grid.
+# Minimal invocation:
+#   grid_build_dataset paths.parent_dir=/path/to/workspace
+
+paths:
+  parent_dir: null
+  raw_data_dir: null        # defaults to parent_dir/data/raw
+  output_dir: null          # defaults to parent_dir/data/grid
+  audit_dir: null           # defaults to parent_dir/audits/grid_dataset
+  manifest_path: null       # defaults to the packaged reviewed AUMC feature manifest
+  admission_ids_file: null  # optional one-admissionid-per-line bounded cohort
+
+split:
+  unit_of_analysis: admission  # admission or subject
+  train_frac: 0.8
+  val_frac: 0.1
+  test_frac: 0.1
+  seed: 42
+
+run:
+  sample_size: null
+  patients_per_file: 1000
+  seed: 42
+  features: null
+  reconstruction_types: null
+  apply_inclusion_criteria: true
+  scale: true
+  impute: true
+  one_hot: true
+  log_level: INFO
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

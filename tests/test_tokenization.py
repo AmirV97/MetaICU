@@ -12,8 +12,7 @@ from pathlib import Path
 import polars as pl
 from safetensors.torch import load_file
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-PIPELINE_ROOT = REPO_ROOT / "MetaICU"
+PIPELINE_ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))

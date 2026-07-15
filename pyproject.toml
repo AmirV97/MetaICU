@@ -13,9 +13,11 @@ dependencies = [
   "hydra-core>=1.3",
   "omegaconf>=2.3",
   "pandas>=2.0",
+  "numpy>=1.24",
   "polars[rtcompat]>=1.0",
   "pyarrow>=14.0",
   "PyYAML>=6.0",
+  "scikit-learn>=1.3",
   "safetensors>=0.5",
   "torch>=2.0",
 ]
@@ -27,10 +29,11 @@ build-aumc-meds = "metaicu.aumcdb.tokenized.cli.build_amsterdam_meds:main"
 build-aumc-tokenized = "metaicu.aumcdb.tokenized.cli.build_amsterdam_tokenized:main"
 retrieve-aumc-externals = "metaicu.aumcdb.tokenized.cli.retrieve_externals:main"
 grid_build_manifest = "metaicu.aumcdb.grid.cli.grid_build_manifest:main"
+grid_build_dataset = "metaicu.aumcdb.grid.cli.grid_build_dataset:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"metaicu.aumcdb.tokenized" = ["configs/*.yaml"]
-"metaicu.aumcdb.grid" = ["data/*.csv"]
+"metaicu.aumcdb.tokenized" = ["configs/*.yaml", "data/*.csv"]
+"metaicu.aumcdb.grid" = ["configs/*.yaml", "data/*.csv", "data/*.md"]

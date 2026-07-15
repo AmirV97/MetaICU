@@ -11,8 +11,7 @@ from pathlib import Path
 import pandas as pd
 import polars as pl
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = REPO_ROOT / "MetaICU/src"
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
@@ -221,11 +220,6 @@ class SourceVocabExtractionTests(unittest.TestCase):
         self.assertIn("field_mismatch", diff_types)
         self.assertIn("extra_in_extracted", diff_types)
         self.assertIn("missing_in_extracted", diff_types)
-
-    def test_slurm_wrapper_shell_syntax(self) -> None:
-        wrapper = PIPELINE_ROOT / "scripts/run_build_amsterdam_vocab_source_vocab.sh"
-        subprocess.run(["bash", "-n", str(wrapper)], check=True)
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -8,7 +8,7 @@ paths:
   raw_data_dir: null
   pre_meds_dir: null
   audit_dir: null
-  supplied_vocab: mappings/aumc_supplied_vocab.csv
+  supplied_vocab: null       # bundled aumc_supplied_vocab.csv unless explicitly overridden
   output_vocab: null
   external_root: null
   omop_vocab_dir: null

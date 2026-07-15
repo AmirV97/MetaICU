@@ -4,17 +4,18 @@ from __future__ import annotations
 
 import sys
 import unittest
+from importlib.resources import files
 from pathlib import Path
 
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = REPO_ROOT / "MetaICU/src"
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-PIPELINE_ROOT = REPO_ROOT / "MetaICU"
-SUPPLIED_VOCAB = PIPELINE_ROOT / "mappings/aumc_supplied_vocab.csv"
+SUPPLIED_VOCAB = Path(
+    str(files("metaicu.aumcdb.tokenized").joinpath("data/aumc_supplied_vocab.csv"))
+)
 REQUIRED_COLUMNS = [
     "dataset",
     "source_table",

@@ -1,13 +1,16 @@
 # MetaICU
 
-A multi-database ICU data-processing library (AmsterdamUMCdb now; MIMIC/eICU/SICdb/HiRID planned). Each database gets its own submodule under `src/metaicu/<db>/`, currently `aumcdb/`, which supports vocabulary construction, split-aware pre-MEDS, MEDS-like outputs, ETHOS-style tokenized timelines (`aumcdb/tokenized/`), and an iCareFM-style hourly grid feature manifest (`aumcdb/grid/`).
+A multi-database ICU data-processing library. AmsterdamUMCdb currently has two sibling pipelines under `src/metaicu/aumcdb/`:
+
+- `tokenized/`: supplied vocabulary, pre-MEDS, MEDS-like events, and ETHOS-style tokenization.
+- `grid/`: iCareFM-style raw CSV to split-aware hourly grid construction.
 
 ## Quick Start
 
 ```bash
 git clone https://github.com/AmirV97/MetaICU.git
 cd MetaICU
-python -m pip install -e .
+uv pip install --python /path/to/python -e .
 ```
 
 For the full step-by-step workflow (external retrieval, vocabulary build, pre-MEDS, MEDS, tokenization, all CLI commands and flags), see **[docs/user_runbook.md](docs/user_runbook.md)**.
@@ -18,7 +21,8 @@ Implemented:
 
 - external retrieval/setup helper
 - supplied vocabulary build/install
-- iCareFM-style grid feature manifest
+- iCareFM-style grid feature manifest and reviewed-manifest parser
+- raw CSV to hourly grid extraction with unit harmonization, broad physiological outlier removal, train-fitted scaling, imputation, and categorical encoding
 - deterministic subject splits as a pre-MEDS substage
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory

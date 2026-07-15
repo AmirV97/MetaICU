@@ -15,7 +15,11 @@ from typing import Any
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
-from metaicu.aumcdb.tokenized.vocab_pipeline.build_workflow import BuildVocabConfig, write_build_vocab_outputs
+from metaicu.aumcdb.tokenized.vocab_pipeline.build_workflow import (
+    BuildVocabConfig,
+    packaged_supplied_vocab,
+    write_build_vocab_outputs,
+)
 from metaicu.aumcdb.tokenized.vocab_pipeline.candidate_map import CandidateMapConfig, write_candidate_map_outputs
 from metaicu.aumcdb.tokenized.vocab_pipeline.evidence_normalization import EvidenceConfig, write_mapping_evidence
 from metaicu.aumcdb.tokenized.vocab_pipeline.resources import write_resource_inventory
@@ -39,17 +43,6 @@ def _optional_path(value: Any) -> Path | None:
     if value in (None, "", "null", "None"):
         return None
     return _path(value)
-
-
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[3]
-
-
-def _project_path(value: Any) -> Path:
-    path = _path(value)
-    if path.is_absolute():
-        return path
-    return _project_root() / path
 
 
 def _default_audit_dir(output_vocab: Path) -> Path:
@@ -134,7 +127,8 @@ def run_build_vocab(cfg: DictConfig) -> dict[str, Path]:
         external_root=_configured_or_parent(cfg, "external_root", parent_dir, "externals"),
         omop_vocab_dir=_configured_or_parent(cfg, "omop_vocab_dir", parent_dir, "externals/omop_vocab"),
         audit_dir=audit_dir,
-        supplied_vocab=_project_path(cfg.paths.supplied_vocab),
+        supplied_vocab=_optional_path(OmegaConf.select(cfg, "paths.supplied_vocab"))
+        or packaged_supplied_vocab(),
         output_vocab=output_vocab,
         dataset=str(cfg.source_vocab.dataset),
         max_rows_per_table=cfg.source_vocab.max_rows_per_table,

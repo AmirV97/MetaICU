@@ -128,7 +128,7 @@ def _apply_treatment_scaler(col, qt):
 def scale_grid(grid, matches, train_admission_ids):
     """grid: wide DataFrame from grid.assemble_grid (pre-imputation -- still has true nulls
     where a hour was never observed). matches: tag -> feature info dict from
-    grid.manifest.parse_manifest(). train_admission_ids: iterable of admissionids in the train
+    grid.build.manifest_parser.parse_manifest(). train_admission_ids: iterable of admissionids in the train
     split -- scaling parameters are fit on these rows' non-null values only.
 
     Returns (grid, scalers): grid with every direct_numeric/derived_output_rate/treatment_rate

@@ -3,7 +3,7 @@ admission_context raw extraction: the 5 resolved static/demographic features (ag
 height, sex, adm) recovered directly from admissions.csv columns per the manifest's resolved
 bin-median / category-collapse policies. No itemid-vocabulary matching applies here (see each
 feature's manifest Notes -- "source is a static admissions-table column, not a vocab-matched
-observation"), so this bypasses grid.manifest's generic keep_matches parsing entirely, the
+observation"), so this bypasses grid.build.manifest_parser's generic keep_matches parsing entirely, the
 same way treatment_rate_formulas.py hardcodes its own policy outside the manifest-matching
 flow. `ethnic` (the 6th iCareFM Table S3 demographic) stays excluded: no reliable
 AmsterdamUMCdb ethnicity source (manifest notes -- only a nationality field, judged a

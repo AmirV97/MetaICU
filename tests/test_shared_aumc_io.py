@@ -24,7 +24,7 @@ from metaicu.aumcdb.common.raw_shards import (
     raw_shards_exist,
 )
 from metaicu.aumcdb.common.raw_tables import load_admissions
-from metaicu.aumcdb.grid.extract_numeric import extract_numeric_categorical
+from metaicu.aumcdb.grid.build.extract_numeric import extract_numeric_categorical
 from metaicu.aumcdb.tokenized.pre_meds.large_tables import transform_table
 from tests.fixtures.aumc_bounded import write_bounded_aumc_raw
 

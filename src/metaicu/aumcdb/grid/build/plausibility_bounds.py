@@ -93,7 +93,7 @@ PLAUSIBLE_RANGE = {
 
 
 def resolve_bounds(matches):
-    """matches: tag -> feature info dict from grid.manifest.parse_manifest(). Returns
+    """matches: tag -> feature info dict from grid.build.manifest_parser.parse_manifest(). Returns
     {tag: (lo, hi)} for every direct_numeric/derived_output_rate feature that has a bound --
     a manual PLAUSIBLE_RANGE entry, or an automatic (0, 100) for any %-unit feature. Tags with
     neither (currently just `pt`) are absent from the result -- left unbounded."""

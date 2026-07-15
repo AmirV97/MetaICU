@@ -15,9 +15,9 @@ SRC_ROOT = PIPELINE_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from metaicu.aumcdb.grid.build_workflow import GridDatasetConfig
+from metaicu.aumcdb.grid.build.build_workflow import GridDatasetConfig
 from metaicu.aumcdb.grid.cli.grid_build_dataset import _build_config
-from metaicu.aumcdb.grid.manifest_parser import DEFAULT_REVIEWED_MANIFEST, parse_manifest
+from metaicu.aumcdb.grid.build.manifest_parser import DEFAULT_REVIEWED_MANIFEST, parse_manifest
 
 
 class GridDatasetStructureTests(unittest.TestCase):

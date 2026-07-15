@@ -20,7 +20,7 @@ from metaicu.aumcdb.tokenized.meds.common import (
     runtime_phase_expr,
 )
 from metaicu.aumcdb.tokenized.meds.vocab import table_vocab
-from metaicu.aumcdb.tokenized.utils.parquet_datasets import parquet_exists, resolve_table_parquet, scan_parquet
+from metaicu.aumcdb.common.parquet import parquet_exists, resolve_table_parquet, scan_parquet
 
 NULL_UNIT_KEY = "<NULL>"
 

@@ -35,6 +35,7 @@ class GridDatasetStructureTests(unittest.TestCase):
                 "paths": {
                     "parent_dir": str(parent_dir),
                     "raw_data_dir": None,
+                    "raw_shards_dir": None,
                     "output_dir": None,
                     "audit_dir": None,
                     "manifest_path": None,
@@ -42,6 +43,9 @@ class GridDatasetStructureTests(unittest.TestCase):
                 },
                 "split": {"unit_of_analysis": "subject", "train_frac": 0.8, "val_frac": 0.1, "test_frac": 0.1, "seed": 7},
                 "run": {
+                    "build_raw_shards": True,
+                    "rebuild_raw_shards": False,
+                    "raw_shard_rows": 1000,
                     "sample_size": 20,
                     "patients_per_file": 10,
                     "seed": 3,
@@ -54,6 +58,7 @@ class GridDatasetStructureTests(unittest.TestCase):
                 },
             }))
         self.assertEqual(config.raw_data_dir, parent_dir / "data/raw")
+        self.assertEqual(config.raw_shards_dir, parent_dir / "data/raw_shards")
         self.assertEqual(config.output_dir, parent_dir / "data/grid")
         self.assertEqual(config.audit_dir, parent_dir / "audits/grid_dataset")
         self.assertEqual(config.manifest_path, DEFAULT_REVIEWED_MANIFEST)

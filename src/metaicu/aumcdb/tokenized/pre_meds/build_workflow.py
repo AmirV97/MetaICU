@@ -18,6 +18,8 @@ from typing import Any
 import pandas as pd
 import polars as pl
 
+from metaicu.aumcdb.common.parquet import parquet_exists
+from metaicu.aumcdb.common.raw_shards import build_raw_shards_for_tables
 from metaicu.aumcdb.tokenized.pre_meds.admissions import (
     load_epoch_map,
     write_admissions_outputs,
@@ -35,7 +37,6 @@ from metaicu.aumcdb.tokenized.pre_meds.interval_tables import (
 )
 from metaicu.aumcdb.tokenized.pre_meds.large_tables import (
     TableAccumulator,
-    build_raw_shards_for_tables,
     transform_table,
 )
 from metaicu.aumcdb.tokenized.pre_meds.measured import (
@@ -46,7 +47,6 @@ from metaicu.aumcdb.tokenized.pre_meds.measured import (
 from metaicu.aumcdb.tokenized.splits.build_splits import SplitConfig, write_subject_splits
 from metaicu.aumcdb.tokenized.transforms.binning import CausalMeanBinningConfig, CausalMeanBinningTransform
 from metaicu.aumcdb.tokenized.transforms.hf_inventory import HFInventoryBuilder, HFInventoryConfig
-from metaicu.aumcdb.tokenized.utils.parquet_datasets import parquet_exists
 
 REQUIRED_RAW_TABLES = [
     "admissions.csv",

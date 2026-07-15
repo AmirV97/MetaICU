@@ -1,8 +1,10 @@
-"""Shared Polars helpers and raw-CSV schemas for Amsterdam pre-MEDS transforms."""
+"""Shared timing and admission-join helpers for Amsterdam pre-MEDS transforms."""
 
 from __future__ import annotations
 
 import polars as pl
+
+from metaicu.aumcdb.common.raw_schema import LARGE_TABLE_RAW_SCHEMAS, cast_raw_schema
 
 
 # Columns selected from admissions.parquet and joined to every event table.
@@ -30,86 +32,6 @@ def admission_anchor_columns(anchors: pl.DataFrame) -> list[str]:
     if "split" in anchors.columns:
         columns.append("split")
     return columns
-
-# Explicit Polars dtypes for the three large Amsterdam tables.
-# Applied after pandas reads with latin1 encoding; unknown columns are skipped.
-LARGE_TABLE_RAW_SCHEMAS: dict[str, dict[str, type]] = {
-    "numericitems": {
-        "admissionid": pl.Int64,
-        "itemid": pl.Int64,
-        "item": pl.String,
-        "tag": pl.String,
-        "value": pl.Float64,
-        "unitid": pl.Int64,
-        "unit": pl.String,
-        "comment": pl.String,
-        "measuredat": pl.Int64,
-        "registeredat": pl.Int64,
-        "registeredby": pl.String,
-        "updatedat": pl.Int64,
-        "updatedby": pl.String,
-        "islabresult": pl.Int64,
-        "fluidout": pl.Int64,
-    },
-    "listitems": {
-        "admissionid": pl.Int64,
-        "itemid": pl.Int64,
-        "item": pl.String,
-        "valueid": pl.Int64,
-        "value": pl.String,
-        "measuredat": pl.Int64,
-        "registeredat": pl.Int64,
-        "registeredby": pl.String,
-        "updatedat": pl.Int64,
-        "updatedby": pl.String,
-        "islabresult": pl.Int64,
-    },
-    "drugitems": {
-        "admissionid": pl.Int64,
-        "orderid": pl.Int64,
-        "ordercategoryid": pl.Int64,
-        "ordercategory": pl.String,
-        "itemid": pl.Int64,
-        "item": pl.String,
-        "isadditive": pl.Int64,
-        "isconditional": pl.Int64,
-        "rate": pl.Float64,
-        "rateunit": pl.String,
-        "rateunitid": pl.Int64,
-        "ratetimeunitid": pl.Int64,
-        "doserateperkg": pl.Int64,
-        "dose": pl.Float64,
-        "doseunit": pl.String,
-        "doserateunit": pl.String,
-        "doseunitid": pl.Int64,
-        "doserateunitid": pl.Int64,
-        "administered": pl.Float64,
-        "administeredunit": pl.String,
-        "administeredunitid": pl.Int64,
-        "action": pl.String,
-        "start": pl.Int64,
-        "stop": pl.Int64,
-        "duration": pl.Int64,
-        "solutionitemid": pl.Int64,
-        "solutionitem": pl.String,
-        "solutionadministered": pl.Float64,
-        "solutionadministeredunit": pl.String,
-        "fluidin": pl.Float64,
-        "iscontinuous": pl.Int64,
-    },
-}
-
-
-def cast_raw_schema(table: str, df: pl.DataFrame) -> pl.DataFrame:
-    """Cast known columns to explicit dtypes after latin1 CSV read."""
-    schema = LARGE_TABLE_RAW_SCHEMAS[table]
-    exprs = [
-        pl.col(col).cast(dtype, strict=False)
-        for col, dtype in schema.items()
-        if col in df.columns
-    ]
-    return df.with_columns(exprs) if exprs else df
-
 
 def filter_measuredat_sentinel(
     df: pl.DataFrame,

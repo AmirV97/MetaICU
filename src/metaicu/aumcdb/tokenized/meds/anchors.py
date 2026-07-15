@@ -13,7 +13,7 @@ from pathlib import Path
 import polars as pl
 
 from metaicu.aumcdb.tokenized.meds.common import coerce_debug_frame, empty_debug_frame
-from metaicu.aumcdb.tokenized.utils.parquet_datasets import resolve_table_parquet, scan_parquet
+from metaicu.aumcdb.common.parquet import resolve_table_parquet, scan_parquet
 
 
 def sample_admissions(

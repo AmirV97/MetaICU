@@ -16,7 +16,7 @@ from typing import Any, Sequence
 
 import polars as pl
 
-from metaicu.aumcdb.tokenized.utils.parquet_datasets import parquet_exists, scan_parquet
+from metaicu.aumcdb.common.parquet import parquet_exists, scan_parquet
 
 BINNING_PROVENANCE_COLUMNS = [
     "bin_start_ms",

@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 
 
 def _load_matches(matches):
-    """matches: tag -> feature info dict (from grid.manifest.parse_manifest), restricted to
+    """matches: tag -> feature info dict (from grid.build.manifest_parser.parse_manifest), restricted to
     direct_numeric/derived_output_rate/categorical entries by the caller or filtered here."""
     numeric_numericitems, numeric_listitems_const, categorical_listitems = [], [], []
     for tag, info in matches.items():
@@ -219,7 +219,7 @@ def extract_numeric_categorical(
     admission_ids=None,
     raw_shards_dir=None,
 ):
-    """matches: tag -> feature info dict, from grid.manifest.parse_manifest(). admissions:
+    """matches: tag -> feature info dict, from grid.build.manifest_parser.parse_manifest(). admissions:
     DataFrame from grid.raw_csv.load_admissions(), used for the admittedat join. admission_ids:
     optional iterable to restrict extraction to (for the bounded sample runs); None = full
     population. Returns (numeric_long, categorical_long) polars DataFrames, or None for either

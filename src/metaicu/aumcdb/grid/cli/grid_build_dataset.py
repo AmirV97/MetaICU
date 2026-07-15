@@ -10,8 +10,8 @@ from typing import Any
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
-from metaicu.aumcdb.grid.build_workflow import GridDatasetConfig, write_grid_dataset_outputs
-from metaicu.aumcdb.grid.manifest_parser import DEFAULT_REVIEWED_MANIFEST
+from metaicu.aumcdb.grid.build.build_workflow import GridDatasetConfig, write_grid_dataset_outputs
+from metaicu.aumcdb.grid.build.manifest_parser import DEFAULT_REVIEWED_MANIFEST
 
 
 def _optional_path(value: Any) -> Path | None:

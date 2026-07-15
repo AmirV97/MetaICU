@@ -92,7 +92,7 @@ def apply_inclusion_criteria(admissions, numeric_long, matches,
     (admissionid/tag/hour/agg_value) -- must be extracted BEFORE calling this (needs real
     per-hour data, not just admission metadata), and before grid.split.assign_splits (splits
     must be computed on the final, post-inclusion-criteria cohort, not before). matches: tag ->
-    info dict from grid.manifest.parse_manifest().
+    info dict from grid.build.manifest_parser.parse_manifest().
 
     Returns admissions filtered to only the admissions passing all 3 criteria (LOS check +
     measurement count + max gap)."""

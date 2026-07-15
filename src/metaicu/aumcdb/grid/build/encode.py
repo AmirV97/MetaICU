@@ -6,7 +6,7 @@ remains at that point is a genuine pre-first-observation gap -- exactly what the
 missing class represents, not a value to fabricate).
 
 Category vocabulary per feature is taken from the MANIFEST's declared standardized_label set
-(grid.manifest.parse_manifest()'s keep_matches), not empirically observed values in this
+(grid.build.manifest_parser.parse_manifest()'s keep_matches), not empirically observed values in this
 particular run -- ties the one-hot schema to the documented feature definition and guarantees
 every declared category gets a column even if it never happens to appear in a given
 train/val/test split (a rare category with an all-zero column is expected, not a bug).
@@ -34,7 +34,7 @@ def _sanitize(label):
 
 
 def get_categorical_vocab(matches):
-    """matches: tag -> feature info dict from grid.manifest.parse_manifest(). Returns
+    """matches: tag -> feature info dict from grid.build.manifest_parser.parse_manifest(). Returns
     {tag: sorted_list_of_declared_standardized_labels} for every categorical feature -- the
     dedicated missing class is NOT included here, it's added separately in
     one_hot_encode_categorical (every categorical feature gets one, not just ones with a
@@ -51,7 +51,7 @@ def get_categorical_vocab(matches):
 def one_hot_encode_categorical(grid, matches):
     """grid: wide DataFrame from grid.impute.impute_grid (categorical columns still single
     string-label columns; real nulls = pre-first-observation gaps). matches: tag -> info dict
-    from grid.manifest.parse_manifest().
+    from grid.build.manifest_parser.parse_manifest().
 
     Returns (grid, encoding_schema): grid has each categorical tag column REPLACED by its
     one-hot expansion; encoding_schema is a list of row-dicts (feature, category, column_name,

@@ -37,7 +37,7 @@ ZERO_FILL_TAG_OVERRIDE = {"supp_o2_vent"}
 def impute_grid(grid, matches, scaled=True):
     """grid: wide DataFrame from grid.assemble_grid (ideally already passed through
     grid.scale.scale_grid). matches: tag -> feature info dict, from
-    grid.manifest.parse_manifest() -- used to look up each column's reconstruction_type.
+    grid.build.manifest_parser.parse_manifest() -- used to look up each column's reconstruction_type.
     scaled: whether numeric observation columns have already been standardized -- controls
     whether their post-forward-fill remaining nulls get the final 0-fill (0 = population mean,
     only valid once scaled). Pass False if calling this on raw, unscaled values (e.g. QA/

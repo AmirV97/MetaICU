@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 def _load_matches(matches):
-    """matches: tag -> feature info dict, from grid.manifest.parse_manifest()."""
+    """matches: tag -> feature info dict, from grid.build.manifest_parser.parse_manifest()."""
     drugitems_matches, processitems_matches, point_matches = [], [], []
     for tag, info in matches.items():
         if info["reconstruction_type"] != "treatment_indicator":
@@ -153,7 +153,7 @@ def extract_treatment_indicator(
     admission_ids=None,
     raw_shards_dir=None,
 ):
-    """matches: tag -> feature info dict, from grid.manifest.parse_manifest(). admissions:
+    """matches: tag -> feature info dict, from grid.build.manifest_parser.parse_manifest(). admissions:
     DataFrame from grid.raw_csv.load_admissions(). admission_ids: optional iterable to
     restrict extraction to; None = full population. Returns a single (admissionid, tag, hour)
     DataFrame of distinct "On" hours, or None if no matches at all."""

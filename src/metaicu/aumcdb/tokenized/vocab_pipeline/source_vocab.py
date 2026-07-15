@@ -10,7 +10,7 @@ from typing import Any
 import pandas as pd
 import polars as pl
 
-from metaicu.aumcdb.tokenized.utils.parquet_datasets import parquet_row_count, resolve_table_parquet, scan_parquet
+from metaicu.aumcdb.common.parquet import parquet_row_count, resolve_table_parquet, scan_parquet
 from metaicu.aumcdb.tokenized.vocab_pipeline.policy_common import norm_key
 
 

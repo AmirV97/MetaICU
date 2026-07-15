@@ -64,7 +64,9 @@ def _load_matches(matches):
     return numeric_numericitems, numeric_listitems_const, categorical_listitems
 
 
-def _build_numeric_from_numericitems(pairs, raw_data_dir, admissions, admission_ids, bounds):
+def _build_numeric_from_numericitems(
+    pairs, raw_data_dir, admissions, admission_ids, bounds, raw_shards_dir=None
+):
     """A raw itemid can legitimately feed more than one output feature (e.g. itemid 12279
     'O2 concentratie' is kept by both fio2 and supp_o2_vent) -- fan out via a join (one
     lookup row per (itemid,tag)) rather than assuming a 1:1 itemid->tag mapping.
@@ -76,7 +78,7 @@ def _build_numeric_from_numericitems(pairs, raw_data_dir, admissions, admission_
     itemids = list({int(itemid) for _, itemid in pairs})
     lookup = pl.DataFrame({"itemid": [int(itemid) for _, itemid in pairs], "tag": [tag for tag, _ in pairs]}).unique()
 
-    lf = scan_raw_table(raw_data_dir, "numericitems", admissions).filter(
+    lf = scan_raw_table(raw_data_dir, "numericitems", admissions, raw_shards_dir).filter(
         pl.col("itemid").is_in(itemids) & (pl.col("admission_relative_ms") >= 0) & _admission_filter(admission_ids)
     ).select(["admissionid", "itemid", "value", "admission_relative_ms"])
 
@@ -155,13 +157,15 @@ def _build_numeric_from_numericitems(pairs, raw_data_dir, admissions, admission_
     return df.select(["admissionid", "tag", "hour", "converted_value"])
 
 
-def _build_numeric_from_listitems_const(triples, raw_data_dir, admissions, admission_ids):
+def _build_numeric_from_listitems_const(
+    triples, raw_data_dir, admissions, admission_ids, raw_shards_dir=None
+):
     if not triples:
         return None
     itemids = list({int(t[1]) for t in triples})
     const_map = {(str(tag), str(itemid), str(valueid)): const for tag, itemid, valueid, const in triples}
 
-    lf = scan_raw_table(raw_data_dir, "listitems", admissions).filter(
+    lf = scan_raw_table(raw_data_dir, "listitems", admissions, raw_shards_dir).filter(
         pl.col("itemid").is_in(itemids) & (pl.col("admission_relative_ms") >= 0) & _admission_filter(admission_ids)
     ).select(["admissionid", "itemid", "valueid", "admission_relative_ms"])
     df = lf.collect(engine="streaming")
@@ -177,7 +181,9 @@ def _build_numeric_from_listitems_const(triples, raw_data_dir, admissions, admis
     return pl.concat(rows) if rows else None
 
 
-def _build_categorical(quads, raw_data_dir, admissions, admission_ids):
+def _build_categorical(
+    quads, raw_data_dir, admissions, admission_ids, raw_shards_dir=None
+):
     """quads: (tag, itemid, valueid, standardized_label). Different itemids under the same
     feature use unrelated valueid numbering, so the join key is (itemid,valueid) -> label,
     not itemid -> tag alone -- pooling raw valueid across itemids would silently mix
@@ -195,7 +201,7 @@ def _build_categorical(quads, raw_data_dir, admissions, admission_ids):
         "label": [q[3] for q in quads],
     })
 
-    lf = scan_raw_table(raw_data_dir, "listitems", admissions).filter(
+    lf = scan_raw_table(raw_data_dir, "listitems", admissions, raw_shards_dir).filter(
         pl.col("itemid").is_in(itemids) & (pl.col("admission_relative_ms") >= 0) & _admission_filter(admission_ids)
     ).select(["admissionid", "itemid", "valueid", "admission_relative_ms"])
     df = lf.collect(engine="streaming")
@@ -206,7 +212,13 @@ def _build_categorical(quads, raw_data_dir, admissions, admission_ids):
     return df.select(["admissionid", "tag", "hour", "label"])
 
 
-def extract_numeric_categorical(matches, raw_data_dir, admissions, admission_ids=None):
+def extract_numeric_categorical(
+    matches,
+    raw_data_dir,
+    admissions,
+    admission_ids=None,
+    raw_shards_dir=None,
+):
     """matches: tag -> feature info dict, from grid.manifest.parse_manifest(). admissions:
     DataFrame from grid.raw_csv.load_admissions(), used for the admittedat join. admission_ids:
     optional iterable to restrict extraction to (for the bounded sample runs); None = full
@@ -222,8 +234,21 @@ def extract_numeric_categorical(matches, raw_data_dir, admissions, admission_ids
 
     numeric_long = None
     numeric_parts = [p for p in [
-        _build_numeric_from_numericitems(numeric_numericitems, raw_data_dir, admissions, admission_ids, bounds),
-        _build_numeric_from_listitems_const(numeric_listitems_const, raw_data_dir, admissions, admission_ids),
+        _build_numeric_from_numericitems(
+            numeric_numericitems,
+            raw_data_dir,
+            admissions,
+            admission_ids,
+            bounds,
+            raw_shards_dir,
+        ),
+        _build_numeric_from_listitems_const(
+            numeric_listitems_const,
+            raw_data_dir,
+            admissions,
+            admission_ids,
+            raw_shards_dir,
+        ),
     ] if p is not None]
     if numeric_parts:
         numeric_long = pl.concat(numeric_parts).group_by(["tag", "admissionid", "hour"]).agg(
@@ -232,7 +257,13 @@ def extract_numeric_categorical(matches, raw_data_dir, admissions, admission_ids
         log.info(f"numeric_long: {numeric_long.height} rows, {numeric_long['tag'].n_unique()} tags")
 
     categorical_long = None
-    categorical_raw = _build_categorical(categorical_listitems, raw_data_dir, admissions, admission_ids)
+    categorical_raw = _build_categorical(
+        categorical_listitems,
+        raw_data_dir,
+        admissions,
+        admission_ids,
+        raw_shards_dir,
+    )
     if categorical_raw is not None:
         categorical_long = categorical_raw.group_by(["tag", "admissionid", "hour"]).agg(
             pl.col("label").mode().first().alias("agg_label")

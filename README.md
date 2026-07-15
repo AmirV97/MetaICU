@@ -22,6 +22,7 @@ Implemented:
 - external retrieval/setup helper
 - supplied vocabulary build/install
 - iCareFM-style grid feature manifest and reviewed-manifest parser
+- shared Latin-1-preserving raw parquet cache for the grid and tokenized pipelines
 - raw CSV to hourly grid extraction with unit harmonization, broad physiological outlier removal, train-fitted scaling, imputation, and categorical encoding
 - deterministic subject splits as a pre-MEDS substage
 - source-preserving pre-MEDS extraction

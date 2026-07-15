@@ -5,6 +5,7 @@
 paths:
   parent_dir: null
   raw_data_dir: null        # defaults to parent_dir/data/raw
+  raw_shards_dir: null      # defaults to parent_dir/data/raw_shards
   output_dir: null          # defaults to parent_dir/data/grid
   audit_dir: null           # defaults to parent_dir/audits/grid_dataset
   manifest_path: null       # defaults to the packaged reviewed AUMC feature manifest
@@ -18,6 +19,9 @@ split:
   seed: 42
 
 run:
+  build_raw_shards: true
+  rebuild_raw_shards: false
+  raw_shard_rows: 5000000
   sample_size: null
   patients_per_file: 1000
   seed: 42

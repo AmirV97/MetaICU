@@ -50,7 +50,9 @@ def _explode_interval_mean(df):
     return df.select(["admissionid", "tag", "match_key", "hour", "converted_value"]).explode("hour")
 
 
-def _extract_drugitems_matches(raw_data_dir, admissions, admission_ids, in_scope_tags):
+def _extract_drugitems_matches(
+    raw_data_dir, admissions, admission_ids, in_scope_tags, raw_shards_dir=None
+):
     """Batched: one scan of drugitems.csv across every in-scope tag's drugitems-sourced matches
     (matches the one-scan-per-table pattern already used in extract_numeric.py/
     extract_indicator.py) -- previously did one scan per match (15 separate scans of the same
@@ -69,7 +71,7 @@ def _extract_drugitems_matches(raw_data_dir, admissions, admission_ids, in_scope
     lookup = pl.DataFrame(match_rows).with_columns(pl.col("ordercategoryid").cast(pl.Int64))
     itemids = lookup["itemid"].unique().to_list()
 
-    lf = scan_raw_table(raw_data_dir, "drugitems", admissions).filter(
+    lf = scan_raw_table(raw_data_dir, "drugitems", admissions, raw_shards_dir).filter(
         pl.col("itemid").is_in(itemids) & _admission_filter(admission_ids)
     ).select(["admissionid", "itemid", "ordercategoryid", "start_admission_relative_ms",
               "stop_admission_relative_ms", "duration", "rate", "dose"])
@@ -116,12 +118,12 @@ def _extract_drugitems_matches(raw_data_dir, admissions, admission_ids, in_scope
     return _explode_interval_mean(df)
 
 
-def _extract_ufilt(raw_data_dir, admissions, admission_ids):
+def _extract_ufilt(raw_data_dir, admissions, admission_ids, raw_shards_dir=None):
     """No route filter -- see treatment_rate_formulas.py's ufilt entry for why (the raw CSV
     has no column that reproduces amsterdam_pipeline's SUBJECT_FLUID_OUTPUT/MEASUREMENT_BEDSIDE
     split; pooling unfiltered is an accepted, quantified tradeoff)."""
     m = TREATMENT_RATE_MATCHES["ufilt"][0]
-    df = scan_raw_table(raw_data_dir, "numericitems", admissions).filter(
+    df = scan_raw_table(raw_data_dir, "numericitems", admissions, raw_shards_dir).filter(
         (pl.col("itemid") == m["itemid"]) & _admission_filter(admission_ids)
     ).select(["admissionid", "value", "admission_relative_ms"]).collect(engine="streaming")
     log.info(f"ufilt: itemid={m['itemid']} (unfiltered, see docstring) -> {df.height} rows")
@@ -143,7 +145,13 @@ def _extract_ufilt(raw_data_dir, admissions, admission_ids):
     ).select(["admissionid", "tag", "match_key", "hour", "converted_value"])
 
 
-def extract_treatment_rate(raw_data_dir, admissions, admission_ids=None, tags=None):
+def extract_treatment_rate(
+    raw_data_dir,
+    admissions,
+    admission_ids=None,
+    tags=None,
+    raw_shards_dir=None,
+):
     """Ignores the manifest's matches dict -- treatment_rate's formulas are hand-curated in
     treatment_rate_formulas.py (the manifest's per-match decision-reason text is prose, not a
     structured formula; TREATMENT_RATE_MATCHES is the executable transcription of it, already
@@ -157,7 +165,13 @@ def extract_treatment_rate(raw_data_dir, admissions, admission_ids=None, tags=No
     in_scope_tags = set(TREATMENT_RATE_MATCHES) if tags is None else set(tags) & set(TREATMENT_RATE_MATCHES)
 
     rate_long = None
-    drugitems_long = _extract_drugitems_matches(raw_data_dir, admissions, admission_ids, in_scope_tags - {"ufilt"})
+    drugitems_long = _extract_drugitems_matches(
+        raw_data_dir,
+        admissions,
+        admission_ids,
+        in_scope_tags - {"ufilt"},
+        raw_shards_dir,
+    )
     if drugitems_long is not None:
         rate_long = drugitems_long.group_by(["tag", "admissionid", "hour"]).agg(
             pl.col("converted_value").mean().alias("agg_value")
@@ -165,7 +179,11 @@ def extract_treatment_rate(raw_data_dir, admissions, admission_ids=None, tags=No
         log.info(f"treatment_rate (drugitems-sourced): {rate_long.height} rows, "
                  f"{rate_long['tag'].n_unique()} tags")
 
-    ufilt_raw = _extract_ufilt(raw_data_dir, admissions, admission_ids) if "ufilt" in in_scope_tags else None
+    ufilt_raw = (
+        _extract_ufilt(raw_data_dir, admissions, admission_ids, raw_shards_dir)
+        if "ufilt" in in_scope_tags
+        else None
+    )
     ufilt_long = None
     if ufilt_raw is not None:
         ufilt_long = ufilt_raw.group_by(["tag", "admissionid", "hour"]).agg(

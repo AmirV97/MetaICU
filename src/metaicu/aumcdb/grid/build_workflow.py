@@ -14,6 +14,9 @@ from pathlib import Path
 
 import polars as pl
 
+from metaicu.aumcdb.common.raw_shards import build_raw_shards_for_tables
+from metaicu.aumcdb.common.raw_tables import raw_table_input_mode
+
 from .assemble import assemble_grid
 from .encode import one_hot_encode_categorical, save_categorical_encoding
 from .extract_indicator import extract_treatment_indicator
@@ -28,6 +31,7 @@ from .split import assign_splits
 
 
 log = logging.getLogger(__name__)
+_LARGE_TABLES = ["numericitems", "listitems", "drugitems"]
 
 
 @dataclass(frozen=True)
@@ -37,6 +41,10 @@ class GridDatasetConfig:
     raw_data_dir: Path
     output_dir: Path
     audit_dir: Path
+    raw_shards_dir: Path | None = None
+    build_raw_shards: bool = True
+    rebuild_raw_shards: bool = False
+    raw_shard_rows: int = 5_000_000
     manifest_path: Path | None = None
     admission_ids_file: Path | None = None
     sample_size: int | None = None
@@ -127,6 +135,10 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
 
     if config.patients_per_file <= 0:
         raise ValueError("patients_per_file must be positive")
+    if config.raw_shard_rows <= 0:
+        raise ValueError("raw_shard_rows must be positive")
+    if config.build_raw_shards and config.raw_shards_dir is None:
+        raise ValueError("build_raw_shards=true requires raw_shards_dir")
     if config.one_hot and not config.impute:
         raise ValueError("one_hot requires impute so categorical missingness has its defined meaning")
 
@@ -137,6 +149,26 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     if not matches:
         raise ValueError("No resolved feature matches are in scope")
     log.info("Resolved %d grid features", len(matches))
+
+    raw_shard_summary: dict[str, object] = {"skipped": "run.build_raw_shards=false"}
+    if config.build_raw_shards:
+        log.info("Building or reusing shared raw parquet shards")
+        raw_shard_summary = build_raw_shards_for_tables(
+            tables=_LARGE_TABLES,
+            raw_dir=config.raw_data_dir,
+            raw_shards_dir=config.raw_shards_dir,
+            partition_rows=config.raw_shard_rows,
+            max_rows=None,
+            rebuild=config.rebuild_raw_shards,
+        )
+        log.info(
+            "Raw shard cache ready: %s",
+            {
+                table: summary["action"]
+                for table, summary in raw_shard_summary.items()
+                if isinstance(summary, dict)
+            },
+        )
 
     admission_ids = get_admission_ids(
         config.raw_data_dir,
@@ -150,7 +182,11 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     admissions_before_inclusion = admissions.height
 
     numeric_long, categorical_long = extract_numeric_categorical(
-        matches, config.raw_data_dir, admissions, admission_ids
+        matches,
+        config.raw_data_dir,
+        admissions,
+        admission_ids,
+        config.raw_shards_dir,
     )
     if numeric_long is None:
         raise ValueError("Grid construction requires at least one resolved numeric feature")
@@ -182,11 +218,19 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         scalers.update(static_scalers)
 
     indicator_on_hours = extract_treatment_indicator(
-        matches, config.raw_data_dir, admissions, included_ids
+        matches,
+        config.raw_data_dir,
+        admissions,
+        included_ids,
+        config.raw_shards_dir,
     )
     rate_tags = [tag for tag, info in matches.items() if info["reconstruction_type"] == "treatment_rate"]
     rate_long = extract_treatment_rate(
-        config.raw_data_dir, admissions, included_ids, tags=rate_tags
+        config.raw_data_dir,
+        admissions,
+        included_ids,
+        tags=rate_tags,
+        raw_shards_dir=config.raw_shards_dir,
     ) if rate_tags else None
 
     grid = assemble_grid(admissions, numeric_long, categorical_long, indicator_on_hours, rate_long)
@@ -234,6 +278,11 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "scaled": config.scale,
         "imputed": config.impute,
         "one_hot_encoded": config.one_hot,
+        "raw_shards": raw_shard_summary,
+        "large_table_input_modes": {
+            table: raw_table_input_mode(table, config.raw_shards_dir)
+            for table in _LARGE_TABLES
+        },
         "manifest_report": manifest_report,
     }, indent=2, sort_keys=True, default=str))
 

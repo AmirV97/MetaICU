@@ -110,6 +110,18 @@ audits/grid_manifest/grid_manifest_source_candidate_examples.csv
 
 The manifest is stage 1 of the iCareFM-style hourly-grid fork. It has one row per packaged Table S3 feature tag and records broad source candidates from the source vocab, supplied vocab, and OpenICU AUMC mappings. It does not scan raw AUMC rows, decide unit conversion, or construct the grid dataset.
 
+## Grid Dataset
+
+```bash
+grid_build_dataset paths.parent_dir=/path/to/aumc_workspace
+```
+
+The grid and tokenized pipelines share the Latin-1-preserving cache under
+`data/raw_shards/`. The first pipeline to run builds schema-cast parquet shards
+for `numericitems`, `listitems`, and `drugitems`; later grid or pre-MEDS runs
+reuse them. Set `run.rebuild_raw_shards=true` only when the raw source files or
+canonical raw schemas have changed.
+
 ## Pre-MEDS
 
 ```bash
@@ -129,7 +141,7 @@ data/metadata/hf_numeric_binning_summary.json
 audits/pre-MEDS/premeds_summary.json
 ```
 
-The raw shard cache is source-preserving and internal to pre-MEDS: no patient filtering, vocab decisions, sentinel drops, or time transforms are applied there. The high-frequency inventory is fitted on train only. Causal mean-binning is then applied to each split using that frozen inventory. Rare-but-dense numeric variables, such as CRRT settings that appear in few stays but are very dense when present, are also flagged for binning; the default rare-dense gate requires 2 sampled admission/item groups plus a high row burden and a high-frequency CI above the threshold. Empty bins are not emitted.
+The raw shard cache is source-preserving and shared with the grid pipeline: no patient filtering, vocab decisions, sentinel drops, or time transforms are applied there. The high-frequency inventory is fitted on train only. Causal mean-binning is then applied to each split using that frozen inventory. Rare-but-dense numeric variables, such as CRRT settings that appear in few stays but are very dense when present, are also flagged for binning; the default rare-dense gate requires 2 sampled admission/item groups plus a high row burden and a high-frequency CI above the threshold. Empty bins are not emitted.
 
 Selected repeated categorical state streams are state-change deduplicated in pre-MEDS. Defaults include ventilation mode, CRRT modality, rhythm, oxygen/admin route, NIV program status, sputum state, pupil state, selected score components/final scores, ectopy, chest-drain state, and EVD state. The policy keeps the first value and later value changes per admission/item.
 

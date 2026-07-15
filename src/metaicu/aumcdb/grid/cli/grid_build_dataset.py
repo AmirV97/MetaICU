@@ -41,8 +41,12 @@ def _build_config(cfg: DictConfig) -> GridDatasetConfig:
     parent_dir = _optional_path(OmegaConf.select(cfg, "paths.parent_dir"))
     return GridDatasetConfig(
         raw_data_dir=_resolve_path(cfg, "raw_data_dir", parent_dir, "data/raw"),
+        raw_shards_dir=_resolve_path(cfg, "raw_shards_dir", parent_dir, "data/raw_shards"),
         output_dir=_resolve_path(cfg, "output_dir", parent_dir, "data/grid"),
         audit_dir=_resolve_path(cfg, "audit_dir", parent_dir, "audits/grid_dataset"),
+        build_raw_shards=bool(OmegaConf.select(cfg, "run.build_raw_shards", default=True)),
+        rebuild_raw_shards=bool(OmegaConf.select(cfg, "run.rebuild_raw_shards", default=False)),
+        raw_shard_rows=int(OmegaConf.select(cfg, "run.raw_shard_rows", default=5_000_000)),
         manifest_path=_optional_path(OmegaConf.select(cfg, "paths.manifest_path")) or DEFAULT_REVIEWED_MANIFEST,
         admission_ids_file=_optional_path(OmegaConf.select(cfg, "paths.admission_ids_file")),
         sample_size=OmegaConf.select(cfg, "run.sample_size"),

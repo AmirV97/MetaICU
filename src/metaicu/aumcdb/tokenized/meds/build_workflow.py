@@ -32,7 +32,7 @@ from metaicu.aumcdb.tokenized.meds.numeric import (
     numeric_input_table_name,
 )
 from metaicu.aumcdb.tokenized.meds.vocab import load_vocab
-from metaicu.aumcdb.tokenized.utils.parquet_datasets import parquet_exists, resolve_table_parquet, scan_parquet
+from metaicu.aumcdb.common.parquet import parquet_exists, resolve_table_parquet, scan_parquet
 
 
 @dataclass(frozen=True)

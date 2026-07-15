@@ -65,7 +65,9 @@ def _interval_on_hours(df, tag_expr):
     return df.select(["admissionid", tag_expr, "hour"]).explode("hour")
 
 
-def _build_drugitems_on_hours(matches, raw_data_dir, admissions, admission_ids):
+def _build_drugitems_on_hours(
+    matches, raw_data_dir, admissions, admission_ids, raw_shards_dir=None
+):
     """An (itemid,ordercategoryid) pair can legitimately feed more than one indicator (e.g.
     Propofol under Spuitpompen counts for both prop_ind and the broader sed indicator) --
     join() fans this out into one row per tag automatically, no 1:1 assumption needed."""
@@ -78,7 +80,7 @@ def _build_drugitems_on_hours(matches, raw_data_dir, admissions, admission_ids):
          "tag": [tag for tag, _, _ in matches]}
     ).unique().with_columns(pl.col("ordercategoryid").cast(pl.Int64))
 
-    lf = scan_raw_table(raw_data_dir, "drugitems", admissions).filter(
+    lf = scan_raw_table(raw_data_dir, "drugitems", admissions, raw_shards_dir).filter(
         pl.col("itemid").is_in(itemids) & _admission_filter(admission_ids)
     ).select(["admissionid", "itemid", "ordercategoryid", "start_admission_relative_ms", "stop_admission_relative_ms"])
     df = lf.collect(engine="streaming")
@@ -88,7 +90,9 @@ def _build_drugitems_on_hours(matches, raw_data_dir, admissions, admission_ids):
     return _interval_on_hours(df, "tag")
 
 
-def _build_processitems_on_hours(matches, raw_data_dir, admissions, admission_ids):
+def _build_processitems_on_hours(
+    matches, raw_data_dir, admissions, admission_ids, raw_shards_dir=None
+):
     if not matches:
         return None
     itemid_to_tag = {}
@@ -100,7 +104,7 @@ def _build_processitems_on_hours(matches, raw_data_dir, admissions, admission_id
     itemid_to_tag = {k: next(iter(v)) for k, v in itemid_to_tag.items()}
     itemids = list(itemid_to_tag.keys())
 
-    lf = scan_raw_table(raw_data_dir, "processitems", admissions).filter(
+    lf = scan_raw_table(raw_data_dir, "processitems", admissions, raw_shards_dir).filter(
         pl.col("itemid").is_in(itemids) & _admission_filter(admission_ids)
     ).select(["admissionid", "itemid", "start_admission_relative_ms", "stop_admission_relative_ms"])
     df = lf.collect(engine="streaming")
@@ -112,7 +116,9 @@ def _build_processitems_on_hours(matches, raw_data_dir, admissions, admission_id
     return _interval_on_hours(df, "tag")
 
 
-def _build_point_on_hours(matches, raw_data_dir, admissions, admission_ids):
+def _build_point_on_hours(
+    matches, raw_data_dir, admissions, admission_ids, raw_shards_dir=None
+):
     if not matches:
         return None
     by_table = {t: {} for t in POINT_TABLES}
@@ -127,7 +133,7 @@ def _build_point_on_hours(matches, raw_data_dir, admissions, admission_ids):
                 raise ValueError(f"{table} itemid {itemid} maps to multiple tags {tags}")
         itemid_to_tag = {k: next(iter(v)) for k, v in itemid_to_tags.items()}
         itemids = list(itemid_to_tag.keys())
-        lf = scan_raw_table(raw_data_dir, table, admissions).filter(
+        lf = scan_raw_table(raw_data_dir, table, admissions, raw_shards_dir).filter(
             pl.col("itemid").is_in(itemids) & (pl.col("admission_relative_ms") >= 0) & _admission_filter(admission_ids)
         ).select(["admissionid", "itemid", "admission_relative_ms"])
         df = lf.collect(engine="streaming")
@@ -140,7 +146,13 @@ def _build_point_on_hours(matches, raw_data_dir, admissions, admission_ids):
     return pl.concat(parts) if parts else None
 
 
-def extract_treatment_indicator(matches, raw_data_dir, admissions, admission_ids=None):
+def extract_treatment_indicator(
+    matches,
+    raw_data_dir,
+    admissions,
+    admission_ids=None,
+    raw_shards_dir=None,
+):
     """matches: tag -> feature info dict, from grid.manifest.parse_manifest(). admissions:
     DataFrame from grid.raw_csv.load_admissions(). admission_ids: optional iterable to
     restrict extraction to; None = full population. Returns a single (admissionid, tag, hour)
@@ -151,9 +163,15 @@ def extract_treatment_indicator(matches, raw_data_dir, admissions, admission_ids
              f"point ({'/'.join(POINT_TABLES)}) match count: {len(point_matches)}")
 
     parts = [p for p in [
-        _build_drugitems_on_hours(drugitems_matches, raw_data_dir, admissions, admission_ids),
-        _build_processitems_on_hours(processitems_matches, raw_data_dir, admissions, admission_ids),
-        _build_point_on_hours(point_matches, raw_data_dir, admissions, admission_ids),
+        _build_drugitems_on_hours(
+            drugitems_matches, raw_data_dir, admissions, admission_ids, raw_shards_dir
+        ),
+        _build_processitems_on_hours(
+            processitems_matches, raw_data_dir, admissions, admission_ids, raw_shards_dir
+        ),
+        _build_point_on_hours(
+            point_matches, raw_data_dir, admissions, admission_ids, raw_shards_dir
+        ),
     ] if p is not None]
     if not parts:
         return None

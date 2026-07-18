@@ -48,21 +48,23 @@ def get_categorical_vocab(matches):
     return vocab
 
 
-def one_hot_encode_categorical(grid, matches):
-    """grid: wide DataFrame from grid.impute.impute_grid (categorical columns still single
-    string-label columns; real nulls = pre-first-observation gaps). matches: tag -> info dict
-    from grid.build.manifest_parser.parse_manifest().
+def one_hot_encode_columns(df, vocab, start_pos=0):
+    """Shared one-hot expansion core, reused for both grid categorical features (vocab from the
+    manifest, see get_categorical_vocab) and static/demographic categorical features (vocab
+    fixed in grid.build.extract_static.STATIC_CATEGORICAL_VOCAB). df: any DataFrame carrying
+    `tag` as a plain string/label column for every tag in vocab -- grid or admissions alike.
 
-    Returns (grid, encoding_schema): grid has each categorical tag column REPLACED by its
-    one-hot expansion; encoding_schema is a list of row-dicts (feature, category, column_name,
+    Returns (df, encoding_schema, next_pos): df has each tag column REPLACED by its one-hot
+    expansion; encoding_schema is a list of row-dicts (feature, category, column_name,
     position_in_feature, position_global) -- one row per one-hot column produced, in the exact
-    order the columns were added -- see save_categorical_encoding for how this is persisted."""
-    vocab = get_categorical_vocab(matches)
+    order the columns were added, with position_global continuing from start_pos so multiple
+    calls (e.g. static features first, then grid features) can be concatenated into one
+    contiguous schema -- see save_categorical_encoding for how this is persisted."""
     encoding_schema = []
-    global_pos = 0
+    global_pos = start_pos
 
     for tag, categories in vocab.items():
-        if tag not in grid.columns:
+        if tag not in df.columns:
             continue
         col_names = [f"{tag}__{_sanitize(cat)}" for cat in categories]
         if len(set(col_names)) != len(col_names):
@@ -91,11 +93,20 @@ def one_hot_encode_categorical(grid, matches):
         })
         global_pos += 1
 
-        grid = grid.with_columns(new_cols).drop(tag)
+        df = df.with_columns(new_cols).drop(tag)
         log.info(f"{tag}: one-hot encoded into {len(categories) + 1} columns "
                  f"({len(categories)} categories + missing)")
 
-    return grid, encoding_schema
+    return df, encoding_schema, global_pos
+
+
+def one_hot_encode_categorical(grid, matches, start_pos=0):
+    """grid: wide DataFrame from grid.impute.impute_grid (categorical columns still single
+    string-label columns; real nulls = pre-first-observation gaps). matches: tag -> info dict
+    from grid.build.manifest_parser.parse_manifest(). See one_hot_encode_columns for the shared
+    mechanics and return shape."""
+    vocab = get_categorical_vocab(matches)
+    return one_hot_encode_columns(grid, vocab, start_pos=start_pos)
 
 
 def save_categorical_encoding(encoding_schema, output_path):

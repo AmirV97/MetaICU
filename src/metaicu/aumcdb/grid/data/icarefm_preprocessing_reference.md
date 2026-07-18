@@ -118,6 +118,37 @@ aggregation into an hourly sparse grid:
   filled with 0 (= no treatment), regardless of how long ago the last dose
   was given.
 
+## Derived TTE targets, presence mask, static prepend (implemented 2026-07-16..18)
+
+Grid additions on top of A.4.1-A.4.3, for the TTE pretraining objective (target list
+per Supplement B.2.1):
+
+- **Derived TTE targets** (`grid.build.derive_targets`): two channels that aren't raw
+  AmsterdamUMCdb concepts are computed on the raw pre-scaling grid, right after
+  `assemble_grid`, then flow through scale/impute/mask like any `direct_numeric`
+  feature:
+  - `pf_ratio = po2 / (fio2/100)`. FiO2 is stored on a 0-100 **percent** scale, but the
+    P/F ratio needs it as a 0.21-1.0 **fraction**, so divide by 100 first. (Fixed
+    2026-07-18; the earlier version divided by raw percent, making `pf_ratio` ~100x too
+    small -- the same fix already made in `iCareFM_replicate/src/labels.py`'s
+    respiratory_failure/sofa_respiratory.)
+  - `urine_rate_per_weight = urine_rate / weight` (raw unscaled weight).
+  Both null-propagate from their constituents and null on a non-positive denominator;
+  both are log1p-scaled.
+- **K=34 TTE target manifest**: `K34_TTE_TARGETS` (B.2.1's K=35 minus `bili_dir`, absent
+  from AmsterdamUMCdb) is emitted to `tte_targets.json` (canonical list + order) so a
+  consumer never re-derives it.
+- **Presence mask** (`grid.build.impute.capture_presence_mask`): an Int8
+  `{tag}__observed` column per `direct_numeric`/`derived_output_rate` tag, captured
+  **before** imputation destroys the null pattern -- the `M` in Eq. 2's `[X‖M]` and the
+  censoring signal for the TTE loss. Categorical missingness is already recoverable from
+  the one-hot `{tag}__missing` class, and treatments carry no unknown-vs-absent
+  distinction, so neither gets a mask.
+- **Static-demographic prepend**: the 5 static features (age/weight/height + sex/adm
+  one-hot) are prepended as leading columns on every hourly row, so each per-timestep
+  sample carries patient context directly (numeric 0-filled when scaled = population
+  mean; `ethnic` has no AmsterdamUMCdb source).
+
 ## Downstream feature extraction (A.4.4) -- not part of the base grid
 
 Separate from grid construction: for ML input features, rolling-window

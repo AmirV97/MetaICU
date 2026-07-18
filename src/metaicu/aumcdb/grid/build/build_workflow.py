@@ -18,12 +18,13 @@ from metaicu.aumcdb.common.raw_shards import build_raw_shards_for_tables
 from metaicu.aumcdb.common.raw_tables import raw_table_input_mode
 
 from .assemble import assemble_grid
-from .encode import one_hot_encode_categorical, save_categorical_encoding
+from .derive_targets import K34_TTE_TARGETS, DERIVED_TARGET_SOURCES, add_derived_tte_targets
+from .encode import one_hot_encode_categorical, one_hot_encode_columns, save_categorical_encoding
 from .extract_indicator import extract_treatment_indicator
 from .extract_numeric import extract_numeric_categorical
 from .extract_rate import extract_treatment_rate
-from .extract_static import extract_static_features
-from .impute import impute_grid
+from .extract_static import STATIC_CATEGORICAL_VOCAB, extract_static_features
+from .impute import capture_presence_mask, impute_grid
 from .manifest_parser import ALL_RECONSTRUCTION_TYPES, parse_manifest
 from .sampling import apply_inclusion_criteria, get_admission_ids, load_valid_admissions
 from .scale import save_scalers, scale_grid, scale_static_features
@@ -65,31 +66,48 @@ class GridDatasetConfig:
 
 def _write_shards(
     grid: pl.DataFrame,
+    admissions: pl.DataFrame,
     admission_ids: list[int],
     output_dir: Path,
-    patients_per_file: int,
+    units_per_file: int,
+    unit_of_analysis: str,
 ) -> dict[int, dict[str, int | str]]:
-    """Write numbered admission batches and return metadata needed for the sidecar."""
+    """Write numbered batches of samples and return per-admission metadata needed for the
+    sidecar. unit_of_analysis="admission": one sample per admission. "subject": one sample
+    per patient, its admissions concatenated in chronological (admittedat) order."""
+
+    order = admissions.select(["admissionid", "patientid", "admittedat"]).filter(
+        pl.col("admissionid").is_in(admission_ids)
+    )
+    unit_col = "patientid" if unit_of_analysis == "subject" else "admissionid"
+    sort_cols = ["patientid", "admittedat", "hour"] if unit_of_analysis == "subject" else ["admissionid", "hour"]
+    unit_ids = sorted(order[unit_col].unique().to_list())
 
     shard_info: dict[int, dict[str, int | str]] = {}
-    for shard_index, start in enumerate(range(0, len(admission_ids), patients_per_file)):
-        batch_ids = admission_ids[start : start + patients_per_file]
-        shard = grid.filter(pl.col("admissionid").is_in(batch_ids)).sort(["admissionid", "hour"])
+    for shard_index, start in enumerate(range(0, len(unit_ids), units_per_file)):
+        batch_units = unit_ids[start : start + units_per_file]
+        batch_admission_ids = order.filter(pl.col(unit_col).is_in(batch_units))["admissionid"].to_list()
+        shard = (
+            grid.filter(pl.col("admissionid").is_in(batch_admission_ids))
+            .join(order, on="admissionid")
+            .sort(sort_cols)
+            .drop(["patientid", "admittedat"])
+        )
         shard_name = f"{shard_index}.parquet"
         shard.write_parquet(output_dir / shard_name)
         counts = shard.group_by("admissionid").len()
         for admission_id, row_count in zip(counts["admissionid"].to_list(), counts["len"].to_list()):
             shard_info[int(admission_id)] = {"shard_file": shard_name, "n_rows": int(row_count)}
-        log.info("Wrote %s: %d admissions, %d rows", shard_name, len(batch_ids), shard.height)
+        log.info("Wrote %s: %d %ss, %d rows", shard_name, len(batch_units), unit_of_analysis, shard.height)
     return shard_info
 
 
-def _write_metadata(
+def _write_metadata_by_admission(
     admissions: pl.DataFrame,
     shard_info: dict[int, dict[str, int | str]],
     output_path: Path,
 ) -> None:
-    """Write one human-readable row per included ICU admission."""
+    """Write one row per included ICU admission, each with its own static features."""
 
     scaled_columns = [column for column in ("age_scaled", "weight_scaled", "height_scaled") if column in admissions]
     records = []
@@ -117,6 +135,45 @@ def _write_metadata(
     log.info("Wrote %s (%d admissions)", output_path.name, len(records))
 
 
+def _write_metadata_by_subject(
+    admissions: pl.DataFrame,
+    shard_info: dict[int, dict[str, int | str]],
+    output_path: Path,
+) -> None:
+    """Write one row per patient: demographics from the earliest admission, outcome
+    (died/alive) from the latest admission, admission-specific fields (adm, admission_ids)
+    as chronologically ordered lists."""
+
+    scaled_columns = [column for column in ("age_scaled", "weight_scaled", "height_scaled") if column in admissions]
+    ordered = admissions.sort(["patientid", "admittedat"])
+    records = []
+    for (patientid,), group in ordered.group_by(["patientid"], maintain_order=True):
+        first = group.row(0, named=True)
+        last = group.row(-1, named=True)
+        admission_ids = [int(a) for a in group["admissionid"].to_list()]
+        n_rows = sum(shard_info.get(aid, {"n_rows": 0})["n_rows"] for aid in admission_ids)
+        record = {
+            "patientid": patientid,
+            "split": first["split"],
+            "admission_ids": ",".join(str(a) for a in admission_ids),
+            "n_admissions": len(admission_ids),
+            "shard_file": shard_info.get(admission_ids[0], {"shard_file": None})["shard_file"],
+            "los_hours": group["true_los_hours"].sum(),
+            "outcome": "died" if last["dateofdeath"] is not None else "alive",
+            "n_rows": n_rows,
+            "age": first["age"],
+            "weight": first["weight"],
+            "height": first["height"],
+            "sex": first["sex"],
+            "adm": ",".join(str(a) for a in group["adm"].to_list()),
+        }
+        for column in scaled_columns:
+            record[column] = first[column]
+        records.append(record)
+    pl.DataFrame(records).write_csv(output_path)
+    log.info("Wrote %s (%d subjects)", output_path.name, len(records))
+
+
 def _select_matches(config: GridDatasetConfig) -> tuple[dict[str, dict], dict]:
     requested_types = config.reconstruction_types or tuple(ALL_RECONSTRUCTION_TYPES)
     matches, report = parse_manifest(config.manifest_path, reconstruction_types=requested_types)
@@ -141,6 +198,8 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         raise ValueError("build_raw_shards=true requires raw_shards_dir")
     if config.one_hot and not config.impute:
         raise ValueError("one_hot requires impute so categorical missingness has its defined meaning")
+    if config.unit_of_analysis not in ("admission", "subject"):
+        raise ValueError(f"unit_of_analysis must be 'admission' or 'subject', got {config.unit_of_analysis!r}")
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
     config.audit_dir.mkdir(parents=True, exist_ok=True)
@@ -202,7 +261,6 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
 
     assignments = assign_splits(
         admissions,
-        config.unit_of_analysis,
         config.train_frac,
         config.val_frac,
         config.test_frac,
@@ -216,6 +274,17 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     if config.scale:
         admissions, static_scalers = scale_static_features(admissions, train_ids)
         scalers.update(static_scalers)
+
+    # sex/adm one-hot encoded on a side copy (demo_source), never on `admissions` itself --
+    # metadata.csv (via _write_metadata_by_admission/_write_metadata_by_subject) still needs the
+    # original human-readable sex/adm values.
+    demo_source = admissions.select(["admissionid", "sex", "adm"])
+    static_categorical_encoding: list[dict] = []
+    next_categorical_pos = 0
+    if config.one_hot:
+        demo_source, static_categorical_encoding, next_categorical_pos = one_hot_encode_columns(
+            demo_source, STATIC_CATEGORICAL_VOCAB
+        )
 
     indicator_on_hours = extract_treatment_indicator(
         matches,
@@ -234,15 +303,41 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     ) if rate_tags else None
 
     grid = assemble_grid(admissions, numeric_long, categorical_long, indicator_on_hours, rate_long)
+    grid, derived_target_matches = add_derived_tte_targets(grid, admissions)
+    matches_with_derived = {**matches, **derived_target_matches}
+    grid, presence_mask_cols = capture_presence_mask(grid, matches_with_derived)
     if config.scale:
-        grid, grid_scalers = scale_grid(grid, matches, train_ids)
+        grid, grid_scalers = scale_grid(grid, matches_with_derived, train_ids)
         scalers.update(grid_scalers)
         save_scalers(scalers, config.output_dir / "scalers.pkl")
     if config.impute:
-        grid = impute_grid(grid, matches, scaled=config.scale)
+        grid = impute_grid(grid, matches_with_derived, scaled=config.scale)
     if config.one_hot:
-        grid, encoding = one_hot_encode_categorical(grid, matches)
-        save_categorical_encoding(encoding, config.output_dir / "categorical_encoding.csv")
+        grid, grid_encoding, _ = one_hot_encode_categorical(grid, matches, start_pos=next_categorical_pos)
+        save_categorical_encoding(
+            static_categorical_encoding + grid_encoding, config.output_dir / "categorical_encoding.csv"
+        )
+
+    # Prepend the 5 available static/demographic features (age, weight, height, sex, adm --
+    # `ethnic` has no AmsterdamUMCdb source, see extract_static.py) onto every hourly row of
+    # their admission, so each per-timestep sample carries patient context directly rather than
+    # only living in metadata.csv. Numeric columns 0-fill remaining nulls when scaled (0 =
+    # population mean post-standardization, same A.4.3 convention as the rest of the grid);
+    # unscaled, real nulls are left as-is.
+    numeric_static_cols = [f"{tag}_scaled" if config.scale else tag for tag in ("age", "weight", "height")]
+    categorical_static_cols = (
+        [row["column_name"] for row in static_categorical_encoding] if config.one_hot else ["sex", "adm"]
+    )
+    demo_numeric = admissions.select(
+        ["admissionid"]
+        + [(pl.col(c).fill_null(0.0) if config.scale else pl.col(c)) for c in numeric_static_cols]
+    )
+    demo_frame = demo_numeric.join(demo_source, on="admissionid")
+    demo_cols = numeric_static_cols + categorical_static_cols
+
+    grid = grid.join(demo_frame, on="admissionid")
+    other_cols = [c for c in grid.columns if c not in demo_cols and c not in ("admissionid", "hour")]
+    grid = grid.select(["admissionid", "hour"] + demo_cols + other_cols)
 
     shard_info: dict[int, dict[str, int | str]] = {}
     split_counts = {}
@@ -253,19 +348,53 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
             continue
         split_dir = config.output_dir / split
         split_dir.mkdir(parents=True, exist_ok=True)
-        for admission_id, info in _write_shards(grid, split_ids, split_dir, config.patients_per_file).items():
+        for admission_id, info in _write_shards(
+            grid, admissions, split_ids, split_dir, config.patients_per_file, config.unit_of_analysis
+        ).items():
             shard_info[admission_id] = {
                 "shard_file": f"{split}/{info['shard_file']}",
                 "n_rows": info["n_rows"],
             }
 
     metadata_path = config.output_dir / "metadata.csv"
-    _write_metadata(admissions, shard_info, metadata_path)
+    if config.unit_of_analysis == "subject":
+        _write_metadata_by_subject(admissions, shard_info, metadata_path)
+    else:
+        _write_metadata_by_admission(admissions, shard_info, metadata_path)
     schema_path = config.output_dir / "feature_schema.json"
-    schema_path.write_text(json.dumps({
+    schema = {
         tag: {"reconstruction_type": info["reconstruction_type"], "target_unit": info["target_unit"]}
         for tag, info in matches.items()
-    }, indent=2, sort_keys=True))
+    }
+    for tag, info in derived_target_matches.items():
+        schema[tag] = {"reconstruction_type": "derived_tte_target", "target_unit": info["target_unit"],
+                       "derived_from": DERIVED_TARGET_SOURCES[tag]}
+    for tag in schema:
+        if f"{tag}__observed" in presence_mask_cols:
+            schema[tag]["presence_mask_column"] = f"{tag}__observed"
+    schema.update({
+        "age": {"reconstruction_type": "static_numeric", "target_unit": "years"},
+        "weight": {"reconstruction_type": "static_numeric", "target_unit": "kg"},
+        "height": {"reconstruction_type": "static_numeric", "target_unit": "cm"},
+        "sex": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+        "adm": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+    })
+    schema_path.write_text(json.dumps(schema, indent=2, sort_keys=True))
+
+    # K=34 TTE pretraining target manifest (see derive_targets.K34_TTE_TARGETS) -- lets a Dataset
+    # class read the canonical target list/order and each target's presence_mask_column directly
+    # from the dataset artifacts, rather than hardcoding or re-deriving it from context.md.
+    available_targets = [tag for tag in K34_TTE_TARGETS if tag in schema]
+    missing_targets = [tag for tag in K34_TTE_TARGETS if tag not in schema]
+    if missing_targets:
+        log.warning(f"TTE targets not resolved in this build (feature-restricted run?): {missing_targets}")
+    tte_targets_path = config.output_dir / "tte_targets.json"
+    tte_targets_path.write_text(json.dumps({
+        "targets": available_targets,
+        "missing": missing_targets,
+        "derived": DERIVED_TARGET_SOURCES,
+        "excluded": {"bili_dir": "not present in AmsterdamUMCdb (context.md Q3)"},
+    }, indent=2))
 
     summary_path = config.audit_dir / "grid_build_summary.json"
     summary_path.write_text(json.dumps({
@@ -290,5 +419,6 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "output_dir": config.output_dir,
         "metadata": metadata_path,
         "feature_schema": schema_path,
+        "tte_targets": tte_targets_path,
         "summary": summary_path,
     }

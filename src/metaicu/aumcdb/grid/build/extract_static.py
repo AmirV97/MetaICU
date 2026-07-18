@@ -43,6 +43,21 @@ ORIGIN_TOP4 = {
 }
 URGENCY_LABEL = {0: "elective", 1: "emergency"}
 
+# Fixed one-hot vocabularies for the two categorical static/demographic features, derived from
+# the same collapse dictionaries above rather than empirically observed values -- guarantees a
+# stable schema across runs/splits even if a rare combination (e.g. an elective ED admission)
+# happens not to appear. sex has real nulls (gender left blank in admissions.csv) so it gets the
+# usual encode.py dedicated missing class; adm's "missing" origin is already its own category
+# label (see origin_collapsed above), so admissions.csv-derived adm values are never actually
+# null.
+SEX_CATEGORIES = ["Man", "Vrouw"]
+ADM_CATEGORIES = sorted(
+    f"{urgency}_{origin}"
+    for urgency in URGENCY_LABEL.values()
+    for origin in list(ORIGIN_TOP4.values()) + ["other", "missing"]
+)
+STATIC_CATEGORICAL_VOCAB = {"sex": SEX_CATEGORIES, "adm": ADM_CATEGORIES}
+
 
 def extract_static_features(admissions):
     """admissions: DataFrame from grid.raw_csv.load_admissions() (or a filtered subset) --

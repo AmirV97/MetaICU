@@ -34,6 +34,36 @@ log = logging.getLogger(__name__)
 ZERO_FILL_TAG_OVERRIDE = {"supp_o2_vent"}
 
 
+def capture_presence_mask(grid, matches):
+    """Must be called on grid.assemble_grid's (or grid.scale.scale_grid's) output, BEFORE
+    impute_grid destroys the null pattern that distinguishes a genuine hourly measurement from
+    an imputed/carried-forward one. Only direct_numeric/derived_output_rate tags need this:
+    categorical missingness is already exactly recoverable from one-hot's dedicated
+    f"{tag}__missing" column (grid.build.encode), and treatment_indicator/treatment_rate draw no
+    unknown-vs-confirmed-absent distinction at all (A.4.3: missing is unconditionally 0, "no
+    medication given") -- a mask would be meaningless noise for those.
+
+    Returns (grid, mask_cols): grid gets one new Int8 column f"{tag}__observed" per continuous/
+    derived-rate tag (1 = real ground-truth value this hour, 0 = null here, about to be forward-
+    or zero-filled by impute_grid). mask_cols is the list of new column names, in the order
+    added."""
+    mask_cols = []
+    new_cols = []
+    for tag, info in matches.items():
+        if tag not in grid.columns:
+            continue
+        if info["reconstruction_type"] not in ("direct_numeric", "derived_output_rate"):
+            continue
+        col_name = f"{tag}__observed"
+        new_cols.append(pl.col(tag).is_not_null().cast(pl.Int8).alias(col_name))
+        mask_cols.append(col_name)
+
+    if new_cols:
+        grid = grid.with_columns(new_cols)
+        log.info(f"captured presence mask for {len(mask_cols)} continuous/derived-rate columns")
+    return grid, mask_cols
+
+
 def impute_grid(grid, matches, scaled=True):
     """grid: wide DataFrame from grid.assemble_grid (ideally already passed through
     grid.scale.scale_grid). matches: tag -> feature info dict, from

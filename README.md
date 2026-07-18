@@ -24,6 +24,7 @@ Implemented:
 - iCareFM-style grid feature manifest and reviewed-manifest parser
 - shared Latin-1-preserving raw parquet cache for the grid and tokenized pipelines
 - raw CSV to hourly grid extraction with unit harmonization, broad physiological outlier removal, train-fitted scaling, imputation, and categorical encoding
+- grid per-feature presence masks (`{tag}__observed`), derived TTE targets (P/F ratio, urine-rate-per-weight), static-demographic prepend onto every hourly row, always subject-level splits, and an emitted K=34 TTE-target manifest (`tte_targets.json`)
 - deterministic subject splits as a pre-MEDS substage
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory

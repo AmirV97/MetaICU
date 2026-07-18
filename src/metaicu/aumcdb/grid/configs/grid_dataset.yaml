@@ -12,7 +12,9 @@ paths:
   admission_ids_file: null  # optional one-admissionid-per-line bounded cohort
 
 split:
-  unit_of_analysis: admission  # admission or subject
+  unit_of_analysis: admission  # admission (one sample per admission) or subject (one sample per
+                                # patient, admissions concatenated in chronological order).
+                                # Splitting into train/val/test is always by subject regardless.
   train_frac: 0.8
   val_frac: 0.1
   test_frac: 0.1

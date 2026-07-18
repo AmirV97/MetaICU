@@ -54,6 +54,9 @@ LOG_TRANSFORM_TAGS = {
     "icp": "signed_log1p",
     "cout": "log1p",
     "peep": "log1p",
+    # derived TTE targets (grid.build.derive_targets) -- non-negative ratios, same physiologically
+    # skewed shape as their raw constituents po2/urine_rate above.
+    "pf_ratio": "log1p", "urine_rate_per_weight": "log1p",
 }
 
 

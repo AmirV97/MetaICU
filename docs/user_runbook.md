@@ -5,6 +5,7 @@ This runbook expands the README command sequence. The package currently supports
 - external resource setup
 - supplied vocabulary build/install
 - iCareFM-style grid feature manifest
+- iCareFM-style hourly grid dataset build
 - subject-level train/val/test split creation
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory
@@ -121,6 +122,32 @@ The grid and tokenized pipelines share the Latin-1-preserving cache under
 for `numericitems`, `listitems`, and `drugitems`; later grid or pre-MEDS runs
 reuse them. Set `run.rebuild_raw_shards=true` only when the raw source files or
 canonical raw schemas have changed.
+
+The build runs the full A.4.1-A.4.3 pipeline (hourly gridding, unit harmonization,
+plausibility-bound outlier removal, train-fitted scaling, forward-/zero-fill
+imputation, one-hot categorical encoding; see
+`src/metaicu/aumcdb/grid/data/icarefm_preprocessing_reference.md`) and adds: a
+per-feature presence mask (`{tag}__observed`, 1 = real reading that hour, captured
+before imputation), the derived TTE targets `pf_ratio` (= po2 / (fio2/100)) and
+`urine_rate_per_weight`, and the 5 static demographics (age/weight/height/sex/adm)
+prepended onto every hourly row. Inclusion criteria (A.2.2: LoS >= 4h, >= 4 numeric
+measurements, max gap <= 48h) and the 80/10/10 split are always applied at the
+patient (subject) level, so a patient's repeat admissions never leak across splits.
+
+`run.unit_of_analysis` sets sample granularity: `admission` (default, one sample per
+ICU admission) or `subject` (one per patient, that patient's admissions concatenated
+chronologically).
+
+Outputs under `paths.output_dir`:
+
+```text
+train|val|test/N.parquet              per-split hourly grid shards
+metadata.csv                          one row per admission (or subject)
+feature_schema.json                   per-column reconstruction type, unit, presence-mask column
+tte_targets.json                      canonical K=34 TTE target list and order
+scalers.pkl / scalers.summary.json    train-fitted scalers
+categorical_encoding.csv              one-hot column layout (static + grid)
+```
 
 ## Pre-MEDS
 

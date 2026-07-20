@@ -189,6 +189,8 @@ build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
 
 When split pre-MEDS folders exist, this writes `data/MEDS/{train,val,test}/`. Numeric quantile boundaries are fit on train only, saved to `data/metadata/numeric_quantile_boundaries.parquet`, and reused for all splits.
 
+Before fitting or applying those boundaries, raw numeric values go through `tokenized/meds/numeric_qc.py`, which reuses the grid pipeline's itemid-level corrections (`grid/build/unit_conversion_overrides.py`, `plausibility_bounds.py`, and the manifest's rejected duplicates like `pt`) so the same mislabeled units, device sentinels, and implausible readings don't corrupt either pipeline's numeric values. It's keyed by itemid, the only thing the two pipelines' vocabularies actually share -- grid pools itemids into physiology tags, tokenized keeps each itemid as its own token.
+
 One-cohort QC is still available:
 
 ```bash

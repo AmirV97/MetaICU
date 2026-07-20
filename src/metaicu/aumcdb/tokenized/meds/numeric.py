@@ -19,6 +19,7 @@ from metaicu.aumcdb.tokenized.meds.common import (
     record_join_exclusions,
     runtime_phase_expr,
 )
+from metaicu.aumcdb.tokenized.meds.numeric_qc import apply_itemid_corrections, load_itemid_corrections
 from metaicu.aumcdb.tokenized.meds.vocab import table_vocab
 from metaicu.aumcdb.common.parquet import parquet_exists, resolve_table_parquet, scan_parquet
 
@@ -95,6 +96,9 @@ def _load_joined_numeric_rows(
         .with_columns(runtime_phase_expr("admission_relative_ms").alias("temporal_phase"))
         .collect(engine="streaming")
     )
+    # grid-ported itemid-level unit/sentinel/plausibility corrections -- see numeric_qc.py.
+    # Applied before phase filtering so it affects both boundary fitting and event coding.
+    raw = apply_itemid_corrections(raw, load_itemid_corrections())
 
     exclusions = record_join_exclusions("numericitems", raw, list(include_phases))
     emitted = raw.filter(pl.col("_emit") & pl.col("temporal_phase").is_in(list(include_phases)))

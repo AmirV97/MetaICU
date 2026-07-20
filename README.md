@@ -32,7 +32,7 @@ Implemented:
 - causal mean-binned numeric pre-MEDS outputs
 - bounded/full MEDS-like conversion for a supplied pre-MEDS directory
 - split-aware MEDS conversion for train/val/test
-- train-frozen numeric quantile boundaries across train/val/test
+- train-frozen numeric quantile boundaries across train/val/test, corrected with the same itemid-level unit/sentinel/plausibility fixes as the grid pipeline (`tokenized/meds/numeric_qc.py`, ported from `grid/build/unit_conversion_overrides.py` and `plausibility_bounds.py`)
 - train-frozen token vocabulary and tokenized safetensor outputs
 
 ## Tests

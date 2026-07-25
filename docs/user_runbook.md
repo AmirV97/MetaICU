@@ -3,7 +3,7 @@
 This runbook expands the README command sequence. The package currently supports:
 
 - external resource setup
-- supplied vocabulary build/install
+- supplied vocabulary build (resolved from raw data, external evidence, and curated policy manifests)
 - iCareFM-style grid feature manifest
 - iCareFM-style hourly grid dataset build
 - subject-level train/val/test split creation
@@ -81,6 +81,12 @@ Select SNOMED, LOINC, RxNorm, RxNorm Extension, ATC, UCUM, and OMOP Extension. E
 ```bash
 build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
 ```
+
+This resolves and validates the vocabulary from the raw data, external evidence, and packaged
+policy manifests in this run -- it does not read a prebuilt supplied vocabulary as an input. A
+source token found in the raw data with no matching rule or curated decision fails the build by
+default; pass `run.allow_unresolved_source_tokens=true` for a bounded/audit-only build instead.
+See `docs/aumc_vocab_rebuild_handoff.md` for the full design and known scope limits.
 
 Output:
 

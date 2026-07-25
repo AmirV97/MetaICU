@@ -1,0 +1,2 @@
+source_token,policy_layer,harmonized_token,token_role,emit_as_model_token,non_drug_drugitem_class,target_vocabulary,target_concept_id,target_code,target_label,mapping_source,match_strength,mapping_confidence
+MEASUREMENT_CATEGORICAL//16995//4,v7_targeted_refinement,SNOMED//37154585,outcome_metadata,False,,SNOMED,37154585,,37154585,AMSTEL,source_code,high

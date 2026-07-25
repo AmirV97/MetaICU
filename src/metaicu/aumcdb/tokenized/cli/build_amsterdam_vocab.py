@@ -2,8 +2,10 @@
 
 The CLI is intentionally thin. It reads configuration, dispatches one public
 pipeline step, and leaves all data logic in ``metaicu.vocab_pipeline``
-modules. The supplied vocabulary is consumed as a stable artifact rather than
-rebuilt through historical validation steps.
+modules. The ``build_vocab`` step resolves and validates the supplied vocabulary from raw
+data, external evidence, and packaged policy manifests (see
+``vocab_pipeline.build_workflow.write_build_vocab_outputs``); it does not read a prebuilt
+supplied vocabulary as an input.
 """
 
 from __future__ import annotations
@@ -133,6 +135,7 @@ def run_build_vocab(cfg: DictConfig) -> dict[str, Path]:
         dataset=str(cfg.source_vocab.dataset),
         max_rows_per_table=cfg.source_vocab.max_rows_per_table,
         overwrite=bool(OmegaConf.select(cfg, "run.overwrite", default=False)),
+        allow_unresolved_source_tokens=bool(OmegaConf.select(cfg, "run.allow_unresolved_source_tokens", default=False)),
     )
     return write_build_vocab_outputs(config)
 

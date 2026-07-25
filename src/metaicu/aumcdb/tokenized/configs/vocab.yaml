@@ -18,6 +18,7 @@ paths:
 
 run:
   overwrite: false
+  allow_unresolved_source_tokens: false
 
 source_vocab:
   dataset: AmsterdamUMCdb

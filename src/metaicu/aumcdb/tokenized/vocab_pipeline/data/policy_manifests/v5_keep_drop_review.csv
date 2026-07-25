@@ -1,0 +1,17 @@
+source_token,policy_layer,harmonized_token,token_role,emit_as_model_token,non_drug_drugitem_class,target_vocabulary,target_concept_id,target_code,target_label,mapping_source,match_strength,mapping_confidence
+DRUG//START//65//9424,v5_keep_drop_review,ATC//SFX//B05,,True,crystalloid_or_diluent,ATC,21601161,,B05BB01,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//55//7291,v5_keep_drop_review,ATC//SFX//B05,,True,crystalloid_or_diluent,ATC,21601162,,B05BB02,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//114//12588,v5_keep_drop_review,ATC//V06//GENERAL_NUTRIENTS,,True,enteral_nutrition,ATC,21605350,,V06DB,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//55//7293,v5_keep_drop_review,ATC//SFX//B05,,True,crystalloid_or_diluent,ATC,21601161,,B05BB01,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//17//7252,v5_keep_drop_review,ATC//SFX//B05,,True,colloid_or_volume_expander,ATC,21601143,,B05AA06,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//55//7316,v5_keep_drop_review,ATC//SFX//B05,,True,crystalloid_or_diluent,ATC,21601161,,B05BB01,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//114//12586,v5_keep_drop_review,ATC//V06//GENERAL_NUTRIENTS,,True,enteral_nutrition,ATC,21605350,,V06DB,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//55//7257,v5_keep_drop_review,ATC//SFX//B05,,True,crystalloid_or_diluent,ATC,21601157,,B05BA03,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//61//8429,v5_keep_drop_review,ATC//SFX//B05,,True,blood_product,ATC,21601149,,B05AX01,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//114//12948,v5_keep_drop_review,ATC//V06//GENERAL_NUTRIENTS,,True,enteral_nutrition,ATC,21605350,,V06DB,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//63//7314,v5_keep_drop_review,ATC//V06//GENERAL_NUTRIENTS,,True,enteral_nutrition,ATC,21605350,,V06DB,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//114//12610,v5_keep_drop_review,OMOP//OMOP_CONCEPT//40798859,,True,enteral_nutrition,OMOP_CONCEPT,40798859,,General Nutrients,AMSTEL_usagi,source_code_omop,medium
+DRUG//START//65//9569,v5_keep_drop_review,ATC//SFX//B05,,True,crystalloid_or_diluent,ATC,21601157,,B05BA03,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//61//7367,v5_keep_drop_review,ATC//SFX//B05,,True,blood_product,ATC,21601151,,B05AX03,AMSTEL_source_concepts,source_code_atc,high
+DRUG//START//114//12608,v5_keep_drop_review,ATC//V06//GENERAL_NUTRIENTS,,True,enteral_nutrition,ATC,21605350,,V06DB,AMSTEL_source_concepts,source_code_atc,high
+LAB//11889//°,v5_keep_drop_review,RICU//TEMP,,True,,RICU,,,temp,YAIB_ricu,table_itemid,medium

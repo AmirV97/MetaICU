@@ -275,6 +275,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
             str(PIPELINE_ROOT / "scripts/build_amsterdam_vocab.py"),
             "step=build_vocab",
             f"paths.parent_dir={parent_dir}",
+            "run.allow_unresolved_source_tokens=true",
         ]
         subprocess.run(cmd, cwd=self.root, check=True)
 
@@ -295,6 +296,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
             f"paths.external_root={self.external_root}",
             f"paths.omop_vocab_dir={self.omop_vocab}",
             f"paths.output_vocab={output_vocab}",
+            "run.allow_unresolved_source_tokens=true",
         ]
         subprocess.run(cmd, cwd=self.root, check=True)
 
@@ -320,6 +322,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
             f"paths.audit_dir={cli_audit}",
             f"paths.supplied_vocab={supplied_vocab}",
             f"paths.output_vocab={output_vocab}",
+            "run.allow_unresolved_source_tokens=true",
         ]
         subprocess.run(cmd, cwd=PIPELINE_ROOT, check=True)
 
@@ -331,8 +334,8 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
         self.assertTrue((cli_audit / "vocab_pipeline_source_vocab.csv").exists())
         self.assertTrue((cli_audit / "vocab_pipeline_mapping_evidence.csv").exists())
         self.assertTrue((cli_audit / "vocab_pipeline_candidates.csv").exists())
-        copied = pd.read_csv(output_vocab)
-        self.assertEqual(copied.iloc[0]["source_token"], "DRUG//START//5//20")
+        built = pd.read_csv(output_vocab, dtype=str, keep_default_na=False)
+        self.assertIn("DRUG//START//5//20", built["source_token"].tolist())
 
 
     def test_build_vocab_refuses_to_overwrite_existing_output_by_default(self) -> None:
@@ -353,6 +356,7 @@ INSERT INTO fs VALUES (10, 'Rhythm', 'Rhythm', 'cardiac grouping', 1, 'rhythm', 
             f"paths.omop_vocab_dir={self.omop_vocab}",
             f"paths.supplied_vocab={supplied_vocab}",
             f"paths.output_vocab={output_vocab}",
+            "run.allow_unresolved_source_tokens=true",
         ]
         failed = subprocess.run(cmd, cwd=PIPELINE_ROOT, capture_output=True, text=True)
         self.assertNotEqual(failed.returncode, 0)

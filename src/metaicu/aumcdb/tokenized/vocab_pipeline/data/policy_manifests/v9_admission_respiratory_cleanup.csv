@@ -1,0 +1,51 @@
+source_token,policy_layer,harmonized_token,token_role,emit_as_model_token,non_drug_drugitem_class,target_vocabulary,target_concept_id,target_code,target_label,mapping_source,match_strength,mapping_confidence
+DRUG//START//65//6927,v9_admission_respiratory_cleanup,OMOP//OMOP_CONCEPT//2924033,dynamic_event,True,,OMOP_CONCEPT,2924033.0,,procainamide 100 MG/ML Injection [Pronestyl],AMSTEL_usagi_local_correction,source_code_omop_corrected,high
+DRUG//START//32//9027,v9_admission_respiratory_cleanup,NUTRITION//ORAL,dynamic_event/nutrition_fluid,True,oral_food,LOCAL,,,Oral nutrition,semantic_policy,local_category,high
+MEASUREMENT_CATEGORICAL//16995//1,v9_admission_respiratory_cleanup,CLINICAL_CONTEXT//ADMISSION_TYPE//MEDICAL,static_context/admission_type,True,,LOCAL,,,Medisch,Stage3R_v9_admission_type_policy,source_value_policy,high
+MEASUREMENT_CATEGORICAL//16995//3,v9_admission_respiratory_cleanup,CLINICAL_CONTEXT//ADMISSION_TYPE//PLANNED_SURGERY,static_context/admission_type,True,,LOCAL,,,Geplande chirurgie,Stage3R_v9_admission_type_policy,source_value_policy,high
+MEASUREMENT_CATEGORICAL//16995//2,v9_admission_respiratory_cleanup,CLINICAL_CONTEXT//ADMISSION_TYPE//EMERGENCY_SURGERY,static_context/admission_type,True,,LOCAL,,,Spoed chirurgie,Stage3R_v9_admission_type_policy,source_value_policy,high
+MEASUREMENT_CATEGORICAL//8848//1,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//VENTILATOR_DEVICE,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_CATEGORICAL//8848//3,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//VENTILATOR_DEVICE,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_CATEGORICAL//8848//2,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//VENTILATOR_DEVICE,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_CATEGORICAL//16957//1,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//PROTECTIVE_VENTILATION_STRATEGY,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_CATEGORICAL//21233//3,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY,workflow_metadata,False,,AUMC_LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3J_curated_policy,local_parent_token,medium
+MEASUREMENT_CATEGORICAL//21234//20,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY,workflow_metadata,False,,AUMC_LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3J_curated_policy,local_parent_token,medium
+MEASUREMENT_CATEGORICAL//13105//3,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY,workflow_metadata,False,,AUMC_LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3J_curated_policy,local_parent_token,medium
+MEASUREMENT_CATEGORICAL//16957//3,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//PROTECTIVE_VENTILATION_STRATEGY,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_CATEGORICAL//16685//2,v9_admission_respiratory_cleanup,OMOP_CONCEPT//LOINC//46237002,outcome_metadata,False,,LOINC,46237002,,46237002,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//16685//3,v9_admission_respiratory_cleanup,OMOP_CONCEPT//LOINC//46237002,outcome_metadata,False,,LOINC,46237002,,46237002,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//16685//4,v9_admission_respiratory_cleanup,OMOP_CONCEPT//LOINC//46237002,outcome_metadata,False,,LOINC,46237002,,46237002,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//16685//1,v9_admission_respiratory_cleanup,OMOP_CONCEPT//LOINC//46237002,outcome_metadata,False,,LOINC,46237002,,46237002,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//16685//5,v9_admission_respiratory_cleanup,OMOP_CONCEPT//LOINC//46237002,outcome_metadata,False,,LOINC,46237002,,46237002,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//12567//J/l,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//WORK_OF_BREATHING,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//12303//Geen,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//RSBI,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//7905//°C,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//14091//µV,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//NAVA,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//14092//µV,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//NAVA,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//14089//cmH2O/µV,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//NAVA,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//14090//µV,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//NAVA,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//15292//ml,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//14736//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//13076//Geen,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//FIO2_AUXILIARY,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//19611//UNKNOWN,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15278//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15770//°C,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//20019//mmol/l,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15277//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//19618//sec,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//19619//sec,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//16629//Geen,v9_admission_respiratory_cleanup,DEVICE//VENTILATION_RESPIRATORY//FIO2_AUXILIARY,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_RESPIRATORY,Stage3R_v9_ventilation_policy,source_label_coarse_rule,medium
+MEASUREMENT_BEDSIDE//16838//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//14742//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15290//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15279//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//16837//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15168//Geen,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//20018//10^9/l,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//16848///min,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//16847///min,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//16835//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//14737//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15280//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15281//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high
+MEASUREMENT_BEDSIDE//15282//mmHg,v9_admission_respiratory_cleanup,SNOMED//602639,care_target_metadata,False,,SNOMED,602639,,602639,AMSTEL,source_code,high

@@ -123,11 +123,25 @@ def _count_vocab(frame: pl.LazyFrame, group_exprs: list[pl.Expr]) -> pl.DataFram
     )
 
 
+NULL_TEXT_LITERALS = ["none", "nan", "null", "<na>"]
+
+
+def _is_null_text_expr(column: str) -> pl.Expr:
+    """True for an actually-null value, an empty/whitespace string, or a literal null-text
+    token (e.g. the raw AmsterdamUMCdb export encodes some missing ``unit`` cells as the literal
+    text "None", not an empty field). Mirrors the historical pipeline's ``normalize_code``/this
+    package's ``policy_common.norm_key`` null-literal convention.
+    """
+
+    text = _text_expr(column)
+    return text.is_null() | (text.str.strip_chars() == "") | (text.str.strip_chars().str.to_lowercase().is_in(NULL_TEXT_LITERALS))
+
+
 def _numeric_vocab(config: SourceVocabConfig) -> pd.DataFrame:
     frame = _input_scan(config, "numericitems")
     if config.input_format == "raw":
         frame = frame.with_columns(_numeric_code_prefix_expr().alias("code_prefix"))
-    unit_token = pl.when(_text_expr("unit").is_null() | (_text_expr("unit").str.strip_chars() == ""))
+    unit_token = pl.when(_is_null_text_expr("unit"))
     unit_token = unit_token.then(pl.lit("UNKNOWN")).otherwise(_text_expr("unit"))
     grouped = _count_vocab(
         frame,

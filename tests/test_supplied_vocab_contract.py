@@ -64,7 +64,7 @@ class SuppliedVocabContractTests(unittest.TestCase):
 
     def test_emitted_rows_have_model_tokens_and_roles(self) -> None:
         emitted = self.vocab[self.emit]
-        self.assertEqual(len(emitted), 4836)
+        self.assertEqual(len(emitted), 4837)
         self.assertTrue(emitted["harmonized_token"].ne("").all())
         self.assertTrue(emitted["token_role"].ne("").all())
 
@@ -83,8 +83,8 @@ class SuppliedVocabContractTests(unittest.TestCase):
             & self.vocab["source_token"].str.startswith("LAB//")
             & self.emit
         ]
-        self.assertEqual(len(lab), 515)
-        self.assertEqual(int(lab["row_count_num"].sum()), 14301315)
+        self.assertEqual(len(lab), 516)
+        self.assertEqual(int(lab["row_count_num"].sum()), 14301350)
         self.assertTrue(lab["token_role"].eq("dynamic_event/lab").all())
 
         non_lab_lab_role = self.vocab[

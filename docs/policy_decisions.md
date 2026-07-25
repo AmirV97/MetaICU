@@ -28,7 +28,7 @@ The vocabulary is source-preserving: every Amsterdam source token is kept, even 
 | `emit_as_model_token` | Whether this source token should become a model event/context token. |
 | `non_drug_drugitem_class` | Semantic class for non-medication rows found in `drugitems`. |
 | `target_vocabulary` | Target vocabulary, when mapped to a standard concept/code. |
-| `target_concept_id` | OMOP concept ID, when available. |
+| `target_concept_id` | OMOP concept ID, when available. **Known quirk (found 2026-07-24, see REDACTED_PROJECT's `amsterdam_pipeline/PROJECT_CONTEXT.md`): 23 rows carry the literal integer `0` here, not null. `0` is OMOP's own "No matching concept" sentinel, not a real resolvable concept -- treat it as unmapped, not as a resolved id. Filtering on `target_concept_id.is_not_null()` alone will incorrectly include these 23 rows.** |
 | `target_code` | Native target code, e.g. ATC or LOINC code, when available. |
 | `target_label` | Human-readable target concept/code label. |
 | `mapping_source` | Evidence source used for the mapping/policy. |

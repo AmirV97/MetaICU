@@ -20,7 +20,7 @@ For the full step-by-step workflow (external retrieval, vocabulary build, pre-ME
 Implemented:
 
 - external retrieval/setup helper
-- supplied vocabulary build/install
+- supplied vocabulary build (resolved from raw data, external evidence, and curated policy manifests -- see `docs/aumc_vocab_rebuild_handoff.md`)
 - iCareFM-style grid feature manifest and reviewed-manifest parser
 - shared Latin-1-preserving raw parquet cache for the grid and tokenized pipelines
 - raw CSV to hourly grid extraction with unit harmonization, broad physiological outlier removal, train-fitted scaling, imputation, and categorical encoding

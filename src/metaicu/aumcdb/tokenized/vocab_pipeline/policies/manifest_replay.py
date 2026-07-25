@@ -8,8 +8,8 @@ assumed prior value. Manifests never touch source-identity columns or ``row_coun
 Each manifest here is a versioned reference to a historical, one-off clinical-curation decision
 (see docs/aumc_vocab_rebuild_handoff.md, "Policy Manifest Contract": "Reviewed exceptions should
 remain data") that was captured by diffing the real historical artifact lineage rather than
-re-derived from raw evidence -- see amsterdam_pipeline/scripts/50_generate_policy_manifests.py in
-the REDACTED_PROJECT research checkout for how these were produced and verified.
+re-derived from raw evidence. See docs/aumc_vocab_rebuild_handoff.md for how these were produced
+and verified.
 """
 
 from __future__ import annotations

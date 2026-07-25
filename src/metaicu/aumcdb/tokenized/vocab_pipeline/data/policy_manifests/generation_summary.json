@@ -4,62 +4,62 @@
     "before_file": "final_harmonized_token_map_v3_full_reviewed.csv",
     "after_file": "final_harmonized_token_map_v4_full_reviewed.csv",
     "n_source_tokens_changed": 2605,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v4_curated_unmapped.csv"
+    "output": "v4_curated_unmapped.csv"
   },
   {
     "policy_layer": "v5_keep_drop_review",
     "before_file": "final_harmonized_token_map_v4_full_reviewed.csv",
     "after_file": "final_harmonized_token_map_v5_full_reviewed.csv",
     "n_source_tokens_changed": 16,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v5_keep_drop_review.csv"
+    "output": "v5_keep_drop_review.csv"
   },
   {
     "policy_layer": "v6_semantic_contamination",
     "before_file": "final_harmonized_token_map_v5_full_reviewed.csv",
     "after_file": "final_harmonized_token_map_v6_full_reviewed.csv",
     "n_source_tokens_changed": 9014,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v6_semantic_contamination.csv"
+    "output": "v6_semantic_contamination.csv"
   },
   {
     "policy_layer": "v7_targeted_refinement",
     "before_file": "final_harmonized_token_map_v6_full_reviewed.csv",
     "after_file": "final_harmonized_token_map_v7_targeted_reviewed.csv",
     "n_source_tokens_changed": 1,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v7_targeted_refinement.csv"
+    "output": "v7_targeted_refinement.csv"
   },
   {
     "policy_layer": "v8_device_outcome_refinement",
     "before_file": "final_harmonized_token_map_v7_targeted_reviewed.csv",
     "after_file": "final_harmonized_token_map_v8_full_reviewed.csv",
     "n_source_tokens_changed": 29,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v8_device_outcome_refinement.csv"
+    "output": "v8_device_outcome_refinement.csv"
   },
   {
     "policy_layer": "v9_admission_respiratory_cleanup",
     "before_file": "final_harmonized_token_map_v8_full_reviewed.csv",
     "after_file": "final_harmonized_token_map_v9_full_reviewed.csv",
     "n_source_tokens_changed": 50,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v9_admission_respiratory_cleanup.csv"
+    "output": "v9_admission_respiratory_cleanup.csv"
   },
   {
     "policy_layer": "v10_medication_atc",
     "before_file": "final_harmonized_token_map_v9_full_reviewed.csv",
     "after_file": "final_harmonized_token_map_v10_clean.csv",
     "n_source_tokens_changed": 5601,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v10_medication_atc.csv"
+    "output": "v10_medication_atc.csv"
   },
   {
     "policy_layer": "v11_listitem_values",
     "before_file": "final_harmonized_token_map_v10_clean.csv",
     "after_file": "final_harmonized_token_map_v11_clean.csv",
     "n_source_tokens_changed": 5798,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v11_listitem_values.csv"
+    "output": "v11_listitem_values.csv"
   },
   {
     "policy_layer": "v13_lab_consolidation",
     "before_file": "final_harmonized_token_map_v12_sentinel_fixed.csv",
     "after_file": "final_harmonized_token_map_v13_lab_consolidated.csv",
     "n_source_tokens_changed": 197,
-    "output": "REDACTED_PATH/amsterdam_pipeline/mappings/policy_manifests/v13_lab_consolidation.csv"
+    "output": "v13_lab_consolidation.csv"
   }
 ]

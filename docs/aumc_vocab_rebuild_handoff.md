@@ -18,15 +18,15 @@ The rebuild described below has been implemented. Summary of what changed and wh
   `policies/engine.py`, in the fixed order specified below.
 - The curated, one-off clinical-curation layers (v4 through v11) were captured as versioned
   manifests by diffing the real historical artifact lineage (v1 through v16, all of which
-  survive on disk) rather than re-deriving the underlying human review -- see
-  `REDACTED_PROJECT/amsterdam_pipeline/scripts/50_generate_policy_manifests.py` for how these were
-  produced. The five genuinely deterministic layers (zero-sentinel, lab consolidation,
-  namespace, lab-role, GCS) were ported as real code into `vocab_pipeline/policies/`.
+  survive in the research checkout that produced this rebuild) rather than re-deriving the
+  underlying human review. The five genuinely deterministic layers (zero-sentinel, lab
+  consolidation, namespace, lab-role, GCS) were ported as real code into
+  `vocab_pipeline/policies/`.
 - Verified byte-for-byte: baseline + manifests + policy code reproduce the historical `v16`
   vocabulary with **zero row-level differences across all 9,014 tokens** (checked both against
   the historical artifact lineage directly and against the actual MetaICU package code).
-- Ran the full build against the real raw AmsterdamUMCdb release (SLURM job 540859, `sbatch
-  scripts/submit_aumc_vocab_rebuild_regression.sh`). Found and fixed one real, high-impact bug
+- Ran the full build against the real raw AmsterdamUMCdb release as an HPC batch job. Found and
+  fixed one real, high-impact bug
   in the process: `source_vocab.py`'s numeric-unit extraction didn't recognize the raw export's
   literal text `"None"` (not an empty/null cell) as a missing unit, mis-keying ~65M rows of
   major vitals (e.g. `Saturatie (Monitor)`, `Ademfrequentie Monitor`) under a `//None` token
@@ -114,11 +114,8 @@ The implementation that replaces this copy must:
 
 ## Artifact Status
 
-The relevant historical artifacts are under:
-
-```text
-REDACTED_PROJECT/amsterdam_pipeline/mappings/
-```
+The relevant historical artifacts are under `amsterdam_pipeline/mappings/` in the research
+checkout that produced this rebuild.
 
 The corrected candidate for promotion is v16, not v14:
 

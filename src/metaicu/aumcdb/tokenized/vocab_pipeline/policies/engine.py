@@ -3,8 +3,7 @@
 Order matters -- later, more specific layers intentionally override earlier, more general ones
 (see docs/aumc_vocab_rebuild_handoff.md, "Policy Layer Order"). This exact sequence was verified
 to reproduce the historical v16 vocabulary with zero row-level differences before being ported
-here (see amsterdam_pipeline/scripts/51_verify_full_pipeline_replay.py in the REDACTED_PROJECT
-research checkout).
+here as real code.
 """
 
 from __future__ import annotations

@@ -35,17 +35,9 @@ class PolicyFrames:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--raw-dir", type=Path, default=Path("REDACTED_PATH/Datasets/AmsterdamUMCdb"))
-    parser.add_argument(
-        "--vocab",
-        type=Path,
-        default=Path("REDACTED_PATH/MetaICU/mappings/aumc_supplied_vocab.csv"),
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=Path("REDACTED_PATH/audits/aumc_samp_policy_audit"),
-    )
+    parser.add_argument("--raw-dir", type=Path, required=True, help="Directory containing raw AmsterdamUMCdb CSV files")
+    parser.add_argument("--vocab", type=Path, required=True, help="Path to aumc_supplied_vocab.csv")
+    parser.add_argument("--output-dir", type=Path, required=True, help="Directory to write audit outputs")
     parser.add_argument("--chunksize", type=int, default=1_000_000)
     return parser.parse_args()
 

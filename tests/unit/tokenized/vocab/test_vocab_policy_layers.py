@@ -53,7 +53,7 @@ class ZeroSentinelTests(unittest.TestCase):
         a = fixed.set_index("source_token").loc["A"]
         b = fixed.set_index("source_token").loc["B"]
         self.assertEqual(a["harmonized_token"], "")
-        self.assertEqual(a["emit_as_model_token"], False)
+        self.assertEqual(a["emit_as_model_token"], "False")
         self.assertEqual(a["token_role"], "metadata_only")
         self.assertEqual(a["mapping_confidence"], "unmapped")
         # untouched row is not affected
@@ -99,7 +99,7 @@ class GcsComponentTests(unittest.TestCase):
             ]
         )
         fixed = apply_gcs_component_policy(vocab)
-        self.assertEqual(fixed.iloc[0]["emit_as_model_token"], True)
+        self.assertEqual(fixed.iloc[0]["emit_as_model_token"], "True")
         self.assertEqual(fixed.iloc[0]["token_role"], "dynamic_event/score_component")
 
     def test_ra_verbal_is_corrected_from_motor_to_verbal_concept(self) -> None:
@@ -115,7 +115,7 @@ class GcsComponentTests(unittest.TestCase):
             ]
         )
         fixed = apply_gcs_component_policy(vocab)
-        self.assertEqual(fixed.iloc[0]["target_concept_id"], 3013144.0)
+        self.assertEqual(fixed.iloc[0]["target_concept_id"], "3013144.0")
         self.assertEqual(fixed.iloc[0]["harmonized_token"], "OMOP_CONCEPT//LOINC//3013144")
 
     def test_non_gcs_listitem_is_untouched(self) -> None:

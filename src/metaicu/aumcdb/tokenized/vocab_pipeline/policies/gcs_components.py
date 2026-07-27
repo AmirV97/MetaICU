@@ -27,7 +27,8 @@ def apply_gcs_component_policy(vocab: pd.DataFrame) -> pd.DataFrame:
     ra_verbal_mask = fixed["source_itemid"].astype(str) == RA_VERBAL_ITEMID
     target_norm = fixed["target_concept_id"].astype(str).str.replace(r"\.0$", "", regex=True)
     ra_verbal_wrong = ra_verbal_mask & target_norm.eq(RA_VERBAL_WRONG_CONCEPT_ID)
-    fixed.loc[ra_verbal_wrong, "target_concept_id"] = float(RA_VERBAL_CORRECT_CONCEPT_ID)
+    # Policy frames are string-backed because they are replayed from CSV manifests.
+    fixed.loc[ra_verbal_wrong, "target_concept_id"] = f"{RA_VERBAL_CORRECT_CONCEPT_ID}.0"
     fixed.loc[ra_verbal_wrong, "harmonized_token"] = f"OMOP_CONCEPT//LOINC//{RA_VERBAL_CORRECT_CONCEPT_ID}"
     fixed.loc[ra_verbal_wrong, "target_label"] = RA_VERBAL_CORRECT_CONCEPT_ID
 
@@ -35,7 +36,7 @@ def apply_gcs_component_policy(vocab: pd.DataFrame) -> pd.DataFrame:
     is_gcs = fixed["source_table"].eq("listitems") & target_norm.isin(GCS_COMPONENT_IDS)
     emit = fixed["emit_as_model_token"].astype(str).str.lower().isin(["true", "1", "yes"])
     needs_emission_fix = is_gcs & (~emit | (fixed["token_role"] != SCORE_COMPONENT_ROLE))
-    fixed.loc[needs_emission_fix, "emit_as_model_token"] = True
+    fixed.loc[needs_emission_fix, "emit_as_model_token"] = "True"
     fixed.loc[needs_emission_fix, "token_role"] = SCORE_COMPONENT_ROLE
 
     return fixed

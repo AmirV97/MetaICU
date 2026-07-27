@@ -18,7 +18,7 @@ def apply_zero_sentinel_normalization(vocab: pd.DataFrame) -> pd.DataFrame:
     target = fixed["target_concept_id"].astype(str).str.replace(r"\.0$", "", regex=True)
     is_zero = target.eq("0")
     fixed.loc[is_zero, ["harmonized_token", "target_vocabulary", "target_concept_id", "target_code", "target_label"]] = ""
-    fixed.loc[is_zero, "emit_as_model_token"] = False
+    fixed.loc[is_zero, "emit_as_model_token"] = "False"
     fixed.loc[is_zero, "token_role"] = NON_EMITTED_ROLE
     fixed.loc[is_zero, "mapping_confidence"] = "unmapped"
     return fixed

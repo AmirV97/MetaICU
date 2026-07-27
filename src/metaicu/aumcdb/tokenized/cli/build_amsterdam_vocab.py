@@ -1,12 +1,4 @@
-"""Hydra CLI for AmsterdamUMCdb vocabulary preparation.
-
-The CLI is intentionally thin. It reads configuration, dispatches one public
-pipeline step, and leaves all data logic in ``metaicu.vocab_pipeline``
-modules. The ``build_vocab`` step resolves and validates the supplied vocabulary from raw
-data, external evidence, and packaged policy manifests (see
-``vocab_pipeline.build_workflow.write_build_vocab_outputs``); it does not read a prebuilt
-supplied vocabulary as an input.
-"""
+"""Hydra CLI for installing or optionally rebuilding the Amsterdam vocabulary."""
 
 from __future__ import annotations
 
@@ -117,21 +109,28 @@ def run_candidate_map(cfg: DictConfig) -> dict[str, Path]:
 
 
 def run_build_vocab(cfg: DictConfig) -> dict[str, Path]:
-    """Run the public one-command vocabulary workflow."""
+    """Install the supplied vocabulary or run the explicit rebuild workflow."""
 
     parent_dir = _optional_path(OmegaConf.select(cfg, "paths.parent_dir"))
+    mode = str(OmegaConf.select(cfg, "run.mode", default="supplied"))
     output_vocab = _optional_path(OmegaConf.select(cfg, "paths.output_vocab")) or _configured_or_parent(
         cfg, "output_vocab", parent_dir, "vocab/aumc_supplied_vocab.csv"
     )
     audit_dir = _optional_path(OmegaConf.select(cfg, "paths.audit_dir")) or (parent_dir / "audits/vocab" if parent_dir is not None else _default_audit_dir(output_vocab))
+
+    def optional_parent_path(key: str, child: str) -> Path | None:
+        configured = _optional_path(OmegaConf.select(cfg, f"paths.{key}"))
+        return configured if configured is not None else _path_from_parent(parent_dir, child)
+
     config = BuildVocabConfig(
-        raw_data_dir=_configured_or_parent(cfg, "raw_data_dir", parent_dir, "data/raw"),
-        external_root=_configured_or_parent(cfg, "external_root", parent_dir, "externals"),
-        omop_vocab_dir=_configured_or_parent(cfg, "omop_vocab_dir", parent_dir, "externals/omop_vocab"),
+        raw_data_dir=optional_parent_path("raw_data_dir", "data/raw"),
+        external_root=optional_parent_path("external_root", "externals"),
+        omop_vocab_dir=optional_parent_path("omop_vocab_dir", "externals/omop_vocab"),
         audit_dir=audit_dir,
         supplied_vocab=_optional_path(OmegaConf.select(cfg, "paths.supplied_vocab"))
         or packaged_supplied_vocab(),
         output_vocab=output_vocab,
+        mode=mode,
         dataset=str(cfg.source_vocab.dataset),
         max_rows_per_table=cfg.source_vocab.max_rows_per_table,
         overwrite=bool(OmegaConf.select(cfg, "run.overwrite", default=False)),

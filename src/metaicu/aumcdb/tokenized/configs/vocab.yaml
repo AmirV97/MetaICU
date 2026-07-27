@@ -1,14 +1,15 @@
 # Hydra config for the cleaned AmsterdamUMCdb vocabulary pipeline.
-# Run from MetaICU/ unless absolute paths are supplied.
+# The default installs the reviewed supplied vocab. Set run.mode=rebuild to
+# retrace it from raw source tokens and reviewed policy manifests.
 
-step: source_vocab
+step: build_vocab
 
 paths:
   parent_dir: null
   raw_data_dir: null
   pre_meds_dir: null
   audit_dir: null
-  supplied_vocab: null       # bundled aumc_supplied_vocab.csv unless explicitly overridden
+  supplied_vocab: null       # reviewed packaged artifact unless explicitly overridden
   output_vocab: null
   external_root: null
   omop_vocab_dir: null
@@ -17,6 +18,7 @@ paths:
   candidates: audits/vocab_pipeline_candidates.csv
 
 run:
+  mode: supplied             # supplied (default) or rebuild
   overwrite: false
   allow_unresolved_source_tokens: false
 

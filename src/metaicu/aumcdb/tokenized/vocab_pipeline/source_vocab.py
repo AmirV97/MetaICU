@@ -37,6 +37,8 @@ SOURCE_TABLES = [
     "procedureorderitems",
 ]
 
+RAW_CSV_CHUNK_ROWS = 1_000_000
+
 EXPECTED_PREFIXES = {
     "numericitems": {"LAB", "MEASUREMENT_BEDSIDE", "SUBJECT_FLUID_OUTPUT"},
     "listitems": {"MEASUREMENT_CATEGORICAL"},
@@ -69,38 +71,12 @@ def _limited_scan(pre_meds_dir: Path, table: str, max_rows: int | None) -> pl.La
     return frame
 
 
-def _scan_raw_csv(raw_data_dir: Path, table: str, max_rows: int | None) -> pl.LazyFrame:
-    path = raw_data_dir / f"{table}.csv"
-    if not path.exists():
-        raise FileNotFoundError(f"Raw Amsterdam table not found: {path}")
-    frame = pl.scan_csv(path, encoding="utf8-lossy", infer_schema_length=0, null_values=[])
-    if max_rows is not None:
-        return frame.limit(max_rows)
-    return frame
-
-
 def _input_scan(config: SourceVocabConfig, table: str) -> pl.LazyFrame:
-    if config.input_format == "raw":
-        if config.raw_data_dir is None:
-            raise ValueError("source_vocab.input_format=raw requires paths.raw_data_dir")
-        return _scan_raw_csv(config.raw_data_dir, table, config.max_rows_per_table)
     if config.input_format == "pre_meds":
         if config.pre_meds_dir is None:
             raise ValueError("source_vocab.input_format=pre_meds requires paths.pre_meds_dir")
         return _limited_scan(config.pre_meds_dir, table, config.max_rows_per_table)
-    raise ValueError(f"Unsupported source vocab input_format: {config.input_format!r}")
-
-
-def _numeric_code_prefix_expr() -> pl.Expr:
-    is_lab = pl.col("islabresult").cast(pl.Utf8).str.strip_chars().eq("1")
-    is_fluid_out = pl.col("fluidout").cast(pl.Utf8).str.strip_chars().eq("1")
-    return (
-        pl.when(is_lab)
-        .then(pl.lit("LAB"))
-        .when(is_fluid_out)
-        .then(pl.lit("SUBJECT_FLUID_OUTPUT"))
-        .otherwise(pl.lit("MEASUREMENT_BEDSIDE"))
-    )
+    raise ValueError(f"_input_scan only supports pre_meds input, not {config.input_format!r}")
 
 
 def _text_expr(column: str) -> pl.Expr:
@@ -123,6 +99,78 @@ def _count_vocab(frame: pl.LazyFrame, group_exprs: list[pl.Expr]) -> pl.DataFram
     )
 
 
+def _count_raw_vocab(
+    config: SourceVocabConfig,
+    table: str,
+    group_columns: list[str],
+    add_numeric_prefix: bool = False,
+) -> pl.DataFrame:
+    """Count raw source-key combinations in bounded, Latin-1-preserving chunks."""
+
+    if config.raw_data_dir is None:
+        raise ValueError("source_vocab.input_format=raw requires paths.raw_data_dir")
+    path = config.raw_data_dir / f"{table}.csv"
+    if not path.exists():
+        raise FileNotFoundError(f"Raw Amsterdam table not found: {path}")
+
+    usecols = list(group_columns)
+    if add_numeric_prefix:
+        usecols.extend(["islabresult", "fluidout"])
+    count_columns = group_columns + (["code_prefix"] if add_numeric_prefix else [])
+
+    combined: pd.DataFrame | None = None
+    for chunk in pd.read_csv(
+        path,
+        encoding="latin1",
+        usecols=usecols,
+        dtype=str,
+        keep_default_na=False,
+        chunksize=RAW_CSV_CHUNK_ROWS,
+        nrows=config.max_rows_per_table,
+        low_memory=False,
+    ):
+        if add_numeric_prefix:
+            is_lab = pd.to_numeric(chunk["islabresult"], errors="coerce").eq(1)
+            is_fluid_out = pd.to_numeric(chunk["fluidout"], errors="coerce").eq(1)
+            chunk["code_prefix"] = "MEASUREMENT_BEDSIDE"
+            chunk.loc[is_fluid_out, "code_prefix"] = "SUBJECT_FLUID_OUTPUT"
+            chunk.loc[is_lab, "code_prefix"] = "LAB"
+        batch_counts = (
+            chunk.groupby(count_columns, dropna=False, sort=False)
+            .size()
+            .rename("row_count")
+            .reset_index()
+        )
+        if combined is None:
+            combined = batch_counts
+        else:
+            combined = pd.concat([combined, batch_counts], ignore_index=True)
+            combined = (
+                combined.groupby(count_columns, dropna=False, sort=False)["row_count"]
+                .sum()
+                .reset_index()
+            )
+
+    if combined is None:
+        return pl.DataFrame({column: [] for column in [*count_columns, "row_count"]})
+    return pl.from_pandas(combined)
+
+
+def _grouped_count(
+    config: SourceVocabConfig,
+    table: str,
+    group_columns: list[str],
+    add_numeric_prefix: bool = False,
+) -> pl.DataFrame:
+    if config.input_format == "raw":
+        return _count_raw_vocab(config, table, group_columns, add_numeric_prefix)
+    frame = _input_scan(config, table)
+    expressions = [pl.col(column) for column in group_columns]
+    if add_numeric_prefix:
+        expressions.append(pl.col("code_prefix"))
+    return _count_vocab(frame, expressions)
+
+
 NULL_TEXT_LITERALS = ["none", "nan", "null", "<na>"]
 
 
@@ -138,20 +186,13 @@ def _is_null_text_expr(column: str) -> pl.Expr:
 
 
 def _numeric_vocab(config: SourceVocabConfig) -> pd.DataFrame:
-    frame = _input_scan(config, "numericitems")
-    if config.input_format == "raw":
-        frame = frame.with_columns(_numeric_code_prefix_expr().alias("code_prefix"))
     unit_token = pl.when(_is_null_text_expr("unit"))
     unit_token = unit_token.then(pl.lit("UNKNOWN")).otherwise(_text_expr("unit"))
-    grouped = _count_vocab(
-        frame,
-        [
-            pl.col("itemid"),
-            pl.col("item"),
-            pl.col("unitid"),
-            pl.col("unit"),
-            pl.col("code_prefix"),
-        ],
+    grouped = _grouped_count(
+        config,
+        "numericitems",
+        ["itemid", "item", "unitid", "unit"],
+        add_numeric_prefix=True,
     )
     out = grouped.select(
         pl.lit(config.dataset).alias("dataset"),
@@ -170,8 +211,7 @@ def _numeric_vocab(config: SourceVocabConfig) -> pd.DataFrame:
 
 
 def _list_vocab(config: SourceVocabConfig) -> pd.DataFrame:
-    frame = _input_scan(config, "listitems")
-    grouped = _count_vocab(frame, [pl.col("itemid"), pl.col("item"), pl.col("valueid"), pl.col("value")])
+    grouped = _grouped_count(config, "listitems", ["itemid", "item", "valueid", "value"])
     out = grouped.select(
         pl.lit(config.dataset).alias("dataset"),
         pl.lit("listitems").alias("source_table"),
@@ -189,10 +229,10 @@ def _list_vocab(config: SourceVocabConfig) -> pd.DataFrame:
 
 
 def _drug_vocab(config: SourceVocabConfig) -> pd.DataFrame:
-    frame = _input_scan(config, "drugitems")
-    grouped = _count_vocab(
-        frame,
-        [pl.col("itemid"), pl.col("item"), pl.col("ordercategoryid"), pl.col("ordercategory")],
+    grouped = _grouped_count(
+        config,
+        "drugitems",
+        ["itemid", "item", "ordercategoryid", "ordercategory"],
     )
     out = grouped.select(
         pl.lit(config.dataset).alias("dataset"),
@@ -211,8 +251,7 @@ def _drug_vocab(config: SourceVocabConfig) -> pd.DataFrame:
 
 
 def _freetext_vocab(config: SourceVocabConfig) -> pd.DataFrame:
-    frame = _input_scan(config, "freetextitems")
-    grouped = _count_vocab(frame, [pl.col("itemid"), pl.col("item")])
+    grouped = _grouped_count(config, "freetextitems", ["itemid", "item"])
     # Freetext is grouped at item level only; this stable pseudo-value ID keeps
     # the token shape compatible with item/value source tokens without using raw text.
     out = grouped.select(
@@ -232,8 +271,7 @@ def _freetext_vocab(config: SourceVocabConfig) -> pd.DataFrame:
 
 
 def _process_vocab(config: SourceVocabConfig) -> pd.DataFrame:
-    frame = _input_scan(config, "processitems")
-    grouped = _count_vocab(frame, [pl.col("itemid"), pl.col("item")])
+    grouped = _grouped_count(config, "processitems", ["itemid", "item"])
     out = grouped.select(
         pl.lit(config.dataset).alias("dataset"),
         pl.lit("processitems").alias("source_table"),
@@ -251,10 +289,10 @@ def _process_vocab(config: SourceVocabConfig) -> pd.DataFrame:
 
 
 def _procedure_vocab(config: SourceVocabConfig) -> pd.DataFrame:
-    frame = _input_scan(config, "procedureorderitems")
-    grouped = _count_vocab(
-        frame,
-        [pl.col("itemid"), pl.col("item"), pl.col("ordercategoryid"), pl.col("ordercategoryname")],
+    grouped = _grouped_count(
+        config,
+        "procedureorderitems",
+        ["itemid", "item", "ordercategoryid", "ordercategoryname"],
     )
     out = grouped.select(
         pl.lit(config.dataset).alias("dataset"),
@@ -307,7 +345,9 @@ def validate_source_vocab(vocab: pd.DataFrame, config: SourceVocabConfig) -> dic
     for table in SOURCE_TABLES:
         table_vocab = vocab[vocab["source_table"].eq(table)].copy()
         if config.input_format == "raw":
-            scanned_rows = _input_scan(config, table).select(pl.len()).collect(engine="streaming").item()
+            # Raw extraction is unfiltered. The grouped counts are accumulated while
+            # reading every input chunk, so their sum is the input row count.
+            scanned_rows = int(table_vocab["row_count"].sum())
         else:
             if config.pre_meds_dir is None:
                 raise ValueError("source_vocab.input_format=pre_meds requires paths.pre_meds_dir")

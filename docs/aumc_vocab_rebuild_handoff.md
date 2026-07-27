@@ -4,8 +4,9 @@
 
 The rebuild described in this document is implemented.
 
-`build-amsterdam-vocab` resolves and validates the vocabulary each run instead of copying a
-frozen CSV. `build_workflow.py` calls `target_resolution.resolve_baseline_targets()` ->
+`build-amsterdam-vocab` installs the reviewed vocabulary by default. With
+`run.mode=rebuild`, `build_workflow.py` calls
+`target_resolution.resolve_baseline_targets()` ->
 `policies.engine.apply_policy_layers()` -> `validation.validate_supplied_vocab()` -> write.
 
 Baseline candidate ranking (historically scripts 08/09/11/12/14/16) is packaged as a versioned
@@ -20,9 +21,9 @@ historical artifact lineage (v1 through v16) rather than re-implementing the ori
 The remaining five layers (zero-sentinel, lab consolidation, namespace, lab-role, GCS) are
 plain code in `vocab_pipeline/policies/`.
 
-Test coverage: `tests/test_vocab_policy_layers.py` (17 cases) plus updates to
-`tests/test_vocab_evidence_normalization.py` for the 4 CLI tests that assumed the old copy-only
-behavior. Full suite: 97/97.
+Policy, CLI, source-extraction, package-asset, and real-data regression tests cover
+the rebuild. The real-data tests remain environment-gated because raw
+AmsterdamUMCdb and Athena files are not distributed with the package.
 
 Validation:
 
@@ -44,33 +45,20 @@ LAB rows, 14,301,315->14,301,350 LAB row sum).
 strict=...)` control failure behavior: an uncovered source token fails the build by default (see
 "Changed Dataset Releases" below); the flag permits bounded/test/audit-only builds instead.
 
-**Open issue:** a live raw-data build currently differs from `v16` outside the 8,750 common
-tokens -- 321 tokens only in the fresh build, 264 only in `v16`. Two causes, neither a
-vocabulary-policy defect:
-
-1. ~256 tokens / ~10M rows: `numericitems.unit` strings containing `µ` or `°` decode as the
-   U+FFFD replacement character under `pl.scan_csv(encoding="utf8-lossy", ...)`. The raw export
-   appears to use a single-byte encoding (e.g. Windows-1252) for these characters, which isn't
-   valid UTF-8; Polars' CSV reader only supports `"utf8"`/`"utf8-lossy"` (no arbitrary codec).
-   This shadows 264 correctly-mapped historical LAB tokens (e.g. `LAB//10008//µg/l`) under a
-   corrupted token instead.
-2. ~65 tokens / ~200 rows: new `listitems` values and `freetextitems` labels present in the
-   current raw data pull that were not in the historical curated snapshot (newer lab-test
-   freetext names, a few new discharge-destination/relationship values). This is expected
-   "changed dataset release" drift, not a defect -- see "Changed Dataset Releases" below.
-
-Fixing the encoding issue (likely needs a non-Polars pre-pass over the affected raw byte
-sequences, since Polars cannot decode Windows-1252 directly) is required before a live raw-data
-run can replace `v16` as the promotion source. Until then, `mappings/aumc_supplied_vocab.csv` is
-`v16`'s content (matches what the new code
-produces for every currently-known source token) rather than this run's live output.
+**Changed-release check:** the previous live raw-data run found 321 fresh-only and
+264 v16-only source tokens. Approximately 256 differences were caused by lossy
+decoding of Latin-1 `µ` and `°` units; source extraction now uses bounded
+Latin-1 pandas chunks and has a dedicated regression test. The remaining small
+tail consisted of new list values/freetext labels in the current raw pull and
+should remain an explicit review failure. A new full HPC regression run is still
+required to record the post-fix counts.
 
 ## Purpose
 
 This document describes how the historical Amsterdam vocabulary artifacts were
 constructed through v14 and then corrected through v16. It is an implementation
-handoff for replacing the current static-copy behavior in MetaICU with a readable,
-testable vocabulary build.
+handoff for maintaining the reviewed supplied artifact and its readable,
+testable optional rebuild.
 
 The intended public behavior is:
 
@@ -88,27 +76,19 @@ AmsterdamUMCdb raw CSVs
 The final public command should run this workflow once. Users should not run the
 historical numbered scripts or know the internal v0-v16 artifact names.
 
-## Critical Current Limitation
+## Current Design Boundary
 
-MetaICU currently performs the first three diagnostic stages, then copies a frozen
-CSV:
+The public command has two modes:
 
-```python
-shutil.copy2(config.supplied_vocab, config.output_vocab)
-```
+- `run.mode=supplied` installs the reviewed packaged vocabulary and is the default.
+- `run.mode=rebuild` extracts source tokens, builds evidence/candidate audits,
+  joins the reviewed baseline resolution, applies policy layers, and validates the
+  reconstructed artifact.
 
-The source-vocabulary, evidence, and candidate-map outputs do not influence the
-installed vocabulary. Pointing the command at different raw data cannot change or
-correct the result.
-
-The implementation that replaces this copy must:
-
-1. resolve candidates into a baseline mapping;
-2. apply the retained clinical policies;
-3. validate the final compact artifact;
-4. write the rebuilt output;
-5. fail clearly when source tokens are not covered by either a rule or a reviewed
-   decision.
+Candidate evidence does not automatically rank or replace reviewed targets. The
+9,014-row baseline-resolution manifest owns that decision. This makes the rebuild
+reproducible for the reviewed Amsterdam source-token universe while ensuring that
+new source tokens fail for review instead of being mapped silently.
 
 ## Artifact Status
 
@@ -143,14 +123,14 @@ The verified local value at the time of this handoff was:
 1e139f0640a4ff2fa1624d8b67bcd2fa4834fd6a327439d2c48f924bac28e5df
 ```
 
-MetaICU's currently packaged `mappings/aumc_supplied_vocab.csv` is not v16:
+MetaICU's packaged `mappings/aumc_supplied_vocab.csv` is v16:
 
 | Comparison | Result |
 |---|---:|
-| Source-token rows in both | 9,014 |
-| MetaICU emitted source tokens | 4,836 |
-| v16 emitted source tokens | 4,837 |
-| Rows with at least one compact policy-field difference | 263 |
+| Source-token rows | 9,014 |
+| Emitted source tokens | 4,837 |
+| Unique emitted destinations | 3,286 |
+| SHA256 | `1e139f0640a4ff2fa1624d8b67bcd2fa4834fd6a327439d2c48f924bac28e5df` |
 
 ## Final Compact Schema
 
@@ -1323,13 +1303,12 @@ Do not recreate:
 4. exploratory semantic samples as required build steps;
 5. historical extended vocabularies with 40-79 stage-specific columns;
 6. v0-v15 intermediate CSVs in user workspaces;
-7. a final `copy2()` of a packaged vocabulary.
+7. presenting supplied-artifact installation as if it were a rebuild.
 
-Keep historical artifacts under research provenance until full v16 parity is
-achieved. After that, the clean build code, policy data, final contract tests, and
-current supplied vocabulary are the maintained implementation.
+Historical artifacts remain research provenance. The maintained implementation is
+the supplied artifact, optional rebuild code, policy data, and contract tests.
 
-## Recommended Implementation Sequence
+## Implemented Migration Sequence
 
 1. Freeze v16 as the internal migration oracle and add a normalized diff helper.
 2. Add package-owned policy manifests extracted from the retained curated audits.
@@ -1340,7 +1319,7 @@ current supplied vocabulary are the maintained implementation.
 6. Implement listitem value policies and diagnosis context.
 7. Integrate zero-sentinel, lab consolidation, namespace, lab-role, and GCS rules
    as normal policy layers.
-8. Replace `shutil.copy2()` with the actual resolver and policy engine.
+8. Add an explicit rebuild mode using the resolver and policy engine.
 9. Run bounded fixtures.
 10. Run full source-token and cell-level parity against v16.
 11. Promote the rebuilt output to `mappings/aumc_supplied_vocab.csv`.
@@ -1352,7 +1331,8 @@ current supplied vocabulary are the maintained implementation.
 
 1. **Candidate table mistaken for final vocabulary**: candidates have evidence,
    not policy.
-2. **Static artifact copied after diagnostics**: raw data has no effect on output.
+2. **Rebuild mode replaced by supplied-artifact installation**: raw data has no
+   effect while the command claims otherwise.
 3. **Curated decisions omitted**: OMOP validation alone reintroduces social/admin
    contamination and loses local device meaning.
 4. **Evidence priority used as semantic truth**: a high-priority alias can beat
@@ -1378,10 +1358,10 @@ current supplied vocabulary are the maintained implementation.
 
 The cleaned MetaICU vocabulary orchestration is complete when:
 
-1. `build-amsterdam-vocab` does not read a supplied vocabulary as an input;
-2. raw data, external evidence, and packaged policy manifests determine the output;
+1. default mode installs the reviewed supplied vocabulary without requiring raw data;
+2. rebuild mode extracts raw source tokens and replays reviewed mapping/policy manifests;
 3. every final field has a recorded policy owner;
-4. the current Amsterdam release reproduces v16 with zero row-level policy
+4. the reviewed Amsterdam source-token universe reproduces v16 with zero row-level policy
    differences;
 5. the final artifact passes all structural and semantic contract tests;
 6. users run one command and receive one compact vocabulary plus audits;

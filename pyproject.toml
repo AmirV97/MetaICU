@@ -36,4 +36,8 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "metaicu.aumcdb.tokenized" = ["configs/*.yaml", "data/*.csv"]
+"metaicu.aumcdb.tokenized.vocab_pipeline" = [
+  "data/policy_manifests/*.csv",
+  "data/policy_manifests/*.json",
+]
 "metaicu.aumcdb.grid" = ["configs/*.yaml", "data/*.csv", "data/*.md"]

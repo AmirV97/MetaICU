@@ -3,7 +3,7 @@
 This runbook expands the README command sequence. The package currently supports:
 
 - external resource setup
-- supplied vocabulary build (resolved from raw data, external evidence, and curated policy manifests)
+- reviewed supplied-vocabulary installation and optional raw-data rebuild
 - iCareFM-style grid feature manifest
 - iCareFM-style hourly grid dataset build
 - subject-level train/val/test split creation
@@ -44,7 +44,7 @@ Main CLI entry points:
 
 ```bash
 retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
-build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
+build-amsterdam-vocab paths.parent_dir=/path/to/aumc_workspace
 grid_build_manifest paths.parent_dir=/path/to/aumc_workspace
 build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace
 build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
@@ -52,41 +52,12 @@ build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
 
 ## Inputs
 
-Run external retrieval first:
+The reviewed Amsterdam vocabulary is bundled with MetaICU. Install it into a
+workspace without raw data or external resources:
 
 ```bash
-retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
+build-amsterdam-vocab paths.parent_dir=/path/to/aumc_workspace
 ```
-
-Then place or symlink raw AmsterdamUMCdb CSVs into:
-
-```text
-/path/to/aumc_workspace/data/raw/
-```
-
-Download Athena/OMOP manually from:
-
-```text
-https://athena.ohdsi.org/vocabulary/list
-```
-
-Select SNOMED, LOINC, RxNorm, RxNorm Extension, ATC, UCUM, and OMOP Extension. Extract the CSVs into:
-
-```text
-/path/to/aumc_workspace/externals/omop_vocab/
-```
-
-## Vocabulary
-
-```bash
-build-amsterdam-vocab step=build_vocab paths.parent_dir=/path/to/aumc_workspace
-```
-
-This resolves and validates the vocabulary from the raw data, external evidence, and packaged
-policy manifests in this run -- it does not read a prebuilt supplied vocabulary as an input. A
-source token found in the raw data with no matching rule or curated decision fails the build by
-default; pass `run.allow_unresolved_source_tokens=true` for a bounded/audit-only build instead.
-See `docs/aumc_vocab_rebuild_handoff.md` for the full design and known scope limits.
 
 Output:
 
@@ -94,11 +65,49 @@ Output:
 /path/to/aumc_workspace/vocab/aumc_supplied_vocab.csv
 ```
 
-Audit outputs are under:
+To install a different reviewed vocabulary file instead of the bundled artifact:
+
+```bash
+build-amsterdam-vocab \
+  paths.parent_dir=/path/to/aumc_workspace \
+  paths.supplied_vocab=/path/to/reviewed_vocab.csv
+```
+
+To rebuild and audit the vocabulary against local raw data, first retrieve the
+external repositories:
+
+```bash
+retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
+```
+
+Place or symlink the raw AmsterdamUMCdb CSVs into:
 
 ```text
-/path/to/aumc_workspace/audits/
+/path/to/aumc_workspace/data/raw/
 ```
+
+Download Athena/OMOP from `https://athena.ohdsi.org/vocabulary/list`. Select
+SNOMED, LOINC, RxNorm, RxNorm Extension, ATC, UCUM, and OMOP Extension, then
+extract the CSVs into:
+
+```text
+/path/to/aumc_workspace/externals/omop_vocab/
+```
+
+Run the optional rebuild:
+
+```bash
+build-amsterdam-vocab \
+  paths.parent_dir=/path/to/aumc_workspace \
+  run.mode=rebuild \
+  run.overwrite=true
+```
+
+The rebuild extracts Latin-1 source tokens, generates evidence/candidate audits,
+replays the reviewed mapping and policy manifests, and validates the result.
+Candidate evidence is retained for audit; the reviewed baseline manifest owns
+target selection. New uncovered source tokens fail by default. Use
+`run.allow_unresolved_source_tokens=true` only for bounded or audit-only runs.
 
 ## Grid Feature Manifest
 
@@ -246,10 +255,26 @@ build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.medication_atc
 
 ## Tests
 
+Run fast unit tests during development:
+
 ```bash
 cd /path/to/MetaICU
-python -m unittest discover -s tests -v
+python -m unittest discover -s tests/unit -t . -v
 ```
+
+Run fixture-based integration tests before merging:
+
+```bash
+python -m unittest discover -s tests/integration -t . -v
+```
+
+Run everything; real-data tests skip unless their documented environment variables are set:
+
+```bash
+python -m unittest discover -s tests -t . -v
+```
+
+See `tests/README.md` for the directory contract and full-data commands.
 
 ## Next Development Tasks
 

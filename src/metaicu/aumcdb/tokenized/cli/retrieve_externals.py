@@ -177,7 +177,7 @@ def athena_instructions() -> str:
 
     vocab_lines = "\n".join(f"- {name}" for name in ATHENA_VOCABULARIES)
     file_lines = "\n".join(f"- {name}" for name in ATHENA_REQUIRED_FILES)
-    return f"""# OMOP / Athena Vocabulary Export\n\nThe Amsterdam vocabulary workflow needs a local Athena vocabulary export. Athena downloads require a logged-in OHDSI Athena account and cannot be retrieved automatically by this script.\n\nOpen: https://athena.ohdsi.org/vocabulary/list\n\nSelect these vocabularies:\n\n{vocab_lines}\n\nNotes:\n\n- CPT4 is not required for the current Amsterdam ICU trajectory vocabulary and may require additional UMLS licensing.\n- If your local policies require CPT4 or other licensed vocabularies later, add them separately and record the license status.\n- After Athena prepares the download, extract the ZIP/TAR contents into `externals/omop_vocab/` under your parent workspace.\n\nThe extracted directory must contain at least:\n\n{file_lines}\n"""
+    return f"""# OMOP / Athena Vocabulary Export\n\nThe optional Amsterdam vocabulary rebuild needs a local Athena vocabulary export. Installing the reviewed vocabulary bundled with MetaICU does not. Athena downloads require a logged-in OHDSI Athena account and cannot be retrieved automatically by this script.\n\nOpen: https://athena.ohdsi.org/vocabulary/list\n\nSelect these vocabularies:\n\n{vocab_lines}\n\nNotes:\n\n- CPT4 is not required for the current Amsterdam ICU trajectory vocabulary and may require additional UMLS licensing.\n- If your local policies require CPT4 or other licensed vocabularies later, add them separately and record the license status.\n- After Athena prepares the download, extract the ZIP/TAR contents into `externals/omop_vocab/` under your parent workspace.\n\nThe extracted directory must contain at least:\n\n{file_lines}\n"""
 
 
 def write_parent_readme(paths: dict[str, Path]) -> Path:
@@ -211,12 +211,21 @@ Expected layout:
 - GitHub-hosted external repositories are cloned into `externals/` by `retrieve_externals.py`.
 - Download the Athena/OMOP export manually and extract its CSV files into `externals/omop_vocab/`.
 
-## Build command
+## Vocabulary commands
+
+Install the reviewed vocabulary bundled with MetaICU:
 
 ```bash
-python /path/to/MetaICU/scripts/build_amsterdam_vocab.py \
-  step=build_vocab \
-  paths.parent_dir={parent}
+build-amsterdam-vocab paths.parent_dir={parent}
+```
+
+To retrace the vocabulary from the raw data and reviewed policy manifests, first
+retrieve the external resources and Athena export described above, then run:
+
+```bash
+build-amsterdam-vocab \
+  paths.parent_dir={parent} \
+  run.mode=rebuild
 ```
 
 The vocabulary output will be:

@@ -2,19 +2,27 @@
 
 ## External Resources Used For Amsterdam Vocabulary Construction
 
-The Amsterdam vocabulary-preparation workflow uses several external reference resources. GitHub-hosted resources can be retrieved with:
+The reviewed vocabulary is bundled with MetaICU and requires no external
+resources:
 
 ```bash
-python scripts/retrieve_externals.py \
-  --parent-dir /path/to/aumc_workspace
+build-amsterdam-vocab paths.parent_dir=/path/to/aumc_workspace
 ```
 
-The OMOP/Athena vocabulary export must be downloaded manually from Athena because it requires a user account and vocabulary/license selection. The user-facing build command receives the workspace root:
+The resources below are needed for the optional raw-data rebuild and its
+candidate-evidence audits. GitHub-hosted resources can be retrieved with:
 
 ```bash
-python scripts/build_amsterdam_vocab.py \
-  step=build_vocab \
-  paths.parent_dir=/path/to/aumc_workspace
+retrieve-aumc-externals --parent-dir /path/to/aumc_workspace
+```
+
+The OMOP/Athena vocabulary export must be downloaded manually because it
+requires a user account and vocabulary/license selection. Run the rebuild with:
+
+```bash
+build-amsterdam-vocab \
+  paths.parent_dir=/path/to/aumc_workspace \
+  run.mode=rebuild
 ```
 
 Expected path placeholders used below:
@@ -39,7 +47,7 @@ Expected path placeholders used below:
 
 ### Required Versus Optional Inputs
 
-The core vocabulary-preparation workflow expects AMSTEL mappings/source concepts, official AmsterdamUMCdb dictionaries, selected AmsterdamUMCdb flowsheet SQL groupings, and a local OMOP/Athena export. BlendedICU timeseries resources are important curated ICU context. BlendedICU medication assets and YAIB/ricu configs are useful auxiliary sources and should be included when available, but should not silently become hard dependencies unless a pipeline step explicitly requires them.
+The optional rebuild expects AMSTEL mappings/source concepts, official AmsterdamUMCdb dictionaries, selected AmsterdamUMCdb flowsheet SQL groupings, and a local OMOP/Athena export. BlendedICU timeseries resources are important curated ICU context. BlendedICU medication assets and YAIB/ricu configs are useful auxiliary sources and should be included when available, but should not silently become hard dependencies unless a pipeline step explicitly requires them.
 
 ### Interpretation Rules
 

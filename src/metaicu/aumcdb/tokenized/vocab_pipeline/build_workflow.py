@@ -1,17 +1,15 @@
-"""One-command user-facing vocabulary build workflow.
+"""Install the reviewed vocabulary or rebuild it from raw Amsterdam source tokens.
 
-This module orchestrates the public vocabulary-preparation steps: it validates that the
-user-provided raw Amsterdam data and external resources can be read, extracts the source
-vocabulary and mapping evidence, resolves baseline targets, applies the fixed-order policy
-layers (curated manifests + deterministic rules), validates the result against the
-supplied-vocabulary contract, and writes the constructed vocabulary to the configured output
-location. See docs/aumc_vocab_rebuild_handoff.md for the full design and target_resolution.py's
-docstring for the one remaining known scope limit (baseline candidate ranking).
+The default user workflow installs the reviewed supplied artifact. The optional rebuild mode
+extracts source tokens, generates mapping-evidence audits, replays the reviewed target/policy
+manifests, validates the result, and writes a reconstructed artifact.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import shutil
 import subprocess
 import time
 from dataclasses import dataclass
@@ -59,21 +57,15 @@ def packaged_supplied_vocab() -> Path:
 
 @dataclass(frozen=True)
 class BuildVocabConfig:
-    """Inputs and outputs for the public one-command vocabulary workflow.
+    """Inputs and outputs for supplied-artifact installation or optional rebuilding."""
 
-    ``supplied_vocab`` is no longer the source of the output vocabulary -- the build now
-    resolves and validates the vocabulary from raw data, evidence, and packaged policy
-    manifests (see ``target_resolution.py`` and ``policies/engine.py``). It is kept as an
-    optional historical reference: if present, the build logs a diagnostic diff against it but
-    never reads it as an input to construction.
-    """
-
-    raw_data_dir: Path
-    external_root: Path
-    omop_vocab_dir: Path
+    raw_data_dir: Path | None
+    external_root: Path | None
+    omop_vocab_dir: Path | None
     audit_dir: Path
     supplied_vocab: Path
     output_vocab: Path
+    mode: str = "supplied"
     dataset: str = "AmsterdamUMCdb"
     max_rows_per_table: int | None = None
     overwrite: bool = False
@@ -107,30 +99,36 @@ def _git_commit(path: Path) -> str:
     return result.stdout.strip()
 
 
-def _preflight(config: BuildVocabConfig) -> dict[str, Any]:
-    """Validate user inputs before expensive scans begin."""
+def _check_output_policy(config: BuildVocabConfig) -> None:
+    if config.output_vocab.exists() and not config.overwrite:
+        raise FileExistsError(
+            f"Output vocabulary already exists: {config.output_vocab}. "
+            "Set run.overwrite=true to replace it."
+        )
+
+
+def _preflight_rebuild(config: BuildVocabConfig) -> dict[str, Any]:
+    """Validate optional rebuild inputs before expensive scans begin."""
 
     errors: list[str] = []
-    if not config.raw_data_dir.is_dir():
+    if config.raw_data_dir is None or not config.raw_data_dir.is_dir():
         errors.append(f"Raw Amsterdam data directory does not exist: {config.raw_data_dir}")
     else:
         missing_raw = [name for name in REQUIRED_RAW_TABLES if not (config.raw_data_dir / name).exists()]
         if missing_raw:
             errors.append(f"Missing raw Amsterdam CSV files in {config.raw_data_dir}: {missing_raw}")
 
-    if not config.external_root.is_dir():
+    if config.external_root is None or not config.external_root.is_dir():
         errors.append(f"External resource directory does not exist: {config.external_root}")
-    if not config.omop_vocab_dir.is_dir():
+    if config.omop_vocab_dir is None or not config.omop_vocab_dir.is_dir():
         errors.append(f"OMOP/Athena vocabulary directory does not exist: {config.omop_vocab_dir}")
-    if config.output_vocab.exists() and not config.overwrite:
-        errors.append(
-            f"Output vocabulary already exists: {config.output_vocab}. "
-            "Set run.overwrite=true to replace it."
-        )
 
     if errors:
         raise FileNotFoundError("\n".join(errors))
 
+    _check_output_policy(config)
+    assert config.external_root is not None
+    assert config.omop_vocab_dir is not None
     inventory = inventory_resources(config.external_root, config.omop_vocab_dir)
     inventory_summary = summarize_inventory(inventory)
     if inventory_summary["missing_required_resources"]:
@@ -146,10 +144,11 @@ def _write_run_config(config: BuildVocabConfig, inventory_summary: dict[str, Any
 
     path = config.audit_dir / "run_config.json"
     payload = {
+        "mode": config.mode,
         "dataset": config.dataset,
-        "raw_data_dir": str(config.raw_data_dir),
-        "external_root": str(config.external_root),
-        "omop_vocab_dir": str(config.omop_vocab_dir),
+        "raw_data_dir": str(config.raw_data_dir) if config.raw_data_dir is not None else None,
+        "external_root": str(config.external_root) if config.external_root is not None else None,
+        "omop_vocab_dir": str(config.omop_vocab_dir) if config.omop_vocab_dir is not None else None,
         "audit_dir": str(config.audit_dir),
         "supplied_vocab": str(config.supplied_vocab),
         "output_vocab": str(config.output_vocab),
@@ -162,17 +161,85 @@ def _write_run_config(config: BuildVocabConfig, inventory_summary: dict[str, Any
     return path
 
 
-def write_build_vocab_outputs(config: BuildVocabConfig) -> dict[str, Path]:
-    """Extract source vocab/evidence/candidates, resolve targets, apply policy, write vocab."""
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _validate_packaged_vocab(vocab: pd.DataFrame) -> dict[str, Any]:
+    missing_columns = [column for column in COMPACT_COLUMNS if column not in vocab.columns]
+    if missing_columns:
+        raise ValueError(f"Supplied vocabulary is missing compact columns: {missing_columns}")
+    if vocab["source_token"].duplicated().any():
+        raise ValueError("Supplied vocabulary contains duplicate source_token rows")
+    emitted = vocab["emit_as_model_token"].astype(str).str.lower().isin(["true", "1", "yes"])
+    if vocab.loc[emitted, "harmonized_token"].fillna("").eq("").any():
+        raise ValueError("Supplied vocabulary has emitted rows without harmonized_token")
+    if vocab.loc[emitted, "token_role"].fillna("").eq("").any():
+        raise ValueError("Supplied vocabulary has emitted rows without token_role")
+    return {
+        "source_tokens": int(len(vocab)),
+        "emitted_source_tokens": int(emitted.sum()),
+        "unique_emitted_destinations": int(vocab.loc[emitted, "harmonized_token"].nunique()),
+        "violations": [],
+    }
+
+
+def _install_supplied_vocab(config: BuildVocabConfig) -> dict[str, Path]:
+    """Install the reviewed supplied vocabulary without requiring raw data or externals."""
+
+    total_start = time.perf_counter()
+    config.audit_dir.mkdir(parents=True, exist_ok=True)
+    _check_output_policy(config)
+    if not config.supplied_vocab.is_file():
+        raise FileNotFoundError(f"Supplied vocabulary does not exist: {config.supplied_vocab}")
+
+    _log(f"installing reviewed supplied vocabulary: {config.supplied_vocab}")
+    supplied = pd.read_csv(config.supplied_vocab, low_memory=False)
+    validation_report = _validate_packaged_vocab(supplied)
+    config.output_vocab.parent.mkdir(parents=True, exist_ok=True)
+    if config.supplied_vocab.resolve() != config.output_vocab.resolve():
+        shutil.copy2(config.supplied_vocab, config.output_vocab)
+
+    run_config_path = _write_run_config(config, {})
+    validation_path = config.audit_dir / "final_vocab_validation.json"
+    validation_path.write_text(json.dumps(validation_report, indent=2, sort_keys=True) + "\n")
+    summary_path = config.audit_dir / "build_vocab_summary.json"
+    summary = {
+        "mode": "supplied",
+        "supplied_vocab": str(config.supplied_vocab),
+        "output_vocab": str(config.output_vocab),
+        "sha256": _sha256(config.output_vocab),
+        "validation": validation_report,
+    }
+    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
+    _log(f"done in {_elapsed(total_start)} -> {config.output_vocab}")
+    return {
+        "output_vocab": config.output_vocab,
+        "build_summary": summary_path,
+        "run_config": run_config_path,
+        "final_vocab_validation": validation_path,
+    }
+
+
+def _rebuild_vocab(config: BuildVocabConfig) -> dict[str, Path]:
+    """Rebuild source rows and replay reviewed mapping/policy decisions."""
 
     total_start = time.perf_counter()
     config.audit_dir.mkdir(parents=True, exist_ok=True)
 
     step_start = time.perf_counter()
     _log("preflight validating raw data, external resources, OMOP vocab, and output policy")
-    inventory_summary = _preflight(config)
+    inventory_summary = _preflight_rebuild(config)
     run_config_path = _write_run_config(config, inventory_summary)
     _log(f"preflight finished in {_elapsed(step_start)} -> {run_config_path}")
+
+    assert config.raw_data_dir is not None
+    assert config.external_root is not None
+    assert config.omop_vocab_dir is not None
 
     step_start = time.perf_counter()
     _log(f"1/6 extracting source vocabulary from raw CSVs: {config.raw_data_dir}")
@@ -200,7 +267,7 @@ def write_build_vocab_outputs(config: BuildVocabConfig) -> dict[str, Path]:
     _log(f"2/6 evidence normalization finished in {_elapsed(step_start)} -> {evidence_outputs['mapping_evidence']}")
 
     step_start = time.perf_counter()
-    _log("3/6 constructing source-token candidate map")
+    _log("3/6 constructing source-token candidate map for audit/provenance")
     candidate_outputs = write_candidate_map_outputs(
         CandidateMapConfig(
             source_vocab=source_outputs["source_vocab"],
@@ -211,7 +278,7 @@ def write_build_vocab_outputs(config: BuildVocabConfig) -> dict[str, Path]:
     _log(f"3/6 candidate map finished in {_elapsed(step_start)} -> {candidate_outputs['candidates']}")
 
     step_start = time.perf_counter()
-    _log("4/6 resolving baseline targets")
+    _log("4/6 resolving targets from the reviewed baseline manifest")
     source_vocab = pd.read_csv(source_outputs["source_vocab"], dtype=str, keep_default_na=False)
     baseline_resolution = load_baseline_resolution(DEFAULT_BASELINE_RESOLUTION)
     resolved = resolve_baseline_targets(
@@ -242,6 +309,7 @@ def write_build_vocab_outputs(config: BuildVocabConfig) -> dict[str, Path]:
 
     summary_path = config.audit_dir / "build_vocab_summary.json"
     summary = {
+        "mode": "rebuild",
         "raw_data_dir": str(config.raw_data_dir),
         "external_root": str(config.external_root),
         "omop_vocab_dir": str(config.omop_vocab_dir),
@@ -249,6 +317,11 @@ def write_build_vocab_outputs(config: BuildVocabConfig) -> dict[str, Path]:
         "run_config": str(run_config_path),
         "overwrite": config.overwrite,
         "allow_unresolved_source_tokens": config.allow_unresolved_source_tokens,
+        "target_resolution": {
+            "source": str(DEFAULT_BASELINE_RESOLUTION),
+            "candidate_map_used_for_target_selection": False,
+            "note": "Candidate evidence is retained for audit; reviewed manifests own target selection.",
+        },
         "source_vocab_summary": _read_json(source_outputs["summary"]),
         "mapping_evidence_summary": _read_json(evidence_outputs["mapping_evidence_summary"]),
         "candidate_summary": _read_json(candidate_outputs["candidate_summary"]),
@@ -269,6 +342,16 @@ def write_build_vocab_outputs(config: BuildVocabConfig) -> dict[str, Path]:
     outputs.update({f"evidence_{key}": value for key, value in evidence_outputs.items()})
     outputs.update({f"candidate_{key}": value for key, value in candidate_outputs.items()})
     return outputs
+
+
+def write_build_vocab_outputs(config: BuildVocabConfig) -> dict[str, Path]:
+    """Install the supplied vocab by default, or run the explicit rebuild workflow."""
+
+    if config.mode == "supplied":
+        return _install_supplied_vocab(config)
+    if config.mode == "rebuild":
+        return _rebuild_vocab(config)
+    raise ValueError(f"Unsupported vocabulary mode {config.mode!r}; expected 'supplied' or 'rebuild'")
 
 
 def _write_reference_diff(config: BuildVocabConfig, final_vocab: pd.DataFrame) -> Path:

@@ -22,6 +22,11 @@ dependencies = [
   "torch>=2.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.16,<0.17",
+]
+
 [project.scripts]
 build-amsterdam-vocab = "metaicu.aumcdb.tokenized.cli.build_amsterdam_vocab:main"
 build-aumc-premeds = "metaicu.aumcdb.tokenized.cli.build_amsterdam_premeds:main"
@@ -41,3 +46,17 @@ where = ["src"]
   "data/policy_manifests/*.json",
 ]
 "metaicu.aumcdb.grid" = ["configs/*.yaml", "data/*.csv", "data/*.md"]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import polars as pl
 
-from metaicu.aumcdb.common.raw_schema import LARGE_TABLE_RAW_SCHEMAS, cast_raw_schema
 
 
 # Columns selected from admissions.parquet and joined to every event table.

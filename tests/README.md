@@ -1,5 +1,15 @@
 # Test Suite
 
+GitHub Actions runs the unit and integration suites below on every push and
+pull request. The `real_data` suite is deliberately excluded because hosted CI
+does not have access to AmsterdamUMCdb.
+
+Run the CI lint check locally:
+
+```bash
+uv run ruff check src tests scripts
+```
+
 Tests are separated by execution scope and then by pipeline subsystem.
 
 ```text

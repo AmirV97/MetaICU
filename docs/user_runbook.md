@@ -255,6 +255,17 @@ build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace run.medication_atc
 
 ## Tests
 
+GitHub Actions automatically runs Ruff plus the unit and integration suites on
+each push and pull request. Real-data tests remain local because hosted runners
+cannot access AmsterdamUMCdb.
+
+Install the development tools and run the same lint check locally:
+
+```bash
+uv sync --extra dev
+uv run ruff check src tests scripts
+```
+
 Run fast unit tests during development:
 
 ```bash

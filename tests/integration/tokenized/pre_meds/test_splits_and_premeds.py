@@ -17,9 +17,7 @@ from tests._paths import PROJECT_ROOT as PIPELINE_ROOT
 from metaicu.aumcdb.tokenized.pre_meds.build_workflow import PreMedsConfig, write_premeds_outputs
 from metaicu.aumcdb.common.parquet import parquet_exists
 from metaicu.aumcdb.tokenized.splits.build_splits import (
-    SplitConfig,
     assign_subject_splits,
-    write_subject_splits,
 )
 
 

@@ -37,6 +37,24 @@ Implemented:
 
 ## Tests
 
+GitHub Actions runs Ruff, unit tests, and fixture-based integration tests on
+every push and pull request. Real-data tests remain opt-in because CI has no
+access to AmsterdamUMCdb.
+
+Install the development tools:
+
+```bash
+uv sync --extra dev
+```
+
+Run the same checks locally:
+
+```bash
+uv run ruff check src tests scripts
+uv run python -m unittest discover -s tests/unit -t . -v
+uv run python -m unittest discover -s tests/integration -t . -v
+```
+
 Fast unit tests:
 
 ```bash

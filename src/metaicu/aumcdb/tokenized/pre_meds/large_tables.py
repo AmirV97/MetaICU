@@ -17,9 +17,6 @@ import polars as pl
 
 from metaicu.aumcdb.common.raw_schema import LARGE_TABLE_RAW_SCHEMAS
 from metaicu.aumcdb.common.raw_shards import (
-    RawShardAccumulator,
-    build_raw_shards_for_table,
-    build_raw_shards_for_tables,
     polars_dtypes as _polars_dtypes,
     raw_shards_exist,
     read_latin1_csv_batches as _read_latin1_csv_batches,

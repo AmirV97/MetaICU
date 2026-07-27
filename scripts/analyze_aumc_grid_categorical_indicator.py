@@ -66,7 +66,10 @@ def plot_indicator(df, feature, out_path):
 
     n_on = int((col == 1).sum())
     pct_on = 100 * n_on / n_total if n_total else 0.0
-    colors = ["darkorange" if l == "1" else "lightgray" if l == "0" else "gray" for l in labels]
+    colors = [
+        "darkorange" if label == "1" else "lightgray" if label == "0" else "gray"
+        for label in labels
+    ]
 
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.bar(labels, values, color=colors)

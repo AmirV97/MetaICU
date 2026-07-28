@@ -60,7 +60,7 @@ class SuppliedVocabContractTests(unittest.TestCase):
 
     def test_emitted_rows_have_model_tokens_and_roles(self) -> None:
         emitted = self.vocab[self.emit]
-        self.assertEqual(len(emitted), 4837)
+        self.assertEqual(len(emitted), 4843)
         self.assertTrue(emitted["harmonized_token"].ne("").all())
         self.assertTrue(emitted["token_role"].ne("").all())
 
@@ -124,6 +124,33 @@ class SuppliedVocabContractTests(unittest.TestCase):
         self.assertFalse(emitted.empty)
         joined = "|".join(emitted["harmonized_token"].tolist() + emitted["target_label"].tolist())
         self.assertNotIn("pantoprazole", joined.lower())
+
+    def test_apache_scores_use_current_standard_omop_concepts(self) -> None:
+        expected = {
+            "13081": ("LOINC", "3008138", "9264-3"),
+            "14453": ("LOINC", "3008138", "9264-3"),
+            "16624": ("LOINC", "3008138", "9264-3"),
+            "19499": ("LOINC", "3008138", "9264-3"),
+            "19500": ("SNOMED", "1450877", "1351474005"),
+            "19750": ("LOINC", "3015511", "9265-0"),
+        }
+        rows = self.vocab[
+            self.vocab["source_table"].eq("numericitems")
+            & self.vocab["source_itemid"].isin(expected)
+        ]
+        self.assertEqual(len(rows), 6)
+        self.assertEqual(int(rows["row_count_num"].sum()), 17438)
+        self.assertTrue(_is_true(rows["emit_as_model_token"]).all())
+
+        for itemid, (vocabulary, concept_id, code) in expected.items():
+            row = rows[rows["source_itemid"].eq(itemid)].iloc[0]
+            self.assertEqual(row["target_vocabulary"], vocabulary)
+            self.assertEqual(row["target_concept_id"], concept_id)
+            self.assertEqual(row["target_code"], code)
+            self.assertEqual(
+                row["harmonized_token"],
+                f"OMOP_CONCEPT//{vocabulary}//{concept_id}",
+            )
 
 
 if __name__ == "__main__":

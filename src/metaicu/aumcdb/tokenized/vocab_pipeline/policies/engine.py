@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from metaicu.aumcdb.tokenized.vocab_pipeline.policies.apache_scores import apply_apache_score_policy
 from metaicu.aumcdb.tokenized.vocab_pipeline.policies.gcs_components import apply_gcs_component_policy
 from metaicu.aumcdb.tokenized.vocab_pipeline.policies.lab_role import apply_lab_role_assignment
 from metaicu.aumcdb.tokenized.vocab_pipeline.policies.manifest_replay import apply_manifest_layers
@@ -43,4 +44,5 @@ def apply_policy_layers(baseline: pd.DataFrame, omop_vocab_dir: Path, manifest_d
     state = apply_namespace_canonicalization(state, omop_vocab_dir)
     state = apply_lab_role_assignment(state)
     state = apply_gcs_component_policy(state)
+    state = apply_apache_score_policy(state)
     return state

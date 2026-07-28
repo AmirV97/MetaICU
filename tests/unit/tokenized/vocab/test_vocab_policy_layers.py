@@ -11,6 +11,7 @@ from pathlib import Path
 import pandas as pd
 
 
+from metaicu.aumcdb.tokenized.vocab_pipeline.policies.apache_scores import apply_apache_score_policy
 from metaicu.aumcdb.tokenized.vocab_pipeline.policies.gcs_components import apply_gcs_component_policy
 from metaicu.aumcdb.tokenized.vocab_pipeline.policies.lab_role import apply_lab_role_assignment
 from metaicu.aumcdb.tokenized.vocab_pipeline.policies.manifest_replay import apply_manifest
@@ -82,6 +83,24 @@ class LabRoleTests(unittest.TestCase):
         )
         fixed = apply_lab_role_assignment(vocab)
         self.assertEqual(fixed.iloc[0]["token_role"], "metadata_only")
+
+
+class ApacheScoreTests(unittest.TestCase):
+    def test_apache_itemid_overrides_stale_unmapped_target(self) -> None:
+        vocab = pd.DataFrame(
+            [
+                _row(
+                    source_table="numericitems",
+                    source_itemid="19500",
+                    source_token="MEASUREMENT_BEDSIDE//19500//UNKNOWN",
+                )
+            ]
+        )
+        fixed = apply_apache_score_policy(vocab).iloc[0]
+        self.assertEqual(fixed["harmonized_token"], "OMOP_CONCEPT//SNOMED//1450877")
+        self.assertEqual(fixed["target_code"], "1351474005")
+        self.assertEqual(fixed["emit_as_model_token"], "True")
+        self.assertEqual(fixed["mapping_source"], "manual_omop_override")
 
 
 class GcsComponentTests(unittest.TestCase):

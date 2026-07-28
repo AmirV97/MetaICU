@@ -6965,7 +6965,7 @@ AmsterdamUMCdb,numericitems,13076,,191.0,,A_FiO2,,Geen,MEASUREMENT_BEDSIDE//1307
 AmsterdamUMCdb,numericitems,9470,,0.0,,Pacemaker Ventricle ampl.(output) ingesteld,,,MEASUREMENT_BEDSIDE//9470//UNKNOWN,10791,OMOP_CONCEPT//LOINC//1989449,dynamic_event,True,,LOINC,1989449.0,99693-4,1989449,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,9967,,101.0,,Eo app (bloed),,10^9/l,LAB//9967//10^9/l,10277,LOINC//3028615,dynamic_event/lab,True,,LOINC,3028615.0,3028615,3028615,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,12297,,3.0,,T peep (Set),,sec,MEASUREMENT_BEDSIDE//12297//sec,10221,OMOP_CONCEPT//LOINC//36306099,dynamic_event,True,,LOINC,36306099.0,76229-4,36306099,AMSTEL,source_code,high
-AmsterdamUMCdb,numericitems,13081,,191.0,,A_Apache_Score,,Geen,MEASUREMENT_BEDSIDE//13081//Geen,10094,,metadata_only,False,,,,,,,,unmapped
+AmsterdamUMCdb,numericitems,13081,,191.0,,A_Apache_Score,,Geen,MEASUREMENT_BEDSIDE//13081//Geen,10094,OMOP_CONCEPT//LOINC//3008138,dynamic_event,True,,LOINC,3008138,9264-3,Apache II score,manual_omop_override,exact_itemid,high
 AmsterdamUMCdb,numericitems,14249,,203.0,,NT-proBNP (bloed),,ng/l,LAB//14249//ng/l,9904,OMOP_CONCEPT//LOINC//3029187,dynamic_event/lab,True,,LOINC,3029187.0,33762-6,3029187,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,8719,,6.0,,Wonddrain2 Productie,,ml,SUBJECT_FLUID_OUTPUT//8719//ml,9715,OMOP_CONCEPT//LOINC//3006376,dynamic_event,True,,LOINC,3006376.0,9203-1,3006376,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,8700,,6.0,,Thoraxdrain2 Productie,,ml,MEASUREMENT_BEDSIDE//8700//ml,9482,OMOP_CONCEPT//LOINC//3026556,dynamic_event,True,,LOINC,3026556.0,9129-8,3026556,AMSTEL,source_code,high
@@ -7096,7 +7096,7 @@ AmsterdamUMCdb,numericitems,12778,,6.0,,Galdrain Stand,,ml,MEASUREMENT_BEDSIDE//
 AmsterdamUMCdb,numericitems,8925,,6.0,,Maagzuig,,ml,SUBJECT_FLUID_OUTPUT//8925//ml,2444,OMOP_CONCEPT//LOINC//3023454,dynamic_event,True,,LOINC,3023454.0,9149-6,3023454,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,10238,,44.0,,Cortisol (bloed),,nmol/l,LAB//10238//nmol/l,2430,OMOP_CONCEPT//LOINC//3036481,dynamic_event/lab,True,,LOINC,3036481.0,14675-3,3036481,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,11663,,197.0,,Leuco's/uL (liquor),,/µl,LAB//11663///µl,2416,OMOP//OMOP//3010813,dynamic_event/lab,True,,OMOP,3010813.0,3010813,white_blood_cells,BlendedICU,label_exact,high
-AmsterdamUMCdb,numericitems,19499,,191.0,,NICE Apache II Score,,Geen,MEASUREMENT_BEDSIDE//19499//Geen,2393,,metadata_only,False,,,,,,,,unmapped
+AmsterdamUMCdb,numericitems,19499,,191.0,,NICE Apache II Score,,Geen,MEASUREMENT_BEDSIDE//19499//Geen,2393,OMOP_CONCEPT//LOINC//3008138,dynamic_event,True,,LOINC,3008138,9264-3,Apache II score,manual_omop_override,exact_itemid,high
 AmsterdamUMCdb,numericitems,9954,,97.0,,Cholesterol (bloed),,mmol/l,LAB//9954//mmol/l,2386,LOINC//3019900,dynamic_event/lab,True,,LOINC,3019900.0,3019900,3019900,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,11661,,197.0,,Ery's/uL (liquor),,/µl,LAB//11661///µl,2385,LOINC//3026361,dynamic_event/lab,True,,LOINC,3026361.0,3026361,3026361,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,6824,,186.0,,CK-MB,,IE/l,LAB//6824//IE/l,2315,LOINC//3005785,dynamic_event/lab,True,,LOINC,3005785.0,3005785,3005785,AMSTEL,source_code,high
@@ -7105,7 +7105,7 @@ AmsterdamUMCdb,numericitems,6806,,186.0,,ASAT,,IE/l,LAB//6806//IE/l,2187,OMOP//O
 AmsterdamUMCdb,numericitems,18632,,0.0,,MC NAS Item 12 score,,,MEASUREMENT_BEDSIDE//18632//UNKNOWN,2186,,metadata_only,False,,,,,,,,unmapped
 AmsterdamUMCdb,numericitems,6800,,186.0,,ALAT,,IE/l,LAB//6800//IE/l,2185,OMOP//OMOP//3006923,dynamic_event/lab,True,,OMOP,3006923.0,3006923,alanine_aminotransferase,BlendedICU,label_exact,high
 AmsterdamUMCdb,numericitems,10412,,62.0,,Eiwit g/L (liquor),,g/l,LAB//10412//g/l,2168,LOINC//3019473,dynamic_event/lab,True,,LOINC,3019473.0,3019473,3019473,AMSTEL,source_code,high
-AmsterdamUMCdb,numericitems,19500,,191.0,,NICE Apache IV Score,,Geen,MEASUREMENT_BEDSIDE//19500//Geen,2163,,metadata_only,False,,,,,,,,unmapped
+AmsterdamUMCdb,numericitems,19500,,191.0,,NICE Apache IV Score,,Geen,MEASUREMENT_BEDSIDE//19500//Geen,2163,OMOP_CONCEPT//SNOMED//1450877,dynamic_event,True,,SNOMED,1450877,1351474005,APACHE IV (Acute Physiology and Chronic Health Evaluation IV) score,manual_omop_override,exact_itemid,high
 AmsterdamUMCdb,numericitems,8882,,177.0,,Intrinsic PEEP,,mbar,MEASUREMENT_BEDSIDE//8882//mbar,2149,OMOP_CONCEPT//LOINC//3035822,dynamic_event,True,,LOINC,3035822.0,38199-6,3035822,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,8701,,6.0,,Thoraxdrain3 Productie,,ml,MEASUREMENT_BEDSIDE//8701//ml,2112,OMOP_CONCEPT//LOINC//3026556,dynamic_event,True,,LOINC,3026556.0,9129-8,3026556,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,18361,,99.0,,Gecon.Bili  (bloed),,µmol/l,LAB//18361//µmol/l,2098,OMOP_CONCEPT//LOINC//3005772,dynamic_event/lab,True,,LOINC,3005772.0,29760-6,3005772,AMSTEL,source_code,high
@@ -7205,7 +7205,7 @@ AmsterdamUMCdb,numericitems,11854,,191.0,,Myelocyten % (bloed),,Geen,LAB//11854/
 AmsterdamUMCdb,numericitems,11849,,191.0,,Metamyelocyten % (bloed),,Geen,LAB//11849//Geen,1911,OMOP_CONCEPT//LOINC//3002179,dynamic_event/lab,True,,LOINC,3002179.0,28541-1,3002179,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,11586,,191.0,,Staaf % (bloed),,Geen,LAB//11586//Geen,1905,OMOP_CONCEPT//LOINC//3004809,dynamic_event/lab,True,,LOINC,3004809.0,26508-2,3004809,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,11716,,191.0,,Blasten % (bloed),,Geen,LAB//11716//Geen,1901,OMOP_CONCEPT//LOINC//3025159,dynamic_event/lab,True,,LOINC,3025159.0,26446-5,3025159,AMSTEL,source_code,high
-AmsterdamUMCdb,numericitems,16624,,191.0,,MCA_Apache_Score,,Geen,MEASUREMENT_BEDSIDE//16624//Geen,1898,,metadata_only,False,,,,,,,,unmapped
+AmsterdamUMCdb,numericitems,16624,,191.0,,MCA_Apache_Score,,Geen,MEASUREMENT_BEDSIDE//16624//Geen,1898,OMOP_CONCEPT//LOINC//3008138,dynamic_event,True,,LOINC,3008138,9264-3,Apache II score,manual_omop_override,exact_itemid,high
 AmsterdamUMCdb,numericitems,18828,,0.0,,IC NAS Item 20 score,,,MEASUREMENT_BEDSIDE//18828//UNKNOWN,1864,,metadata_only,False,,,,,,,,unmapped
 AmsterdamUMCdb,numericitems,16447,,0.0,,Veneuze lijn ProcessID,,,MEASUREMENT_BEDSIDE//16447//UNKNOWN,1783,SNOMED//4052413,dynamic_event/device_support,True,,SNOMED,4052413.0,233527006,4052413,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,18637,,0.0,,MC NAS Item 17 score,,,MEASUREMENT_BEDSIDE//18637//UNKNOWN,1739,,metadata_only,False,,,,,,,,unmapped
@@ -7267,7 +7267,7 @@ AmsterdamUMCdb,numericitems,19238,,191.0,,Fysio BBS zit-stand score,,Geen,MEASUR
 AmsterdamUMCdb,numericitems,18830,,0.0,,IC NAS Item 22 score,,,MEASUREMENT_BEDSIDE//18830//UNKNOWN,838,,metadata_only,False,,,,,,,,unmapped
 AmsterdamUMCdb,numericitems,13940,,173.0,,Intracraniële druk(2),,mmHg,MEASUREMENT_BEDSIDE//13940//mmHg,826,OMOP_CONCEPT//LOINC//21490653,dynamic_event,True,,LOINC,21490653.0,60956-0,21490653,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,10291,,62.0,,Totaal Eiwit (urine),,g/l,LAB//10291//g/l,821,LOINC//3019473,dynamic_event/lab,True,,LOINC,3019473.0,3019473,3019473,AMSTEL,source_code,high
-AmsterdamUMCdb,numericitems,19750,,191.0,,NICE Apache III Score,,Geen,MEASUREMENT_BEDSIDE//19750//Geen,818,,metadata_only,False,,,,,,,,unmapped
+AmsterdamUMCdb,numericitems,19750,,191.0,,NICE Apache III Score,,Geen,MEASUREMENT_BEDSIDE//19750//Geen,818,OMOP_CONCEPT//LOINC//3015511,dynamic_event,True,,LOINC,3015511,9265-0,Apache III score,manual_omop_override,exact_itemid,high
 AmsterdamUMCdb,numericitems,8721,,6.0,,Wonddrain4 Productie,,ml,MEASUREMENT_BEDSIDE//8721//ml,807,OMOP_CONCEPT//LOINC//3006376,dynamic_event,True,,LOINC,3006376.0,9203-1,3006376,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,9626,,6.0,,Wondlekkage,,ml,MEASUREMENT_BEDSIDE//9626//ml,804,OMOP_CONCEPT//LOINC//3039001,dynamic_event,True,,LOINC,3039001.0,39122-7,3039001,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,8796,,6.0,,UrineSupraPubis,,ml,MEASUREMENT_BEDSIDE//8796//ml,803,OMOP_CONCEPT//LOINC//3014315,dynamic_event,True,,LOINC,3014315.0,9187-6,3014315,AMSTEL,source_code,high
@@ -7531,7 +7531,7 @@ AmsterdamUMCdb,numericitems,12381,,3.0,,Tinsp (Set),,sec,MEASUREMENT_BEDSIDE//12
 AmsterdamUMCdb,numericitems,12329,,191.0,,O2 concentratie (Set) (2),,Geen,MEASUREMENT_BEDSIDE//12329//Geen,73,OMOP_CONCEPT//LOINC//3024882,dynamic_event,True,,LOINC,3024882.0,19994-3,3024882,AMSTEL,source_code,high
 AmsterdamUMCdb,numericitems,18442,,101.0,,Leuco's ascitesvocht (ascitesvocht),,10^9/l,LAB//18442//10^9/l,72,OMOP//OMOP//3010813,dynamic_event/lab,True,,OMOP,3010813.0,3010813,white_blood_cells,BlendedICU,label_exact,high
 AmsterdamUMCdb,numericitems,12336,,175.0,,PEEP (Set) (2),,cmH2O,MEASUREMENT_BEDSIDE//12336//cmH2O,72,OMOP_CONCEPT//LOINC//3022875,dynamic_event,True,,LOINC,3022875.0,20077-4,3022875,AMSTEL,source_code,high
-AmsterdamUMCdb,numericitems,14453,,191.0,,Research_Apache_Score,,Geen,MEASUREMENT_BEDSIDE//14453//Geen,72,,metadata_only,False,,,,,,Stage3J_curated_policy,drop_first_pass,unmapped
+AmsterdamUMCdb,numericitems,14453,,191.0,,Research_Apache_Score,,Geen,MEASUREMENT_BEDSIDE//14453//Geen,72,OMOP_CONCEPT//LOINC//3008138,dynamic_event,True,,LOINC,3008138,9264-3,Apache II score,manual_omop_override,exact_itemid,high
 AmsterdamUMCdb,numericitems,18633,,0.0,,MC NAS Item 13 score,,,MEASUREMENT_BEDSIDE//18633//UNKNOWN,72,,metadata_only,False,,,,,,Stage3J_curated_policy,drop_first_pass,unmapped
 AmsterdamUMCdb,numericitems,14349,,62.0,,Alb-Fr (bloed),,g/l,LAB//14349//g/l,71,OMOP//OMOP//3024561,dynamic_event/lab,True,,OMOP,3024561.0,3024561,albumin,BlendedICU,label_exact,high
 AmsterdamUMCdb,numericitems,10275,,97.0,,Calcium totaal (urine),,mmol/l,LAB//10275//mmol/l,70,LOINC//3015377,dynamic_event/lab,True,,LOINC,3015377.0,3015377,3015377,AMSTEL,source_code,high

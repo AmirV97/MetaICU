@@ -74,6 +74,8 @@ class TokenizationTests(unittest.TestCase):
 
             self.assertTrue(outputs["summary"].exists())
             self.assertTrue(outputs["vocab"].exists())
+            self.assertTrue(outputs["vocab_artifact"].exists())
+            self.assertIn("train_only", outputs["vocab_artifact"].name)
             self.assertTrue(outputs["timeline_index"].exists())
 
             vocab_codes = outputs["vocab"].read_text().splitlines()
@@ -83,6 +85,9 @@ class TokenizationTests(unittest.TestCase):
             self.assertIn("UNK", vocab_codes)
             self.assertIn("TIMELINE_END", vocab_codes)
             self.assertIn("2h-3h", vocab_codes)
+            self.assertIn("VITAL//HEART_RATE", vocab_codes)
+            self.assertIn("Q5", vocab_codes)
+            self.assertNotIn("VITAL//HEART_RATE//Q5", vocab_codes)
 
             timeline_index = pl.read_parquet(outputs["timeline_index"])
             train_idx = timeline_index.filter(pl.col("split") == "train")
@@ -151,6 +156,69 @@ class TokenizationTests(unittest.TestCase):
             self.assertEqual(summary["analysis_unit"], "subject")
             train_summary = next(row for row in summary["split_summaries"] if row["split"] == "train")
             self.assertEqual(train_summary["timelines"], 1)
+
+    def test_numeric_identity_and_shared_quantile_remain_adjacent_at_same_time(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_meds_split(root, "train", [
+                event(1, 10, 0, "ICU_ADMISSION"),
+                event(1, 10, 60, "LAB//A//Q9"),
+                event(1, 10, 60, "LAB//B//Q1"),
+                event(1, 10, 120, "ICU_DISCHARGE"),
+            ])
+            write_meds_split(root, "val", [event(2, 20, 0, "ICU_ADMISSION")])
+            write_meds_split(root, "test", [event(3, 30, 0, "ICU_ADMISSION")])
+
+            outputs = write_tokenized_outputs(
+                TokenizationConfig(
+                    meds_dir=root / "data/MEDS",
+                    output_dir=root / "data/tokenized",
+                    audit_dir=root / "audits/tokenization",
+                    metadata_dir=root / "data/tokenized/metadata",
+                    max_timelines_per_shard=10,
+                    overwrite=True,
+                )
+            )
+
+            vocab = outputs["vocab"].read_text().splitlines()
+            tokens = load_file(
+                str(root / "data/tokenized/train/0.safetensors")
+            )["tokens"].tolist()
+            decoded = [vocab[token] for token in tokens]
+            self.assertNotIn("LAB//A//Q9", vocab)
+            self.assertNotIn("LAB//B//Q1", vocab)
+            self.assertIn(["LAB//A", "Q9", "LAB//B", "Q1"], [
+                decoded[index:index + 4] for index in range(len(decoded) - 3)
+            ])
+
+    def test_full_data_vocab_includes_codes_observed_only_outside_train(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_meds_split(root, "train", [event(1, 10, 0, "TRAIN_CODE")])
+            write_meds_split(root, "val", [event(2, 20, 0, "VAL_ONLY_CODE")])
+            write_meds_split(root, "test", [event(3, 30, 0, "TEST_ONLY_CODE")])
+
+            outputs = write_tokenized_outputs(
+                TokenizationConfig(
+                    meds_dir=root / "data/MEDS",
+                    output_dir=root / "data/tokenized",
+                    audit_dir=root / "audits/tokenization",
+                    metadata_dir=root / "data/tokenized/metadata",
+                    vocab_artifact_dir=root / "mappings",
+                    vocab_scope="full_data",
+                    overwrite=True,
+                )
+            )
+
+            vocab_codes = outputs["vocab"].read_text().splitlines()
+            self.assertIn("TRAIN_CODE", vocab_codes)
+            self.assertIn("VAL_ONLY_CODE", vocab_codes)
+            self.assertIn("TEST_ONLY_CODE", vocab_codes)
+            self.assertIn("_full_", outputs["vocab_artifact"].name)
+            summary = json.loads(outputs["summary"].read_text())
+            self.assertTrue(
+                all(row["unknown_mapped_rows"] == 0 for row in summary["split_summaries"])
+            )
 
 
 if __name__ == "__main__":

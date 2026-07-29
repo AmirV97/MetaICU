@@ -221,6 +221,15 @@ build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace
 ```
 
 This builds the token vocabulary from `data/MEDS/train` only and reuses that frozen vocabulary for `val` and `test`.
+Use `vocab_scope=full_data` only when a descriptive vocabulary covering all
+three splits is required:
+
+```bash
+build-aumc-tokenized paths.parent_dir=/path/to/aumc_workspace vocab_scope=full_data
+```
+
+The durable vocabulary copy is written under `mappings/` as
+`aumc_token_vocab_train_only_tN.csv` or `aumc_token_vocab_full_tN.csv`.
 Codes seen only in `val` or `test` are mapped to the frozen `UNK` token and recorded in the tokenization unknown-code audit.
 
 Outputs:

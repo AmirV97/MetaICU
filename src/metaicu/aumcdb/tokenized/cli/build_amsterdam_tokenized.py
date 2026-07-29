@@ -43,6 +43,7 @@ def _build_config(cfg: DictConfig) -> TokenizationConfig:
     output_dir = _resolve_path(cfg, "output_dir", parent_dir, "data/tokenized")
     audit_dir = _resolve_path(cfg, "audit_dir", parent_dir, "audits/tokenization")
     metadata_dir = _resolve_path(cfg, "metadata_dir", parent_dir, "data/tokenized/metadata")
+    vocab_artifact_dir = _resolve_path(cfg, "vocab_artifact_dir", parent_dir, "mappings")
     splits = tuple(OmegaConf.to_container(cfg.run.splits, resolve=True))
     time_intervals_spec = dict(OmegaConf.to_container(cfg.time_intervals_spec, resolve=True))
     return TokenizationConfig(
@@ -50,8 +51,10 @@ def _build_config(cfg: DictConfig) -> TokenizationConfig:
         output_dir=output_dir,
         audit_dir=audit_dir,
         metadata_dir=metadata_dir,
+        vocab_artifact_dir=vocab_artifact_dir,
         splits=splits,
         train_split=str(cfg.run.train_split),
+        vocab_scope=str(cfg.run.vocab_scope),
         max_rows=_optional_int(OmegaConf.select(cfg, "run.max_rows")),
         max_timelines_per_shard=int(cfg.run.max_timelines_per_shard),
         medication_atc_depth=str(cfg.run.medication_atc_depth),

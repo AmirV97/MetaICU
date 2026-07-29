@@ -26,6 +26,8 @@ from metaicu.aumcdb.tokenized.tokenization.vocabulary import TokenVocabulary, bu
 TIMELINE_END = "TIMELINE_END"
 DEFAULT_UNKNOWN_TOKEN = "UNK"
 CORE_INPUT_COLUMNS = ["subject_id", "time", "code", "numeric_value", "text_value", "hadm_id", "icustay_id"]
+QUANTILE_TOKENS = frozenset(f"Q{index}" for index in range(1, 11))
+SEQUENCE_INDEX_COLUMN = "_sequence_index"
 
 
 DEFAULT_TIME_INTERVALS_SPEC: dict[str, dict[str, int]] = {
@@ -59,8 +61,10 @@ class TokenizationConfig:
     output_dir: Path
     audit_dir: Path
     metadata_dir: Path
+    vocab_artifact_dir: Path | None = None
     splits: tuple[str, ...] = ("train", "val", "test")
     train_split: str = "train"
+    vocab_scope: str = "train_only"
     max_rows: int | None = None
     max_timelines_per_shard: int = 1000
     medication_atc_depth: str = "full"
@@ -164,6 +168,15 @@ def _transform_medication_code(code: str, medication_atc_depth: str) -> str:
     return "//".join(pieces[:keep])
 
 
+def _expand_fused_quantile_code(code: str) -> tuple[str, ...]:
+    """Split a fused numeric code into an adjacent identity/quantile token pair."""
+
+    base, separator, suffix = code.rpartition("//")
+    if separator and base and suffix in QUANTILE_TOKENS:
+        return base, suffix
+    return (code,)
+
+
 def _interval_tokens_for_gap(gap_us: int, interval_bounds: dict[str, int]) -> tuple[list[str], list[int]]:
     """Return ETHOS-style interval token(s) for one positive time gap."""
 
@@ -191,6 +204,7 @@ def _expand_events(df: pl.DataFrame, config: TokenizationConfig) -> ExpandedEven
             "icustay_id": pl.Int64,
             "time": pl.Datetime("us"),
             "code": pl.String,
+            SEQUENCE_INDEX_COLUMN: pl.Int64,
         }
         return ExpandedEvents(pl.DataFrame(schema=schema), {}, 0)
 
@@ -203,6 +217,7 @@ def _expand_events(df: pl.DataFrame, config: TokenizationConfig) -> ExpandedEven
     for _, stay in df.partition_by(group_cols, as_dict=True, maintain_order=True).items():
         stay = stay.sort(sort_cols)
         previous_time_us: int | None = None
+        sequence_index = 0
         stay_rows = stay.select(["subject_id", "hadm_id", "icustay_id", "time", "code"]).iter_rows(named=True)
         buffered = list(stay_rows)
         for idx, row in enumerate(buffered):
@@ -211,21 +226,50 @@ def _expand_events(df: pl.DataFrame, config: TokenizationConfig) -> ExpandedEven
                 labels, durations = _interval_tokens_for_gap(time_us - previous_time_us, interval_bounds)
                 for label, duration in zip(labels, durations):
                     interval_durations[label].append(duration)
-                    rows.append({**row, "code": label})
-            rows.append({
-                **row,
-                "code": _transform_medication_code(str(row["code"]), config.medication_atc_depth),
-            })
+                    rows.append({**row, "code": label, SEQUENCE_INDEX_COLUMN: sequence_index})
+                    sequence_index += 1
+            normalized_code = _transform_medication_code(
+                str(row["code"]), config.medication_atc_depth
+            )
+            for expanded_code in _expand_fused_quantile_code(normalized_code):
+                rows.append({
+                    **row,
+                    "code": expanded_code,
+                    SEQUENCE_INDEX_COLUMN: sequence_index,
+                })
+                sequence_index += 1
             if idx == len(buffered) - 1:
-                rows.append({**row, "code": TIMELINE_END})
+                rows.append({
+                    **row,
+                    "code": TIMELINE_END,
+                    SEQUENCE_INDEX_COLUMN: sequence_index,
+                })
+                sequence_index += 1
             previous_time_us = time_us
 
     return ExpandedEvents(pl.DataFrame(rows), dict(interval_durations), df.height)
 
 
-def _build_train_expanded(config: TokenizationConfig) -> tuple[ExpandedEvents, TokenVocabulary, Counter[str]]:
-    train = _expand_events(_load_split_events(config, config.train_split), config)
-    code_counts = Counter(train.df["code"].to_list()) if not train.df.is_empty() else Counter()
+def _build_scoped_vocab(
+    config: TokenizationConfig,
+) -> tuple[ExpandedEvents, TokenVocabulary, Counter[str]]:
+    """Build a vocabulary from train only or from every configured split."""
+
+    scope_splits = (
+        (config.train_split,)
+        if config.vocab_scope == "train_only"
+        else config.splits
+    )
+    train: ExpandedEvents | None = None
+    code_counts: Counter[str] = Counter()
+    for split in scope_splits:
+        expanded = _expand_events(_load_split_events(config, split), config)
+        if split == config.train_split:
+            train = expanded
+        if not expanded.df.is_empty():
+            code_counts.update(expanded.df["code"].to_list())
+    if train is None:
+        train = _expand_events(_load_split_events(config, config.train_split), config)
     vocab_codes = list(code_counts)
     if config.unknown_token:
         vocab_codes.append(config.unknown_token)
@@ -241,6 +285,11 @@ def _write_vocab_files(
 ) -> dict[str, Path]:
     train_dir = config.output_dir / config.train_split
     vocab_path = vocab.dump(train_dir)
+    artifact_dir = config.vocab_artifact_dir or config.output_dir / "mappings"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    artifact_scope = "full" if config.vocab_scope == "full_data" else "train_only"
+    scoped_vocab_path = artifact_dir / f"aumc_token_vocab_{artifact_scope}_t{len(vocab)}.csv"
+    shutil.copy2(vocab_path, scoped_vocab_path)
     pl.DataFrame(
         [{"code": code, "count": count} for code, count in train_code_counts.most_common()]
     ).write_csv(train_dir / "code_counts.csv")
@@ -257,7 +306,12 @@ def _write_vocab_files(
         shutil.copy(train_dir / "vocab_decoded.csv", split_dir / "vocab_decoded.csv")
         shutil.copy(interval_path, split_dir / "interval_estimates.json")
 
-    return {"vocab": vocab_path, "intervals": interval_path, "code_counts": train_dir / "code_counts.csv"}
+    return {
+        "vocab": vocab_path,
+        "vocab_artifact": scoped_vocab_path,
+        "intervals": interval_path,
+        "code_counts": train_dir / "code_counts.csv",
+    }
 
 
 def _quantile(values: list[int], q: float) -> int:
@@ -294,9 +348,8 @@ def _prepare_outputs(config: TokenizationConfig) -> None:
 
 def _timeline_groups(df: pl.DataFrame, config: TokenizationConfig) -> Iterable[pl.DataFrame]:
     group_cols = _timeline_group_columns(config)
-    sort_cols = _within_timeline_sort_columns(config)
     for _, group in df.partition_by(group_cols, as_dict=True, maintain_order=True).items():
-        yield group.sort(sort_cols)
+        yield group.sort(SEQUENCE_INDEX_COLUMN)
 
 
 def _timeline_metadata(group: pl.DataFrame, split: str, shard_idx: int, timeline_idx: int, token_start: int, token_end: int, config: TokenizationConfig) -> dict[str, Any]:
@@ -471,6 +524,7 @@ def _write_audits(
     summary = {
         "splits": list(config.splits),
         "train_split": config.train_split,
+        "vocab_scope": config.vocab_scope,
         "output_dir": str(config.output_dir),
         "metadata_dir": str(config.metadata_dir),
         "meds_dir": str(config.meds_dir),
@@ -498,10 +552,12 @@ def write_tokenized_outputs(config: TokenizationConfig) -> dict[str, Path]:
         raise ValueError("max_timelines_per_shard must be >= 1")
     if config.analysis_unit not in {"stay", "subject"}:
         raise ValueError("analysis_unit must be 'stay' or 'subject'")
+    if config.vocab_scope not in {"train_only", "full_data"}:
+        raise ValueError("vocab_scope must be 'train_only' or 'full_data'")
 
     _prepare_outputs(config)
-    _log("1/4 building train-frozen token vocabulary")
-    train_expanded, vocab, train_counts = _build_train_expanded(config)
+    _log(f"1/4 building token vocabulary (scope={config.vocab_scope})")
+    train_expanded, vocab, train_counts = _build_scoped_vocab(config)
     vocab_paths = _write_vocab_files(config, vocab, train_counts, train_expanded.interval_durations_us)
     codes_metadata = _write_codes_metadata(config, vocab, train_counts)
     _log(f"  vocab size={len(vocab):,} -> {vocab_paths['vocab']}")
@@ -545,6 +601,7 @@ def write_tokenized_outputs(config: TokenizationConfig) -> dict[str, Path]:
     outputs = {
         "summary": summary_path,
         "vocab": vocab_paths["vocab"],
+        "vocab_artifact": vocab_paths["vocab_artifact"],
         "codes_metadata": codes_metadata,
         "timeline_index": config.metadata_dir / "timeline_index.parquet",
     }

@@ -3,9 +3,14 @@
 # Minimal invocation:
 #   build-aumc-tokenized paths.parent_dir=/path/to/workspace
 #
-# The token vocabulary is built from data/MEDS/train only and reused unchanged
-# for val/test. By default, timelines are one ICU admission/stay each, keyed by
-# (subject_id, hadm_id), with a metadata timeline index for recovery.
+# The default train_only vocabulary is built from data/MEDS/train and reused
+# unchanged for val/test. Select vocab_scope=full_data for a descriptive
+# vocabulary spanning all configured splits. By default, timelines are one ICU
+# admission/stay each, keyed by (subject_id, hadm_id).
+
+defaults:
+  - vocab_scope: train_only
+  - _self_
 
 paths:
   parent_dir: null
@@ -13,6 +18,7 @@ paths:
   output_dir: null     # defaults to parent_dir/data/tokenized
   audit_dir: null      # defaults to parent_dir/audits/tokenization
   metadata_dir: null   # defaults to parent_dir/data/tokenized/metadata
+  vocab_artifact_dir: null  # defaults to parent_dir/mappings
 
 run:
   overwrite: false

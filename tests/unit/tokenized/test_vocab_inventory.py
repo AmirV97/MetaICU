@@ -35,10 +35,10 @@ class VocabInventoryTests(unittest.TestCase):
             })
             admissions.write_parquet(pre_meds / "admissions.parquet")
             pl.DataFrame({
-                "admissionid": [10, 20],
-                "itemid": [1, 2],
-                "unitid": [1, 1],
-                "event_temporal_phase": ["admission", "admission"],
+                "admissionid": [10, 20, 10],
+                "itemid": [1, 2, 6789],
+                "unitid": [1, 1, 1],
+                "event_temporal_phase": ["admission", "admission", "admission"],
             }).write_parquet(pre_meds / "numericitems.parquet")
             pl.DataFrame({
                 "admissionid": [10, 20],
@@ -68,6 +68,7 @@ class VocabInventoryTests(unittest.TestCase):
             pl.DataFrame([
                 self._vocab_row("numericitems", 1, "LAB//TRAIN", unitid=1),
                 self._vocab_row("numericitems", 2, "LAB//VAL", unitid=1),
+                self._vocab_row("numericitems", 6789, "LAB//EXCLUDED_PT", unitid=1),
                 self._vocab_row("listitems", 3, "STATE//TRAIN", valueid=1),
                 self._vocab_row("listitems", 4, "STATE//VAL", valueid=1),
             ]).write_csv(vocab_path)
@@ -84,6 +85,7 @@ class VocabInventoryTests(unittest.TestCase):
             self.assertLess(train, full)
             self.assertIn("STATE//VAL", full - train)
             self.assertNotIn("LAB//VAL", full)
+            self.assertNotIn("LAB//EXCLUDED_PT", train | full)
             self.assertEqual({f"Q{i}" for i in range(1, 11)}, {x for x in train if x.startswith("Q")})
 
     @staticmethod

@@ -14,6 +14,7 @@ from pathlib import Path
 import polars as pl
 
 from metaicu.aumcdb.common.parquet import resolve_table_parquet, scan_parquet
+from metaicu.aumcdb.tokenized.meds.numeric_qc import EXCLUDED_ITEMIDS
 from metaicu.aumcdb.tokenized.meds.vocab import load_vocab, table_vocab
 from metaicu.aumcdb.tokenized.meds.outcomes import assign_death_outcomes
 from metaicu.aumcdb.tokenized.tokenization.build_workflow import (
@@ -111,6 +112,8 @@ def _measurement_codes(
         .filter(_phase_filter())
         .join(tv.lazy(), on=list(joins.values()), how="inner")
     )
+    if table == "numericitems" and EXCLUDED_ITEMIDS:
+        rows = rows.filter(~pl.col("itemid").is_in(EXCLUDED_ITEMIDS))
     return _collect_unique_codes(rows, "harmonized_token")
 
 

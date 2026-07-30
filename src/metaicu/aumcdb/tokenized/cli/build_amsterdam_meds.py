@@ -78,12 +78,13 @@ def _base_paths(cfg: DictConfig) -> tuple[Path, Path, Path, Path, Path]:
 
 
 def _build_single_config(cfg: DictConfig) -> MEDSConfig:
-    pre_meds_dir, vocab_path, output_dir, audit_dir, _ = _base_paths(cfg)
+    pre_meds_dir, vocab_path, output_dir, audit_dir, metadata_dir = _base_paths(cfg)
     return MEDSConfig(
         pre_meds_dir=pre_meds_dir,
         vocab_path=vocab_path,
         output_dir=output_dir,
         audit_dir=audit_dir,
+        metadata_dir=metadata_dir,
         mode=str(cfg.run.mode),
         num_patients=_optional_int(OmegaConf.select(cfg, "run.num_patients")),
         seed=int(cfg.run.seed),

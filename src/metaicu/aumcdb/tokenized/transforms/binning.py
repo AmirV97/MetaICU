@@ -49,6 +49,13 @@ def percent_reduction(before: int, after: int) -> float | None:
     return round(100.0 * (1.0 - after / before), 6)
 
 
+def _partition_sink(root: Path, key: str) -> Any:
+    """Return the partitioned Parquet sink used by the installed Polars."""
+    if hasattr(pl, "PartitionBy"):
+        return pl.PartitionBy(root, key=key, include_key=False)
+    return pl.PartitionByKey(root, by=key, include_key=False)
+
+
 @dataclass(frozen=True)
 class CausalMeanBinningConfig:
     """Configuration for one numericitems causal mean-binning run."""
@@ -97,6 +104,8 @@ class CausalMeanBinningConfig:
         )
     )
     window_minutes: int = 60
+    partition_column: str = "admissionid"
+    partition_count: int = 64
     overwrite: bool = False
 
 
@@ -129,6 +138,8 @@ class CausalMeanBinningTransform:
         cfg = self.config
         if cfg.window_minutes <= 0:
             raise ValueError("window_minutes must be > 0")
+        if cfg.partition_count <= 0:
+            raise ValueError("partition_count must be > 0")
         if not parquet_exists(cfg.input_path):
             raise FileNotFoundError(f"Missing numericitems input for binning: {cfg.input_path}")
         if not cfg.inventory_path.is_file():
@@ -154,25 +165,48 @@ class CausalMeanBinningTransform:
             self._scan_input().filter(pl.col(cfg.signal_column).is_in(highres_ids))
         ) if highres_ids else 0
 
-        if highres_ids:
-            dense = self._binned_dense_frame(highres_ids, input_columns)
-            passthrough = self._raw_passthrough_frame(highres_ids, input_columns)
-            output = pl.concat([dense, passthrough], how="vertical_relaxed")
-        else:
-            output = self._raw_passthrough_frame(highres_ids, input_columns)
+        bucket_root = self._write_input_buckets()
+        self._prepare_output_path()
+        try:
+            bucket_files = sorted(bucket_root.rglob("*.parquet"))
+            for part_index, bucket_file in enumerate(bucket_files):
+                source = pl.scan_parquet(bucket_file)
+                if highres_ids:
+                    dense = self._binned_dense_frame(
+                        source, highres_ids, input_columns
+                    )
+                    passthrough = self._raw_passthrough_frame(
+                        source, highres_ids, input_columns
+                    )
+                    output = pl.concat(
+                        [dense, passthrough], how="vertical_relaxed"
+                    )
+                else:
+                    output = self._raw_passthrough_frame(
+                        source, highres_ids, input_columns
+                    )
+                output = output.select(
+                    input_columns + BINNING_PROVENANCE_COLUMNS
+                )
+                self._write_output_part(output, part_index)
+        finally:
+            shutil.rmtree(bucket_root, ignore_errors=True)
 
-        output = output.select(input_columns + BINNING_PROVENANCE_COLUMNS)
-        output_rows = output.height
-        binned_rows = self._dataframe_count(output, pl.col("binning_method") == "causal_mean")
-        passthrough_rows = self._dataframe_count(output, pl.col("binning_method") == "raw_passthrough")
-
-        self._write_output(output)
+        written = scan_parquet(cfg.output_path)
+        output_rows = self._row_count(written)
+        binned_rows = self._lazyframe_count(
+            written, pl.col("binning_method") == "causal_mean"
+        )
+        passthrough_rows = self._lazyframe_count(
+            written, pl.col("binning_method") == "raw_passthrough"
+        )
         summary = {
             "split": cfg.split_name,
             "input_path": str(cfg.input_path),
             "output_path": str(cfg.output_path),
             "inventory_path": str(cfg.inventory_path),
             "window_minutes": cfg.window_minutes,
+            "partition_count": cfg.partition_count,
             "raw_rows": raw_rows,
             "output_rows": output_rows,
             "high_resolution_signal_count": len(highres_ids),
@@ -195,10 +229,19 @@ class CausalMeanBinningTransform:
         return int(frame.select(pl.len().alias("n")).collect(engine="streaming")["n"][0])
 
     @staticmethod
-    def _dataframe_count(frame: pl.DataFrame, predicate: pl.Expr) -> int:
-        return int(frame.filter(predicate).select(pl.len().alias("n"))["n"][0])
+    def _lazyframe_count(frame: pl.LazyFrame, predicate: pl.Expr) -> int:
+        return int(
+            frame.filter(predicate)
+            .select(pl.len().alias("n"))
+            .collect(engine="streaming")["n"][0]
+        )
 
-    def _binned_dense_frame(self, highres_ids: list[Any], input_columns: list[str]) -> pl.DataFrame:
+    def _binned_dense_frame(
+        self,
+        source: pl.LazyFrame,
+        highres_ids: list[Any],
+        input_columns: list[str],
+    ) -> pl.LazyFrame:
         cfg = self.config
         group_cols = [col for col in _unique_preserving_order(list(cfg.grouping_columns)) if col in input_columns]
         if cfg.signal_column not in group_cols:
@@ -210,7 +253,7 @@ class CausalMeanBinningTransform:
         ]
 
         dense = (
-            self._scan_input()
+            source
             .filter(pl.col(cfg.signal_column).is_in(highres_ids))
             .filter(pl.col(cfg.time_column).is_not_null())
             .filter(pl.col(cfg.value_column).is_not_null())
@@ -235,12 +278,16 @@ class CausalMeanBinningTransform:
             )
         )
         dense = self._recompute_measurement_times(dense)
-        dense_df = dense.collect(engine="streaming")
-        return self._align_to_input_schema(dense_df, input_columns)
+        return self._align_to_input_schema(dense, input_columns)
 
-    def _raw_passthrough_frame(self, highres_ids: list[Any], input_columns: list[str]) -> pl.DataFrame:
+    def _raw_passthrough_frame(
+        self,
+        source: pl.LazyFrame,
+        highres_ids: list[Any],
+        input_columns: list[str],
+    ) -> pl.LazyFrame:
         cfg = self.config
-        raw = self._scan_input()
+        raw = source
         if highres_ids:
             raw = raw.filter(~pl.col(cfg.signal_column).is_in(highres_ids))
         raw = raw.with_columns(
@@ -252,7 +299,7 @@ class CausalMeanBinningTransform:
                 pl.lit("raw_passthrough").alias("binning_method"),
             ]
         )
-        return raw.select(input_columns + BINNING_PROVENANCE_COLUMNS).collect(engine="streaming")
+        return raw.select(input_columns + BINNING_PROVENANCE_COLUMNS)
 
     def _recompute_measurement_times(self, dense: pl.LazyFrame) -> pl.LazyFrame:
         columns = dense.collect_schema().names()
@@ -280,27 +327,70 @@ class CausalMeanBinningTransform:
         return out
 
     @staticmethod
-    def _align_to_input_schema(frame: pl.DataFrame, input_columns: list[str]) -> pl.DataFrame:
+    def _align_to_input_schema(frame: pl.LazyFrame, input_columns: list[str]) -> pl.LazyFrame:
+        columns = frame.collect_schema().names()
         for column in input_columns:
-            if column not in frame.columns:
+            if column not in columns:
                 frame = frame.with_columns(pl.lit(None).alias(column))
         for column in BINNING_PROVENANCE_COLUMNS:
-            if column not in frame.columns:
+            if column not in columns:
                 frame = frame.with_columns(pl.lit(None).alias(column))
         return frame.select(input_columns + BINNING_PROVENANCE_COLUMNS)
 
-    def _write_output(self, output: pl.DataFrame) -> None:
+    def _write_input_buckets(self) -> Path:
+        cfg = self.config
+        schema = self._scan_input().collect_schema()
+        if cfg.partition_column not in schema:
+            raise ValueError(
+                f"Missing binning partition column: {cfg.partition_column}"
+            )
+        bucket_root = cfg.output_path.with_name(
+            f"{cfg.output_path.name}.__tmp_binning_buckets"
+        )
+        if bucket_root.exists():
+            shutil.rmtree(bucket_root)
+        bucket_expr = (
+            pl.col(cfg.partition_column)
+            .cast(pl.Int64)
+            .mod(cfg.partition_count)
+            .alias("_bin_bucket")
+        )
+        self._scan_input().with_columns(bucket_expr).sink_parquet(
+            _partition_sink(bucket_root, "_bin_bucket"),
+            mkdir=True,
+            engine="streaming",
+        )
+        return bucket_root
+
+    def _prepare_output_path(self) -> None:
         path = self.config.output_path
         if path.exists():
             if not self.config.overwrite:
-                raise FileExistsError(f"Binned numeric output already exists: {path}")
+                raise FileExistsError(
+                    f"Binned numeric output already exists: {path}"
+                )
             if path.is_dir():
                 shutil.rmtree(path)
             else:
                 path.unlink()
         if path.suffix == ".parquet":
             path.parent.mkdir(parents=True, exist_ok=True)
-            output.write_parquet(path)
         else:
             path.mkdir(parents=True, exist_ok=True)
-            output.write_parquet(path / "part-00000.parquet")
+
+    def _write_output_part(
+        self, output: pl.LazyFrame, part_index: int
+    ) -> None:
+        path = self.config.output_path
+        if path.suffix == ".parquet":
+            if part_index > 0:
+                raise ValueError(
+                    "File output supports only partition_count=1; use a directory"
+                )
+            output.sink_parquet(path, mkdir=True, engine="streaming")
+        else:
+            output.sink_parquet(
+                path / f"part-{part_index:05d}.parquet",
+                mkdir=True,
+                engine="streaming",
+            )

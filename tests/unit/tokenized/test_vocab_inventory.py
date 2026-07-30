@@ -23,7 +23,10 @@ class VocabInventoryTests(unittest.TestCase):
             pre_meds.mkdir()
             admissions = pl.DataFrame({
                 "admissionid": [10, 20],
+                "hadm_id": [10, 20],
                 "subject_id": [1, 2],
+                "admittedattime": [datetime(2010, 1, 1), datetime(2010, 1, 1)],
+                "dischargedattime": [datetime(2010, 1, 2), datetime(2010, 1, 2)],
                 "dateofdeathtime": [None, datetime(2010, 1, 2)],
                 "gender": ["Man", "Vrouw"],
                 "agegroup": ["60-69", "70-79"],

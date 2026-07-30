@@ -59,6 +59,14 @@ class TokenizationTests(unittest.TestCase):
                 event(3, 30, 0, "ICU_ADMISSION"),
                 event(3, 30, 60, "VITAL//HEART_RATE//Q5"),
             ])
+            source_metadata = root / "data/metadata"
+            source_metadata.mkdir(parents=True)
+            pl.DataFrame({"subject_id": [1, 2, 3]}).write_parquet(
+                source_metadata / "subjects.parquet"
+            )
+            pl.DataFrame({"subject_id": [1, 2, 3], "hadm_id": [10, 20, 30]}).write_parquet(
+                source_metadata / "admissions.parquet"
+            )
 
             outputs = write_tokenized_outputs(
                 TokenizationConfig(
@@ -77,6 +85,12 @@ class TokenizationTests(unittest.TestCase):
             self.assertTrue(outputs["vocab_artifact"].exists())
             self.assertIn("train_only", outputs["vocab_artifact"].name)
             self.assertTrue(outputs["timeline_index"].exists())
+            self.assertTrue(outputs["subjects_metadata"].exists())
+            self.assertTrue(outputs["admissions_metadata"].exists())
+            self.assertEqual(
+                pl.read_parquet(outputs["subjects_metadata"])["subject_id"].to_list(),
+                [1, 2, 3],
+            )
 
             vocab_codes = outputs["vocab"].read_text().splitlines()
             self.assertIn("MEDICATION//C07//A", vocab_codes)

@@ -34,8 +34,9 @@ meds:
     - preadmission
     - admission
   # postadmission excluded by default to prevent leakage.
-  # Outcome tokens (ICU_DISCHARGE, MEDS_DEATH) are written with
-  # temporal_phase='outcome' and must be excluded by training code when used as labels.
+  # ICU_DISCHARGE is emitted per admission. MEDS_DEATH is emitted for at most
+  # one admission per subject and only during ICU or <=24h after discharge.
+  # Later deaths remain in subject/admission metadata only.
   quantile_bins: 10
 
 hydra:

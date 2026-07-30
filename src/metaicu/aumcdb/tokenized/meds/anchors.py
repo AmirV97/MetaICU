@@ -13,6 +13,7 @@ from pathlib import Path
 import polars as pl
 
 from metaicu.aumcdb.tokenized.meds.common import coerce_debug_frame, empty_debug_frame
+from metaicu.aumcdb.tokenized.meds.outcomes import assign_death_outcomes
 from metaicu.aumcdb.common.parquet import resolve_table_parquet, scan_parquet
 
 
@@ -62,9 +63,10 @@ def anchor_and_context_events(admissions: pl.DataFrame) -> pl.DataFrame:
     temporal_phase='outcome'. They are written to the debug parquet and sorted
     last in the timeline. Training code must exclude them when outcome=label.
     """
-    base = admissions.select([
+    base = assign_death_outcomes(admissions).select([
         "subject_id", "admissionid", "hadm_id", "stay_id",
         "admittedattime", "dischargedattime", "dateofdeathtime",
+        "death_token_emitted", "death_token_time",
         "gender", "agegroup", "weightgroup", "heightgroup",
     ])
     frames: list[pl.DataFrame] = []
@@ -88,8 +90,8 @@ def anchor_and_context_events(admissions: pl.DataFrame) -> pl.DataFrame:
         ])
     ))
     frames.append(coerce_debug_frame(
-        base.filter(pl.col("dateofdeathtime").is_not_null()).with_columns([
-            pl.col("dateofdeathtime").alias("time"),
+        base.filter(pl.col("death_token_emitted")).with_columns([
+            pl.col("death_token_time").alias("time"),
             pl.lit("MEDS_DEATH").alias("code"),
             pl.lit("patient").alias("source_table"),
             pl.lit("outcome").alias("token_role"),

@@ -194,6 +194,19 @@ build-aumc-premeds paths.parent_dir=/path/to/aumc_workspace \
   run.num_patients=1000 run.max_rows=1000000
 ```
 
+Full source-preservation and split-integrity audit:
+
+```bash
+audit-aumc-premeds --parent-dir /path/to/aumc_workspace
+```
+
+This performs streaming two-seed source-row fingerprint checks for the large
+tables, reconciles documented exclusions and categorical state-change
+deduplication, verifies subject-level split isolation and split-output parity,
+and checks raw numeric passthrough plus causal hourly-bin invariants. Results
+are written under `audits/pre-MEDS/full_integrity/`; required-check failures
+produce a nonzero exit code.
+
 ## MEDS-Like QC Conversion
 
 Split-aware MEDS conversion:
@@ -203,6 +216,8 @@ build-aumc-meds paths.parent_dir=/path/to/aumc_workspace
 ```
 
 When split pre-MEDS folders exist, this writes `data/MEDS/{train,val,test}/`. Numeric quantile boundaries are fit on train only, saved to `data/metadata/numeric_quantile_boundaries.parquet`, and reused for all splits.
+
+Death is assigned to at most one ICU admission. `MEDS_DEATH` is emitted for an in-ICU death or a death recorded within 24 hours after discharge. Later deaths remain in `data/metadata/subjects.parquet` and `data/metadata/admissions.parquet` without extending the token timeline.
 
 Before fitting or applying those boundaries, raw numeric values go through `tokenized/meds/numeric_qc.py`, which reuses the grid pipeline's itemid-level corrections (`grid/build/unit_conversion_overrides.py`, `plausibility_bounds.py`, and the manifest's rejected duplicates like `pt`) so the same mislabeled units, device sentinels, and implausible readings don't corrupt either pipeline's numeric values. It's keyed by itemid, the only thing the two pipelines' vocabularies actually share -- grid pools itemids into physiology tags, tokenized keeps each itemid as its own token.
 
@@ -232,6 +247,12 @@ The durable vocabulary copy is written under `mappings/` as
 `aumc_token_vocab_train_only_tN.csv` or `aumc_token_vocab_full_tN.csv`.
 Codes seen only in `val` or `test` are mapped to the frozen `UNK` token and recorded in the tokenization unknown-code audit.
 
+Full safetensor integrity audit:
+```bash
+audit-aumc-tokenized --parent-dir /path/to/aumc_workspace
+```
+This reconciles tensor shapes, vocabulary IDs, timeline offsets and identities, timestamp ordering, terminal tokens, shared quantile-token adjacency, stored token counts, and deterministic sampled MEDS-to-token tracebacks. It also writes sequence-length and timeline-duration histograms under `audits/tokenization/full_integrity/`.
+
 Outputs:
 
 ```text
@@ -242,6 +263,8 @@ data/tokenized/train/code_counts.csv
 data/tokenized/train/interval_estimates.json
 data/tokenized/metadata/codes.parquet
 data/tokenized/metadata/timeline_index.parquet
+data/tokenized/metadata/subjects.parquet
+data/tokenized/metadata/admissions.parquet
 audits/tokenization/tokenization_summary.json
 ```
 

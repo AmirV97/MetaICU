@@ -15,6 +15,7 @@ import polars as pl
 
 from metaicu.aumcdb.common.parquet import resolve_table_parquet, scan_parquet
 from metaicu.aumcdb.tokenized.meds.vocab import load_vocab, table_vocab
+from metaicu.aumcdb.tokenized.meds.outcomes import assign_death_outcomes
 from metaicu.aumcdb.tokenized.tokenization.build_workflow import (
     DEFAULT_TIME_INTERVALS_SPEC,
     TIMELINE_END,
@@ -69,14 +70,10 @@ def _collect_unique_codes(frame: pl.LazyFrame, code_column: str) -> set[str]:
 
 
 def _anchor_codes(scope_admissions: pl.LazyFrame) -> set[str]:
+    admissions = scope_admissions.collect(engine="streaming")
+    assigned = assign_death_outcomes(admissions)
     codes = {"ICU_ADMISSION", "ICU_DISCHARGE"}
-    death_rows = (
-        scope_admissions.filter(pl.col("dateofdeathtime").is_not_null())
-        .select(pl.len().alias("n"))
-        .collect(engine="streaming")
-        .item()
-    )
-    if death_rows:
+    if assigned.filter(pl.col("death_token_emitted")).height:
         codes.add("MEDS_DEATH")
     for column, prefix in (
         ("gender", "GENDER"),
@@ -85,10 +82,9 @@ def _anchor_codes(scope_admissions: pl.LazyFrame) -> set[str]:
         ("heightgroup", "HEIGHTGROUP"),
     ):
         values = (
-            scope_admissions.select(pl.col(column).cast(pl.String))
+            assigned.select(pl.col(column).cast(pl.String))
             .drop_nulls()
             .unique()
-            .collect(engine="streaming")
             .get_column(column)
             .to_list()
         )

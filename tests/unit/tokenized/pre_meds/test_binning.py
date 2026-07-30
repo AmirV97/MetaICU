@@ -79,6 +79,7 @@ class CausalMeanBinningTests(unittest.TestCase):
                     summary_path=summary_path,
                     split_name="train",
                     window_minutes=60,
+                    partition_count=1,
                     overwrite=True,
                 )
             ).run()
@@ -127,6 +128,7 @@ class CausalMeanBinningTests(unittest.TestCase):
                     inventory_path=inventory_path,
                     summary_path=summary_path,
                     window_minutes=60,
+                    partition_count=1,
                     overwrite=True,
                 )
             ).run()

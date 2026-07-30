@@ -776,75 +776,75 @@ DRUG//START//65//13490,v11_listitem_values,MEDICATION//V03//A//B17,dynamic_event
 DRUG//START//65//9013,v11_listitem_values,MEDICATION//M03//A//C04,dynamic_event,True,,ATC,21604081.0,M03AC04,atracurium,omop_only_medication_action_ready,validated_atc_code,high
 DRUG//START//67//19211,v11_listitem_values,MEDICATION//H01//A//C01,dynamic_event,True,,ATC,21602690.0,H01AC01,somatropin; parenteral,omop_only_medication_action_ready,validated_atc_code,high
 DRUG//START//70//7023,v11_listitem_values,MEDICATION//R03//D//A04,dynamic_event,True,,ATC,21603332.0,R03DA04,"theophylline; oral, parenteral, rectal",omop_only_medication_action_ready,validated_atc_code,high
-FREETEXT//11646//1,v11_listitem_values,LOINC//3053213,metadata_only,False,,LOINC,3053213.0,47938-6,3053213,AMSTEL,source_code,low
-FREETEXT//10890//1,v11_listitem_values,LOINC//3037185,metadata_only,False,,LOINC,3037185.0,2887-8,3037185,AMSTEL,source_code,low
-FREETEXT//10906//1,v11_listitem_values,LOINC//3003344,metadata_only,False,,LOINC,3003344.0,725-2,3003344,AMSTEL,source_code,low
-FREETEXT//14281//1,v11_listitem_values,LOINC//3045414,metadata_only,False,,LOINC,3045414.0,33052-2,3045414,AMSTEL,source_code,low
-FREETEXT//14278//1,v11_listitem_values,LOINC//3042812,metadata_only,False,,LOINC,3042812.0,32710-6,3042812,AMSTEL,source_code,low
-FREETEXT//10891//1,v11_listitem_values,LOINC//3020650,metadata_only,False,,LOINC,3020650.0,2349-9,3020650,AMSTEL,source_code,low
-FREETEXT//11636//1,v11_listitem_values,LOINC//3045424,metadata_only,False,,LOINC,3045424.0,33051-4,3045424,AMSTEL,source_code,low
+FREETEXT//11646//1,v11_listitem_values,LOINC//47938-6,metadata_only,False,,LOINC,3053213.0,47938-6,Specimen source [Identifier] of Body fluid,AMSTEL,source_code,low
+FREETEXT//10890//1,v11_listitem_values,LOINC//2887-8,metadata_only,False,,LOINC,3037185.0,2887-8,Protein [Presence] in Urine,AMSTEL,source_code,low
+FREETEXT//10906//1,v11_listitem_values,LOINC//725-2,metadata_only,False,,LOINC,3003344.0,725-2,Hemoglobin [Presence] in Urine,AMSTEL,source_code,low
+FREETEXT//14281//1,v11_listitem_values,LOINC//33052-2,metadata_only,False,,LOINC,3045414.0,33052-2,Leukocytes [Presence] in Urine,AMSTEL,source_code,low
+FREETEXT//14278//1,v11_listitem_values,LOINC//32710-6,metadata_only,False,,LOINC,3042812.0,32710-6,Nitrite [Presence] in Urine,AMSTEL,source_code,low
+FREETEXT//10891//1,v11_listitem_values,LOINC//2349-9,metadata_only,False,,LOINC,3020650.0,2349-9,Glucose [Presence] in Urine,AMSTEL,source_code,low
+FREETEXT//11636//1,v11_listitem_values,LOINC//33051-4,metadata_only,False,,LOINC,3045424.0,33051-4,Erythrocytes [Presence] in Urine,AMSTEL,source_code,low
 FREETEXT//10948//1,v11_listitem_values,OMOP//OMOP_CONCEPT//44809913,metadata_only,False,,OMOP_CONCEPT,44809913.0,865971000000100,Save sample for later serum analysis,AMSTEL,itemid,low
-FREETEXT//10858//1,v11_listitem_values,LOINC//3048453,metadata_only,False,,LOINC,3048453.0,47236-5,3048453,AMSTEL,source_code,low
+FREETEXT//10858//1,v11_listitem_values,LOINC//47236-5,metadata_only,False,,LOINC,3048453.0,47236-5,Treponema pallidum IgG+IgM Ab [Presence] in Serum by Immunoassay,AMSTEL,source_code,low
 FREETEXT//11220//1,v11_listitem_values,OMOP//OMOP_CONCEPT//44809913,metadata_only,False,,OMOP_CONCEPT,44809913.0,865971000000100,Save sample for later serum analysis,AMSTEL,itemid,low
-FREETEXT//10885//1,v11_listitem_values,LOINC//3022525,metadata_only,False,,LOINC,3022525.0,18226-1,3022525,AMSTEL,source_code,low
-FREETEXT//10901//1,v11_listitem_values,LOINC//36304419,metadata_only,False,,LOINC,36304419.0,87829-8,36304419,AMSTEL,source_code,low
-FREETEXT//10886//1,v11_listitem_values,LOINC//46235616,metadata_only,False,,LOINC,46235616.0,75819-3,46235616,AMSTEL,source_code,low
-FREETEXT//11641//1,v11_listitem_values,LOINC//36303790,metadata_only,False,,LOINC,36303790.0,87830-6,36303790,AMSTEL,source_code,low
-FREETEXT//10900//1,v11_listitem_values,LOINC//36304079,metadata_only,False,,LOINC,36304079.0,88979-0,36304079,AMSTEL,source_code,low
-FREETEXT//18886//1,v11_listitem_values,LOINC//40771087,metadata_only,False,,LOINC,40771087.0,68502-4,40771087,AMSTEL,source_code,low
+FREETEXT//10885//1,v11_listitem_values,LOINC//18226-1,metadata_only,False,,LOINC,3022525.0,18226-1,Erythrocyte size [Morphology] in Blood,AMSTEL,source_code,low
+FREETEXT//10901//1,v11_listitem_values,LOINC//87829-8,metadata_only,False,,LOINC,36304419.0,87829-8,Bacteria [Presence] in Urine,AMSTEL,source_code,low
+FREETEXT//10886//1,v11_listitem_values,LOINC//75819-3,metadata_only,False,,LOINC,46235616.0,75819-3,Erythrocyte chromasia [Identifier] in Blood by Light microscopy,AMSTEL,source_code,low
+FREETEXT//11641//1,v11_listitem_values,LOINC//87830-6,metadata_only,False,,LOINC,36303790.0,87830-6,Epithelial cells [Presence] in Urine,AMSTEL,source_code,low
+FREETEXT//10900//1,v11_listitem_values,LOINC//88979-0,metadata_only,False,,LOINC,36304079.0,88979-0,Mucus [Presence] in Urine sediment,AMSTEL,source_code,low
+FREETEXT//18886//1,v11_listitem_values,LOINC//68502-4,metadata_only,False,,LOINC,40771087.0,68502-4,Treponema pallidum IgG and IgM panel - Serum Qualitative by Immunofluorescence,AMSTEL,source_code,low
 FREETEXT//14683//1,v11_listitem_values,OMOP//OMOP_CONCEPT//4258677,metadata_only,False,,OMOP_CONCEPT,4258677.0,44608003,Blood group typing,AMSTEL,itemid,low
-FREETEXT//10968//1,v11_listitem_values,LOINC//3032068,metadata_only,False,,LOINC,3032068.0,34713-8,3032068,AMSTEL,source_code,low
-FREETEXT//11386//1,v11_listitem_values,LOINC//3017797,metadata_only,False,,LOINC,3017797.0,22322-2,3017797,AMSTEL,source_code,low
-FREETEXT//11408//1,v11_listitem_values,LOINC//40760007,metadata_only,False,,LOINC,40760007.0,56888-1,40760007,AMSTEL,source_code,low
-FREETEXT//15435//1,v11_listitem_values,LOINC//37021170,metadata_only,False,,LOINC,37021170.0,92701-2,37021170,AMSTEL,source_code,low
-FREETEXT//11395//1,v11_listitem_values,LOINC//3017143,metadata_only,False,,LOINC,3017143.0,16128-1,3017143,AMSTEL,source_code,low
-FREETEXT//17330//1,v11_listitem_values,LOINC//3021879,metadata_only,False,,LOINC,3021879.0,16933-4,3021879,AMSTEL,source_code,low
-FREETEXT//11108//1,v11_listitem_values,LOINC//3024974,metadata_only,False,,LOINC,3024974.0,29604-6,3024974,AMSTEL,source_code,low
-FREETEXT//20383//1,v11_listitem_values,LOINC//36304170,metadata_only,False,,LOINC,36304170.0,87755-5,36304170,AMSTEL,source_code,low
-FREETEXT//20387//1,v11_listitem_values,LOINC//3051552,metadata_only,False,,LOINC,3051552.0,54067-4,3051552,AMSTEL,source_code,low
-FREETEXT//11400//1,v11_listitem_values,LOINC//3016816,metadata_only,False,,LOINC,3016816.0,22244-8,3016816,AMSTEL,source_code,low
-FREETEXT//11270//1,v11_listitem_values,LOINC//3035069,metadata_only,False,,LOINC,3035069.0,16130-7,3035069,AMSTEL,source_code,low
-FREETEXT//11387//1,v11_listitem_values,LOINC//3021879,metadata_only,False,,LOINC,3021879.0,16933-4,3021879,AMSTEL,source_code,low
-FREETEXT//11272//1,v11_listitem_values,LOINC//3019978,metadata_only,False,,LOINC,3019978.0,16131-5,3019978,AMSTEL,source_code,low
-FREETEXT//11402//1,v11_listitem_values,LOINC//3013332,metadata_only,False,,LOINC,3013332.0,30325-5,3013332,AMSTEL,source_code,low
-FREETEXT//11378//1,v11_listitem_values,LOINC//3006585,metadata_only,False,,LOINC,3006585.0,30339-6,3006585,AMSTEL,source_code,low
-FREETEXT//11254//1,v11_listitem_values,LOINC//3044802,metadata_only,False,,LOINC,3044802.0,44982-7,3044802,AMSTEL,source_code,low
-FREETEXT//11271//1,v11_listitem_values,LOINC//21493357,metadata_only,False,,LOINC,21493357.0,82191-8,21493357,AMSTEL,source_code,low
-FREETEXT//11269//1,v11_listitem_values,LOINC//3023671,metadata_only,False,,LOINC,3023671.0,16952-4,3023671,AMSTEL,source_code,low
-FREETEXT//15389//1,v11_listitem_values,LOINC//21492394,metadata_only,False,,LOINC,21492394.0,78357-1,21492394,AMSTEL,source_code,low
-FREETEXT//15478//1,v11_listitem_values,LOINC//3033966,metadata_only,False,,LOINC,3033966.0,35492-8,3033966,AMSTEL,source_code,low
-FREETEXT//15476//1,v11_listitem_values,LOINC//1175793,metadata_only,False,,LOINC,1175793.0,90001-9,1175793,AMSTEL,source_code,low
-FREETEXT//15477//1,v11_listitem_values,LOINC//3033966,metadata_only,False,,LOINC,3033966.0,35492-8,3033966,AMSTEL,source_code,low
-FREETEXT//14553//1,v11_listitem_values,LOINC//46235756,metadata_only,False,,LOINC,46235756.0,76077-7,46235756,AMSTEL,source_code,low
-FREETEXT//14559//1,v11_listitem_values,LOINC//46235758,metadata_only,False,,LOINC,46235758.0,76079-3,46235758,AMSTEL,source_code,low
-FREETEXT//15449//1,v11_listitem_values,LOINC//46235767,metadata_only,False,,LOINC,46235767.0,76088-4,46235767,AMSTEL,source_code,low
-FREETEXT//15455//1,v11_listitem_values,LOINC//1176113,metadata_only,False,,LOINC,1176113.0,89651-4,1176113,AMSTEL,source_code,low
-FREETEXT//15656//1,v11_listitem_values,LOINC//36305681,metadata_only,False,,LOINC,36305681.0,88563-2,36305681,AMSTEL,source_code,low
-FREETEXT//15382//1,v11_listitem_values,LOINC//3027813,metadata_only,False,,LOINC,3027813.0,14556-5,3027813,AMSTEL,source_code,low
-FREETEXT//19000//1,v11_listitem_values,LOINC//36303355,metadata_only,False,,LOINC,36303355.0,88620-0,36303355,AMSTEL,source_code,low
-FREETEXT//19001//1,v11_listitem_values,LOINC//1175203,metadata_only,False,,LOINC,1175203.0,91131-3,1175203,AMSTEL,source_code,low
-FREETEXT//11382//1,v11_listitem_values,LOINC//3012570,metadata_only,False,,LOINC,3012570.0,5002-1,3012570,AMSTEL,source_code,low
-FREETEXT//17673//1,v11_listitem_values,LOINC//36304319,metadata_only,False,,LOINC,36304319.0,88559-0,36304319,AMSTEL,source_code,low
-FREETEXT//17685//1,v11_listitem_values,LOINC//36303784,metadata_only,False,,LOINC,36303784.0,88560-8,36303784,AMSTEL,source_code,low
-FREETEXT//17697//1,v11_listitem_values,LOINC//36304298,metadata_only,False,,LOINC,36304298.0,88561-6,36304298,AMSTEL,source_code,low
-FREETEXT//14551//1,v11_listitem_values,LOINC//46235757,metadata_only,False,,LOINC,46235757.0,76078-5,46235757,AMSTEL,source_code,low
-FREETEXT//14557//1,v11_listitem_values,LOINC//46235759,metadata_only,False,,LOINC,46235759.0,76080-1,46235759,AMSTEL,source_code,low
-FREETEXT//15447//1,v11_listitem_values,LOINC//46235794,metadata_only,False,,LOINC,46235794.0,76089-2,46235794,AMSTEL,source_code,low
-FREETEXT//15453//1,v11_listitem_values,LOINC//46236734,metadata_only,False,,LOINC,46236734.0,77024-8,46236734,AMSTEL,source_code,low
-FREETEXT//15654//1,v11_listitem_values,LOINC//46235763,metadata_only,False,,LOINC,46235763.0,76084-3,46235763,AMSTEL,source_code,low
-FREETEXT//19082//1,v11_listitem_values,LOINC//36304988,metadata_only,False,,LOINC,36304988.0,88627-5,36304988,AMSTEL,source_code,low
-FREETEXT//19165//1,v11_listitem_values,LOINC//36304562,metadata_only,False,,LOINC,36304562.0,88690-3,36304562,AMSTEL,source_code,low
-FREETEXT//11418//1,v11_listitem_values,LOINC//3020134,metadata_only,False,,LOINC,3020134.0,19106-4,3020134,AMSTEL,source_code,low
-FREETEXT//15393//1,v11_listitem_values,LOINC//3014639,metadata_only,False,,LOINC,3014639.0,21405-6,3014639,AMSTEL,source_code,low
-FREETEXT//10812//1,v11_listitem_values,LOINC//3026395,metadata_only,False,,LOINC,3026395.0,22425-3,3026395,AMSTEL,source_code,low
-FREETEXT//19028//1,v11_listitem_values,LOINC//3006631,metadata_only,False,,LOINC,3006631.0,32018-4,3006631,AMSTEL,source_code,low
-FREETEXT//17675//1,v11_listitem_values,LOINC//46235764,metadata_only,False,,LOINC,46235764.0,76085-0,46235764,AMSTEL,source_code,low
-FREETEXT//17687//1,v11_listitem_values,LOINC//46235765,metadata_only,False,,LOINC,46235765.0,76086-8,46235765,AMSTEL,source_code,low
-FREETEXT//17699//1,v11_listitem_values,LOINC//46235766,metadata_only,False,,LOINC,46235766.0,76087-6,46235766,AMSTEL,source_code,low
-FREETEXT//10814//1,v11_listitem_values,LOINC//37019853,metadata_only,False,,LOINC,37019853.0,92126-2,37019853,AMSTEL,source_code,low
-FREETEXT//14401//1,v11_listitem_values,LOINC//46235749,metadata_only,False,,LOINC,46235749.0,76070-2,46235749,AMSTEL,source_code,low
-FREETEXT//17305//1,v11_listitem_values,LOINC//36303951,metadata_only,False,,LOINC,36303951.0,88555-8,36303951,AMSTEL,source_code,low
-FREETEXT//17056//1,v11_listitem_values,LOINC//3006453,metadata_only,False,,LOINC,3006453.0,10900-9,3006453,AMSTEL,source_code,low
+FREETEXT//10968//1,v11_listitem_values,LOINC//34713-8,metadata_only,False,,LOINC,3032068.0,34713-8,Clostridioides difficile toxin A+B [Presence] in Stool,AMSTEL,source_code,low
+FREETEXT//11386//1,v11_listitem_values,LOINC//22322-2,metadata_only,False,,LOINC,3017797.0,22322-2,Hepatitis B virus surface Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//11408//1,v11_listitem_values,LOINC//56888-1,metadata_only,False,,LOINC,40760007.0,56888-1,HIV 1+2 Ab+HIV1 p24 Ag [Presence] in Serum or Plasma by Immunoassay,AMSTEL,source_code,low
+FREETEXT//15435//1,v11_listitem_values,LOINC//92701-2,metadata_only,False,,LOINC,37021170.0,92701-2,Staphylococcus aureus DNA [Presence] in Nose by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//11395//1,v11_listitem_values,LOINC//16128-1,metadata_only,False,,LOINC,3017143.0,16128-1,Hepatitis C virus Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//17330//1,v11_listitem_values,LOINC//16933-4,metadata_only,False,,LOINC,3021879.0,16933-4,Hepatitis B virus core Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//11108//1,v11_listitem_values,LOINC//29604-6,metadata_only,False,,LOINC,3024974.0,29604-6,Cytomegalovirus DNA [#/volume] (viral load) in Blood by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//20383//1,v11_listitem_values,LOINC//87755-5,metadata_only,False,,LOINC,36304170.0,87755-5,Clostridioides difficile BI-NAP1-027 strain DNA [Presence] in Stool by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//20387//1,v11_listitem_values,LOINC//54067-4,metadata_only,False,,LOINC,3051552.0,54067-4,Clostridioides difficile toxin genes [Presence] in Stool by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//11400//1,v11_listitem_values,LOINC//22244-8,metadata_only,False,,LOINC,3016816.0,22244-8,Cytomegalovirus IgG Ab [Presence] in Serum or Plasma,AMSTEL,source_code,low
+FREETEXT//11270//1,v11_listitem_values,LOINC//16130-7,metadata_only,False,,LOINC,3035069.0,16130-7,Herpes simplex virus 1 DNA [Presence] in Specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//11387//1,v11_listitem_values,LOINC//16933-4,metadata_only,False,,LOINC,3021879.0,16933-4,Hepatitis B virus core Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//11272//1,v11_listitem_values,LOINC//16131-5,metadata_only,False,,LOINC,3019978.0,16131-5,Herpes simplex virus 2 DNA [Presence] in Specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//11402//1,v11_listitem_values,LOINC//30325-5,metadata_only,False,,LOINC,3013332.0,30325-5,Cytomegalovirus IgM Ab [Presence] in Serum or Plasma,AMSTEL,source_code,low
+FREETEXT//11378//1,v11_listitem_values,LOINC//30339-6,metadata_only,False,,LOINC,3006585.0,30339-6,Epstein Barr virus capsid IgG Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//11254//1,v11_listitem_values,LOINC//44982-7,metadata_only,False,,LOINC,3044802.0,44982-7,Chlamydophila pneumoniae IgA Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//11271//1,v11_listitem_values,LOINC//82191-8,metadata_only,False,,LOINC,21493357.0,82191-8,Herpes simplex virus 2 DNA [Presence] in Cerebral spinal fluid by NAA with non-probe detection,AMSTEL,source_code,low
+FREETEXT//11269//1,v11_listitem_values,LOINC//16952-4,metadata_only,False,,LOINC,3023671.0,16952-4,Herpes simplex virus 1 DNA [Presence] in Cerebral spinal fluid by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15389//1,v11_listitem_values,LOINC//78357-1,metadata_only,False,,LOINC,21492394.0,78357-1,Mycobacterium tuberculosis DNA [Presence] in Bronchoalveolar lavage by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15478//1,v11_listitem_values,LOINC//35492-8,metadata_only,False,,LOINC,3033966.0,35492-8,Methicillin resistant Staphylococcus aureus (MRSA) DNA [Presence] in Specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15476//1,v11_listitem_values,LOINC//90001-9,metadata_only,False,,LOINC,1175793.0,90001-9,Methicillin resistant Staphylococcus aureus (MRSA) DNA [Presence] in Nose by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15477//1,v11_listitem_values,LOINC//35492-8,metadata_only,False,,LOINC,3033966.0,35492-8,Methicillin resistant Staphylococcus aureus (MRSA) DNA [Presence] in Specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//14553//1,v11_listitem_values,LOINC//76077-7,metadata_only,False,,LOINC,46235756.0,76077-7,Influenza virus A RNA [Presence] in Bronchoalveolar lavage by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//14559//1,v11_listitem_values,LOINC//76079-3,metadata_only,False,,LOINC,46235758.0,76079-3,Influenza virus B RNA [Presence] in Bronchoalveolar lavage by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15449//1,v11_listitem_values,LOINC//76088-4,metadata_only,False,,LOINC,46235767.0,76088-4,Respiratory syncytial virus RNA [Presence] in Bronchoalveolar lavage by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15455//1,v11_listitem_values,LOINC//89651-4,metadata_only,False,,LOINC,1176113.0,89651-4,Human metapneumovirus RNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15656//1,v11_listitem_values,LOINC//88563-2,metadata_only,False,,LOINC,36305681.0,88563-2,Parainfluenza virus 1 RNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15382//1,v11_listitem_values,LOINC//14556-5,metadata_only,False,,LOINC,3027813.0,14556-5,Mycobacterium tuberculosis DNA [Presence] in Sputum by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//19000//1,v11_listitem_values,LOINC//88620-0,metadata_only,False,,LOINC,36303355.0,88620-0,Human coronavirus RNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//19001//1,v11_listitem_values,LOINC//91131-3,metadata_only,False,,LOINC,1175203.0,91131-3,Rhinovirus RNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//11382//1,v11_listitem_values,LOINC//5002-1,metadata_only,False,,LOINC,3012570.0,5002-1,Epstein Barr virus DNA [Presence] in Blood by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//17673//1,v11_listitem_values,LOINC//88559-0,metadata_only,False,,LOINC,36304319.0,88559-0,Parainfluenza virus 2 RNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//17685//1,v11_listitem_values,LOINC//88560-8,metadata_only,False,,LOINC,36303784.0,88560-8,Parainfluenza virus 3 RNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//17697//1,v11_listitem_values,LOINC//88561-6,metadata_only,False,,LOINC,36304298.0,88561-6,Parainfluenza virus 4 RNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//14551//1,v11_listitem_values,LOINC//76078-5,metadata_only,False,,LOINC,46235757.0,76078-5,Influenza virus A RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//14557//1,v11_listitem_values,LOINC//76080-1,metadata_only,False,,LOINC,46235759.0,76080-1,Influenza virus B RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15447//1,v11_listitem_values,LOINC//76089-2,metadata_only,False,,LOINC,46235794.0,76089-2,Respiratory syncytial virus RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15453//1,v11_listitem_values,LOINC//77024-8,metadata_only,False,,LOINC,46236734.0,77024-8,Human metapneumovirus RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//15654//1,v11_listitem_values,LOINC//76084-3,metadata_only,False,,LOINC,46235763.0,76084-3,Parainfluenza virus 1 RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//19082//1,v11_listitem_values,LOINC//88627-5,metadata_only,False,,LOINC,36304988.0,88627-5,Human coronavirus RNA [Presence] in Upper respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//19165//1,v11_listitem_values,LOINC//88690-3,metadata_only,False,,LOINC,36304562.0,88690-3,Pneumocystis jirovecii DNA [Presence] in Lower respiratory specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//11418//1,v11_listitem_values,LOINC//19106-4,metadata_only,False,,LOINC,3020134.0,19106-4,Herpes simplex virus IgG Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//15393//1,v11_listitem_values,LOINC//21405-6,metadata_only,False,,LOINC,3014639.0,21405-6,Mycobacterium sp DNA [Presence] in Bronchial specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//10812//1,v11_listitem_values,LOINC//22425-3,metadata_only,False,,LOINC,3026395.0,22425-3,Mycoplasma pneumoniae Ab [Titer] in Serum,AMSTEL,source_code,low
+FREETEXT//19028//1,v11_listitem_values,LOINC//32018-4,metadata_only,False,,LOINC,3006631.0,32018-4,Hepatitis A virus IgG Ab [Presence] in Serum,AMSTEL,source_code,low
+FREETEXT//17675//1,v11_listitem_values,LOINC//76085-0,metadata_only,False,,LOINC,46235764.0,76085-0,Parainfluenza virus 2 RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//17687//1,v11_listitem_values,LOINC//76086-8,metadata_only,False,,LOINC,46235765.0,76086-8,Parainfluenza virus 3 RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//17699//1,v11_listitem_values,LOINC//76087-6,metadata_only,False,,LOINC,46235766.0,76087-6,Parainfluenza virus 4 RNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//10814//1,v11_listitem_values,LOINC//92126-2,metadata_only,False,,LOINC,37019853.0,92126-2,Mycoplasma pneumoniae DNA [Presence] in Respiratory system specimen by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//14401//1,v11_listitem_values,LOINC//76070-2,metadata_only,False,,LOINC,46235749.0,76070-2,Adenovirus DNA [Presence] in Nasopharynx by NAA with probe detection,AMSTEL,source_code,low
+FREETEXT//17305//1,v11_listitem_values,LOINC//88555-8,metadata_only,False,,LOINC,36303951.0,88555-8,Galactomannan Ag [Presence] in Bronchoalveolar lavage,AMSTEL,source_code,low
+FREETEXT//17056//1,v11_listitem_values,LOINC//10900-9,metadata_only,False,,LOINC,3006453.0,10900-9,Hepatitis B virus surface Ab [Presence] in Serum by Immunoassay,AMSTEL,source_code,low
 FREETEXT//11362//1,v11_listitem_values,SNOMED//865971000000100,metadata_only,False,,SNOMED,44809913.0,865971000000100,Save sample for later serum analysis,AmsterdamUMCdb_dictionary,label_exact,low
 MEASUREMENT_CATEGORICAL//12290//8,v11_listitem_values,DEVICE//VENTILATION_MODE//SPONTANEOUS_PRESSURE_SUPPORT,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//SPONTANEOUS_PRESSURE_SUPPORT,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12290//2,v11_listitem_values,DEVICE//VENTILATION_MODE//PRESSURE_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//PRESSURE_CONTROL,v11_value_level_policy,itemid_valueid,high
@@ -1001,7 +1001,7 @@ MEASUREMENT_CATEGORICAL//12130//2,v11_listitem_values,OMOP//OMOP_CONCEPT//363079
 MEASUREMENT_CATEGORICAL//8663//4,v11_listitem_values,OMOP_CONCEPT//LOINC//3024265,metadata_only,False,,LOINC,3024265.0,8327-9,3024265,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//6735//2,v11_listitem_values,OMOP_CONCEPT//LOINC//3009094,metadata_only,False,,LOINC,3009094.0,9270-0,3009094,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8692//4,v11_listitem_values,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//18668//2,v11_listitem_values,LOINC//40761433,outcome_metadata,False,,LOINC,40761433.0,58332-8,40761433,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//18668//2,v11_listitem_values,LOINC//58332-8,outcome_metadata,False,,LOINC,40761433.0,58332-8,Location of death,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8189//12,v11_listitem_values,OMOP//OMOP_CONCEPT//45879331,dynamic_event,True,,OMOP_CONCEPT,45879331.0,LA6458-9,Zero,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//15172//5,v11_listitem_values,OMOP//OMOP_CONCEPT//46237738,dynamic_event,True,,OMOP_CONCEPT,46237738.0,LA21724-2,4 - Very mild pain,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8898//1,v11_listitem_values,OMOP//OMOP_CONCEPT//45878582,dynamic_event,True,,OMOP_CONCEPT,45878582.0,LA137-2,45878582,AMSTEL,itemid_valueid,high
@@ -1164,7 +1164,7 @@ MEASUREMENT_CATEGORICAL//19872//1,v11_listitem_values,OMOP//OMOP_CONCEPT//458767
 MEASUREMENT_CATEGORICAL//16997//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_GROEPEN//NON_OPERATIVE_CARDIOVASCULAR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_GROEPEN//NON_OPERATIVE_CARDIOVASCULAR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18669//49,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_RESPIRATOIR_RESPIRATOIR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_RESPIRATOIR_RESPIRATOIR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16055//7,v11_listitem_values,OMOP//OMOP_CONCEPT//4116701,dynamic_event,True,,OMOP_CONCEPT,4116701.0,255345002,Hemorrhagic,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13397//1,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13397//1,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18588//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_HOOFDGROEP//NON_OPERATIEF_CARDIOVASCULAIR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_HOOFDGROEP//NON_OPERATIEF_CARDIOVASCULAIR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10697//1,v11_listitem_values,OMOP_CONCEPT//LOINC//3025315,metadata_only,False,,LOINC,3025315.0,29463-7,3025315,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12614//3,v11_listitem_values,OMOP//OMOP_CONCEPT//4050374,dynamic_event/device_support,True,,OMOP_CONCEPT,4050374.0,20922003,Transnasal approach,AMSTEL,itemid_valueid,high
@@ -1241,13 +1241,13 @@ MEASUREMENT_CATEGORICAL//15142//1,v11_listitem_values,OMOP_CONCEPT//LOINC//30415
 MEASUREMENT_CATEGORICAL//13944//3,v11_listitem_values,OMOP//OMOP_CONCEPT//763006,dynamic_event,True,,OMOP_CONCEPT,763006.0,434851000124108,Open,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8730//7,v11_listitem_values,OMOP//OMOP_CONCEPT//4008238,dynamic_event,True,,OMOP_CONCEPT,4008238.0,11207009,Structure of right thigh,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19239//2,v11_listitem_values,OMOP//OMOP_CONCEPT//45884084,dynamic_event,True,,OMOP_CONCEPT,45884084.0,LA6576-8,Positive,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13410//3,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13410//3,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12827//2,v11_listitem_values,OMOP//OMOP_CONCEPT//37156238,dynamic_event,True,,OMOP_CONCEPT,37156238.0,1163216008,Pressure injury stage I,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13066//1,v11_listitem_values,OMOP_CONCEPT//LOINC//3013144,metadata_only,False,,LOINC,3013144.0,11326-6,3013144,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8730//1,v11_listitem_values,OMOP//OMOP_CONCEPT//4207210,dynamic_event,True,,OMOP_CONCEPT,4207210.0,53843000,Structure of rectouterine pouch,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//20351//1,v11_listitem_values,OMOP//OMOP_CONCEPT//373995,metadata_only,False,,OMOP_CONCEPT,373995.0,2776000,Delirium,AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//8896//1,v11_listitem_values,OMOP//OMOP_CONCEPT//4174288,dynamic_event,True,,OMOP_CONCEPT,4174288.0,277904004,Thin sputum,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13410//2,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13410//2,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//6685//10,v11_listitem_values,DEVICE//VENTILATION_MODE//SPONTANEOUS_PRESSURE_SUPPORT,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//SPONTANEOUS_PRESSURE_SUPPORT,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12751//2,v11_listitem_values,SNOMED//4097216,metadata_only,False,,SNOMED,4097216.0,26412008,4097216,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8730//16,v11_listitem_values,OMOP//OMOP_CONCEPT//4014996,dynamic_event,True,,OMOP_CONCEPT,4014996.0,170303002,Structure of right half of neck,AMSTEL,itemid_valueid,high
@@ -1334,7 +1334,7 @@ MEASUREMENT_CATEGORICAL//10589//1,v11_listitem_values,OMOP//OMOP_CONCEPT//458785
 MEASUREMENT_CATEGORICAL//16651//9,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_HOOFDGROEP//NEUROCHIRURGIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_HOOFDGROEP//NEUROCHIRURGIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//6671//4,v11_listitem_values,OMOP//OMOP_CONCEPT//320744,dynamic_event,True,,OMOP_CONCEPT,320744.0,27885002,Complete atrioventricular block,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8693//2,v11_listitem_values,DEVICE//CHEST_DRAIN//SUCTION_LOW,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//SUCTION_LOW,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//18668//1,v11_listitem_values,LOINC//40761433,outcome_metadata,False,,LOINC,40761433.0,58332-8,40761433,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//18668//1,v11_listitem_values,LOINC//58332-8,outcome_metadata,False,,LOINC,40761433.0,58332-8,Location of death,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18669//20,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_NEUROLOGISCH_HOOFD_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_NEUROLOGISCH_HOOFD_TRAUMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8200//4,v11_listitem_values,OMOP_CONCEPT//LOINC//1989388,metadata_only,False,,LOINC,1989388.0,99684-3,1989388,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16993//7,v11_listitem_values,OMOP//OMOP_CONCEPT//581379,metadata_only,False,,OMOP_CONCEPT,581379.0,OMOP4822042,Inpatient Critical Care Facility,AMSTEL,itemid_valueid,high
@@ -1352,7 +1352,7 @@ MEASUREMENT_CATEGORICAL//13121//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSI
 MEASUREMENT_CATEGORICAL//8652//3,v11_listitem_values,OMOP//OMOP_CONCEPT//604316,dynamic_event,True,,OMOP_CONCEPT,604316.0,879860009,Absence of pulse in right foot,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18669//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_CARDIOVASCULAIR_PERIFEER_VASCULAIR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_CARDIOVASCULAIR_PERIFEER_VASCULAIR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13115//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_SUBGROEP_INTERNE_GENEESKUNDE//METABOOL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_SUBGROEP_INTERNE_GENEESKUNDE//METABOOL,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//2,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//2,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//19243//9,v11_listitem_values,OMOP//OMOP_CONCEPT//45878583,dynamic_event,True,,OMOP_CONCEPT,45878583.0,LA6577-6,Negative,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16998//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//CARDIAC_ARREST_WITH_OR_WITHOUT_RESPIRATORY_ARREST,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//CARDIAC_ARREST_WITH_OR_WITHOUT_RESPIRATORY_ARREST,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//7672//1,v11_listitem_values,OMOP_CONCEPT//LOINC//1988427,metadata_only,False,,LOINC,1988427.0,99733-8,1988427,AMSTEL,source_code,high
@@ -1448,7 +1448,7 @@ MEASUREMENT_CATEGORICAL//18670//58,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//13133//3,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//SEPSIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//SEPSIS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19635//7,v11_listitem_values,OMOP_CONCEPT//LOINC//3016335,metadata_only,False,,LOINC,3016335.0,9267-6,3016335,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12820//2,v11_listitem_values,OMOP//OMOP_CONCEPT//37156238,dynamic_event,True,,OMOP_CONCEPT,37156238.0,1163216008,Pressure injury stage I,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//7,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//7,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18669//31,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_CARDIOVASCULAIR_CONGESTIEF_HART_FALEN,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_CARDIOVASCULAIR_CONGESTIEF_HART_FALEN,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16651//11,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_HOOFDGROEP//INTERNE_GENEESKUNDE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_HOOFDGROEP//INTERNE_GENEESKUNDE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18669//39,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_GASTRO_INTESTINAAL_GASTRO_INTESTINALE_BLOEDING,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_GASTRO_INTESTINAAL_GASTRO_INTESTINALE_BLOEDING,v11_value_level_policy,itemid_valueid,high
@@ -1469,7 +1469,7 @@ MEASUREMENT_CATEGORICAL//18671//373,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//12832//2,v11_listitem_values,OMOP//OMOP_CONCEPT//37156238,dynamic_event,True,,OMOP_CONCEPT,37156238.0,1163216008,Pressure injury stage I,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17014//16,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_NEUROLOGIC//NEOPLASM_CRANIAL_SURGERY_FOR_EXCLUDING_TRANSPHENOIDAL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_NEUROLOGIC//NEOPLASM_CRANIAL_SURGERY_FOR_EXCLUDING_TRANSPHENOIDAL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13135//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_ABDOMINAAL//BLOEDING_TRACTUS_DIGESTIVUS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_ABDOMINAAL//BLOEDING_TRACTUS_DIGESTIVUS,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//7,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//7,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8733//4,v11_listitem_values,OMOP//OMOP_CONCEPT//4307671,dynamic_event,True,,OMOP_CONCEPT,4307671.0,83670000,Peritoneal cavity structure,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13130//3,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROCHIRURGIE_OVERIGE//OVERIGE_NEUROLOGIE_NEUROCHIRURGIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROCHIRURGIE_OVERIGE//OVERIGE_NEUROLOGIE_NEUROCHIRURGIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12807//4,v11_listitem_values,OMOP//OMOP_CONCEPT//37156241,dynamic_event,True,,OMOP_CONCEPT,37156241.0,1163221006,Pressure injury stage III,AMSTEL,itemid_valueid,high
@@ -1490,7 +1490,7 @@ MEASUREMENT_CATEGORICAL//19606//3,v11_listitem_values,SCORE//BEHAVIORAL_PAIN_SCA
 MEASUREMENT_CATEGORICAL//18600//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_NEUROLOGISCH//NEUROLOGISCH,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_NEUROLOGISCH//NEUROLOGISCH,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12623//1,v11_listitem_values,OMOP_CONCEPT//LOINC//3046004,metadata_only,False,,LOINC,3046004.0,33444-1,3046004,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13116//7,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//MVP,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//MVP,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//6,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//6,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13135//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_ABDOMINAAL//CHOLANGITIS_PANCRATITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_ABDOMINAAL//CHOLANGITIS_PANCRATITIS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18669//40,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_HEMATOLOGISCH_HEMATOLOGISCH,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_HEMATOLOGISCH_HEMATOLOGISCH,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13119//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//OVERIGE_THORAXCHIRURGIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//OVERIGE_THORAXCHIRURGIE,v11_value_level_policy,itemid_valueid,high
@@ -1540,7 +1540,7 @@ MEASUREMENT_CATEGORICAL//17008//17,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//20662//1,v11_listitem_values,OMOP//OMOP_CONCEPT//4128124,dynamic_event,True,,OMOP_CONCEPT,4128124.0,261185009,Venoarterial,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10702//2,v11_listitem_values,OMOP_CONCEPT//LOINC//42527659,dynamic_event,True,,LOINC,42527659.0,83844-1,42527659,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12822//6,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//6,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//6,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18593//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_NEUROLOGISCH//NEUROLOGISCH,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_NEUROLOGISCH//NEUROLOGISCH,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18597//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_CARDIOVASCULAIR//PERIFEER_VASCULAIR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_CARDIOVASCULAIR//PERIFEER_VASCULAIR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13116//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//MVR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//MVR,v11_value_level_policy,itemid_valueid,high
@@ -1549,7 +1549,7 @@ MEASUREMENT_CATEGORICAL//10604//4,v11_listitem_values,OMOP//OMOP_CONCEPT//413624
 MEASUREMENT_CATEGORICAL//12510//2,v11_listitem_values,OMOP//OMOP_CONCEPT//45884084,dynamic_event,True,,OMOP_CONCEPT,45884084.0,LA6576-8,Positive,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8730//20,v11_listitem_values,OMOP//OMOP_CONCEPT//4091412,dynamic_event,True,,OMOP_CONCEPT,4091412.0,280703005,Subphrenic region,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17005//18,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_RESPIRATORY//PNEUMONIA_BACTERIAL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_RESPIRATORY//PNEUMONIA_BACTERIAL,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//1,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//1,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//7672//4,v11_listitem_values,OMOP_CONCEPT//LOINC//1988427,metadata_only,False,,LOINC,1988427.0,99733-8,1988427,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13115//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_SUBGROEP_INTERNE_GENEESKUNDE//RENAAL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_SUBGROEP_INTERNE_GENEESKUNDE//RENAAL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16448//7,v11_listitem_values,SNOMED//4052413,metadata_only,False,,SNOMED,4052413.0,233527006,4052413,AMSTEL,source_code,high
@@ -1575,7 +1575,7 @@ MEASUREMENT_CATEGORICAL//13129//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSI
 MEASUREMENT_CATEGORICAL//16054//4,v11_listitem_values,OMOP//OMOP_CONCEPT//4113272,dynamic_event,True,,OMOP_CONCEPT,4113272.0,255316004,Purulent,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18669//42,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_METABOLISME_METABOLISME,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_METABOLISME_METABOLISME,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13138//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_RENAAL//DIAGNOSE_ANDERS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_RENAAL//DIAGNOSE_ANDERS,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//3,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//3,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12627//6,v11_listitem_values,OMOP_CONCEPT//LOINC//36305611,metadata_only,False,,LOINC,36305611.0,89086-3,36305611,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8833//8,v11_listitem_values,OMOP_CONCEPT//LOINC//45884806,dynamic_event,True,,LOINC,45884806,LA18258-6,8 mm or >,AMSTEL_value_level,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13120//9,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_VAATCHIRURGIE//DIAGNOSE_ANDERS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_VAATCHIRURGIE//DIAGNOSE_ANDERS,v11_value_level_policy,itemid_valueid,high
@@ -1627,7 +1627,7 @@ MEASUREMENT_CATEGORICAL//13120//3,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSI
 MEASUREMENT_CATEGORICAL//13133//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//CARDIOGENE_SHOCK,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//CARDIOGENE_SHOCK,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18601//3,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_RENAAL//RENAAL_TRANSPLANTATIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_RENAAL//RENAAL_TRANSPLANTATIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//68,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GASTRO_INTESTINAL_PANCREATITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GASTRO_INTESTINAL_PANCREATITIS,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13410//1,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13410//1,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//19608//4,v11_listitem_values,SCORE//BEHAVIORAL_PAIN_SCALE,metadata_only,False,,AUMC_LOCAL,,,SCORE//BEHAVIORAL_PAIN_SCALE,Stage3J_curated_policy,local_parent_token,medium
 MEASUREMENT_CATEGORICAL//13121//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_BUIKCHIRURGIE//LEVER_RESECTIE_PERFUSIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_BUIKCHIRURGIE//LEVER_RESECTIE_PERFUSIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19260//70,v11_listitem_values,OMOP//OMOP_CONCEPT//4092731,dynamic_event,True,,OMOP_CONCEPT,4092731.0,249954005,Movement against gravity,AMSTEL,itemid_valueid,high
@@ -1648,7 +1648,7 @@ MEASUREMENT_CATEGORICAL//15172//11,v11_listitem_values,OMOP//OMOP_CONCEPT//46237
 MEASUREMENT_CATEGORICAL//12832//4,v11_listitem_values,OMOP//OMOP_CONCEPT//37156241,dynamic_event,True,,OMOP_CONCEPT,37156241.0,1163221006,Pressure injury stage III,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13121//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_BUIKCHIRURGIE//PROEFLAPAROTOMIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_BUIKCHIRURGIE//PROEFLAPAROTOMIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18669//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_CARDIOVASCULAIR_HAEMORRAGISCHE_SHOCK,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_CARDIOVASCULAIR_HAEMORRAGISCHE_SHOCK,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13397//2,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13397//2,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//14161//1,v11_listitem_values,SNOMED//4134745,dynamic_event,True,,SNOMED,4134745.0,397930006,4134745,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//6685//8,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13131//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_VASCULAIR_NEUROLOGISCH//INTRACEREBRAAL_HAEMATOOM,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_VASCULAIR_NEUROLOGISCH//INTRACEREBRAAL_HAEMATOOM,v11_value_level_policy,itemid_valueid,high
@@ -1765,7 +1765,7 @@ MEASUREMENT_CATEGORICAL//18671//161,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18671//143,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_SEIZURES_PRIMARY_NO_STRUCTURAL_BRAIN_DISEASE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_SEIZURES_PRIMARY_NO_STRUCTURAL_BRAIN_DISEASE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12128//7,v11_listitem_values,OMOP//OMOP_CONCEPT//38004455,metadata_only,False,,OMOP_CONCEPT,38004455.0,,Gastroenterology,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18593//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_NEUROLOGISCH//EPILETISCH_INSULT,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_NEUROLOGISCH//EPILETISCH_INSULT,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//9,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//9,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12513//4,v11_listitem_values,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8732//2,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8825//9,v11_listitem_values,SNOMED//4064612,dynamic_event,True,,SNOMED,4064612,164884008,ECG: ventricular ectopics,AMSTEL_value_level,itemid_valueid,high
@@ -1826,7 +1826,7 @@ MEASUREMENT_CATEGORICAL//18670//107,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18671//121,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_CVA_CEREBROVASCULAR_ACCIDENT_STROKE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_CVA_CEREBROVASCULAR_ACCIDENT_STROKE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12831//4,v11_listitem_values,OMOP//OMOP_CONCEPT//37156241,dynamic_event,True,,OMOP_CONCEPT,37156241.0,1163221006,Pressure injury stage III,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//6671//31,v11_listitem_values,OMOP//OMOP_CONCEPT//4008859,dynamic_event,True,,OMOP_CONCEPT,4008859.0,111975006,Prolonged QT interval,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//9,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//9,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18669//51,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_RESPIRATOIR_RESPIRATOIR_NEOPLASMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_RESPIRATOIR_RESPIRATOIR_NEOPLASMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//6671//8,v11_listitem_values,SNOMED//320744,dynamic_event,True,,SNOMED,320744,27885002,Complete atrioventricular block,AMSTEL_value_level,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17008//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//ANEURYSM_THORACIC_AORTIC,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//ANEURYSM_THORACIC_AORTIC,v11_value_level_policy,itemid_valueid,high
@@ -1889,7 +1889,7 @@ MEASUREMENT_CATEGORICAL//18669//28,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//6671//24,v11_listitem_values,OMOP//OMOP_CONCEPT//437894,dynamic_event,True,,OMOP_CONCEPT,437894.0,71908006,Ventricular fibrillation,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13064//4,v11_listitem_values,OMOP//OMOP_CONCEPT//4138674,metadata_only,False,,OMOP_CONCEPT,4138674.0,32696007,Structure of right lower leg,AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//17015//13,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_RESPIRATORY//THORACOTOMY_FOR_LUNG_CANCER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_RESPIRATORY//THORACOTOMY_FOR_LUNG_CANCER,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//5,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//5,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16660//12,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_NEUROCHIRURGIE_TUMOR_CHIRURGIE//DIAGNOSE_ANDERS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_NEUROCHIRURGIE_TUMOR_CHIRURGIE//DIAGNOSE_ANDERS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//432,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_EXTREMITY_MULTIPLE_TRAUMA_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_EXTREMITY_MULTIPLE_TRAUMA_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19255//37,v11_listitem_values,OMOP//OMOP_CONCEPT//4092729,dynamic_event,True,,OMOP_CONCEPT,4092729.0,249949001,No active muscle contraction,AMSTEL,itemid_valueid,high
@@ -1900,7 +1900,7 @@ MEASUREMENT_CATEGORICAL//9593//8,v11_listitem_values,OMOP_CONCEPT//LOINC//302426
 MEASUREMENT_CATEGORICAL//10466//8,v11_listitem_values,OMOP//OMOP_CONCEPT//4058123,metadata_only,False,,OMOP_CONCEPT,4058123.0,160540005,"Roman Catholic, follower of religion",AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//18671//40,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_SEPSIS_UNKNOWN,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_SEPSIS_UNKNOWN,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8732//6,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//8,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//8,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18669//32,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_CARDIOVASCULAIR_HYPERTENSIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//NON_OPERATIEF_CARDIOVASCULAIR_HYPERTENSIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//105,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_METABOLIC_METABOLIC_ENDOCRINE_MEDICAL_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_METABOLIC_METABOLIC_ENDOCRINE_MEDICAL_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19251//13,v11_listitem_values,OMOP//OMOP_CONCEPT//4092729,dynamic_event,True,,OMOP_CONCEPT,4092729.0,249949001,No active muscle contraction,AMSTEL,itemid_valueid,high
@@ -1953,14 +1953,14 @@ MEASUREMENT_CATEGORICAL//17018//30,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18611//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_OPERATIEF_GASTR_INTENSTINAAL//GASTRO_INTESTINAAL_VOOR_NEOPLASMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_OPERATIEF_GASTR_INTENSTINAAL//GASTRO_INTESTINAAL_VOOR_NEOPLASMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19258//55,v11_listitem_values,OMOP//OMOP_CONCEPT//4092729,dynamic_event,True,,OMOP_CONCEPT,4092729.0,249949001,No active muscle contraction,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//6671//16,v11_listitem_values,OMOP//OMOP_CONCEPT//4108830,dynamic_event,True,,OMOP_CONCEPT,4108830.0,195069001,Atrial paroxysmal tachycardia,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//8,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//8,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8693//7,v11_listitem_values,DEVICE//CHEST_DRAIN//CLAMPED,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//CLAMPED,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10470//6,v11_listitem_values,SNOMED//763892,outcome_metadata,False,,SNOMED,763892.0,448271000124107,763892,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//28,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//28,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13131//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_VASCULAIR_NEUROLOGISCH//S_A_B,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_VASCULAIR_NEUROLOGISCH//S_A_B,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//33,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_RHYTHM_DISTURBANCE_VENTRICULAR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_RHYTHM_DISTURBANCE_VENTRICULAR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_CARDIOVASCULAR_MEDICAL_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_CARDIOVASCULAR_MEDICAL_OTHER,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//4,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//4,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13132//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_OVERIGE//INFECTIEUZE_AANDOENINGEN_CZS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_OVERIGE//INFECTIEUZE_AANDOENINGEN_CZS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19258//60,v11_listitem_values,OMOP//OMOP_CONCEPT//4093685,dynamic_event,True,,OMOP_CONCEPT,4093685.0,249955006,Movement against resistance,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//14161//4,v11_listitem_values,SNOMED//4134745,dynamic_event,True,,SNOMED,4134745.0,397930006,4134745,AMSTEL,source_code,high
@@ -1997,7 +1997,7 @@ MEASUREMENT_CATEGORICAL//19253//27,v11_listitem_values,OMOP//OMOP_CONCEPT//40971
 MEASUREMENT_CATEGORICAL//12132//2,v11_listitem_values,SNOMED//4152283,dynamic_event,True,,SNOMED,4152283.0,370157003,4152283,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12627//5,v11_listitem_values,OMOP_CONCEPT//LOINC//36305611,metadata_only,False,,LOINC,36305611.0,89086-3,36305611,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13064//3,v11_listitem_values,OMOP//OMOP_CONCEPT//4169248,metadata_only,False,,OMOP_CONCEPT,4169248.0,48979004,Structure of left lower leg,AMSTEL,itemid_valueid,low
-MEASUREMENT_CATEGORICAL//13397//3,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13397//3,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18604//22,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_NON_OPERATIEF_CARDIOVASCULAIR//NA_CARDIAC_ARREST,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_NON_OPERATIEF_CARDIOVASCULAIR//NA_CARDIAC_ARREST,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18669//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_CARDIOVASCULAIR_NA_CARDIAC_ARREST,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEII_DIAGNOSEN//OPERATIEF_CARDIOVASCULAIR_NA_CARDIAC_ARREST,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//261,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_GRAFTS_ALL_OTHER_BYPASS_EXCEPT_RENAL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_GRAFTS_ALL_OTHER_BYPASS_EXCEPT_RENAL,v11_value_level_policy,itemid_valueid,high
@@ -2016,10 +2016,10 @@ MEASUREMENT_CATEGORICAL//8654//3,v11_listitem_values,OMOP//OMOP_CONCEPT//4117262
 MEASUREMENT_CATEGORICAL//12623//10,v11_listitem_values,OMOP_CONCEPT//LOINC//3046004,metadata_only,False,,LOINC,3046004.0,33444-1,3046004,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//17002//12,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_METABOLIC//METABOLIC_ENDOCRINE_MEDICAL_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_METABOLIC//METABOLIC_ENDOCRINE_MEDICAL_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10470//5,v11_listitem_values,SNOMED//763892,outcome_metadata,False,,SNOMED,763892.0,448271000124107,763892,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//7,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//7,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8732//17,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10467//5,v11_listitem_values,OMOP_CONCEPT//LOINC//3046344,metadata_only,False,,LOINC,3046344.0,45404-1,3046344,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//5,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//5,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12614//4,v11_listitem_values,OMOP//OMOP_CONCEPT//4105971,dynamic_event/device_support,True,,OMOP_CONCEPT,4105971.0,180634001,Approach via gastrostomy,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13133//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//HYPOVOLEMISCHE_SHOCK,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//HYPOVOLEMISCHE_SHOCK,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//94,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_METABOLIC_ACID_BASE_ELECTROLYTE_DISTURBANCE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_METABOLIC_ACID_BASE_ELECTROLYTE_DISTURBANCE,v11_value_level_policy,itemid_valueid,high
@@ -2058,12 +2058,12 @@ MEASUREMENT_CATEGORICAL//12128//8,v11_listitem_values,OMOP//OMOP_CONCEPT//380039
 MEASUREMENT_CATEGORICAL//12824//3,v11_listitem_values,OMOP//OMOP_CONCEPT//37156240,dynamic_event,True,,OMOP_CONCEPT,37156240.0,1163218009,Pressure injury stage II,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//140,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_OVERDOSE_SEDATIVES_HYPNOTICS_ANTIPSYCHOTICS_BENZODIAZEPINES,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_OVERDOSE_SEDATIVES_HYPNOTICS_ANTIPSYCHOTICS_BENZODIAZEPINES,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//196,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_CHEST_SPINAL_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_CHEST_SPINAL_TRAUMA,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13410//4,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13410//4,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//17005//10,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_RESPIRATORY//EMBOLUS_PULMONARY,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_RESPIRATORY//EMBOLUS_PULMONARY,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_ANEURYSM_DISSECTING_AORTIC,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_ANEURYSM_DISSECTING_AORTIC,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//9593//9,v11_listitem_values,OMOP_CONCEPT//LOINC//3024265,metadata_only,False,,LOINC,3024265.0,8327-9,3024265,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13116//11,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//DIAGNOSE_ANDERS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//DIAGNOSE_ANDERS,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13410//5,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13410//5,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18671//358,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_MUSCULOSKELETAL_SKIN_ORTHOPEDIC_SURGERY_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_MUSCULOSKELETAL_SKIN_ORTHOPEDIC_SURGERY_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8730//10,v11_listitem_values,OMOP//OMOP_CONCEPT//4283159,dynamic_event,True,,OMOP_CONCEPT,4283159.0,368208006,Left upper arm structure,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8825//1,v11_listitem_values,OMOP//OMOP_CONCEPT//4038688,dynamic_event,True,,OMOP_CONCEPT,4038688.0,11849007,AV junctional rhythm,AMSTEL,itemid_valueid,high
@@ -2078,7 +2078,7 @@ MEASUREMENT_CATEGORICAL//8732//15,v11_listitem_values,SNOMED//4085985,metadata_o
 MEASUREMENT_CATEGORICAL//18671//207,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_HEAD_FACE_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_HEAD_FACE_TRAUMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//393,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_RESPIRATORY_INFECTION_ABSCESS_OTHER_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_RESPIRATORY_INFECTION_ABSCESS_OTHER_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19254//33,v11_listitem_values,OMOP//OMOP_CONCEPT//4097166,dynamic_event,True,,OMOP_CONCEPT,4097166.0,249953004,Movement with gravity eliminated,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//2,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//2,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12821//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17004//16,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_NEUROLOGIC//NEUROLOGIC_MEDICAL_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_NEUROLOGIC//NEUROLOGIC_MEDICAL_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18595//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_RESPIRATOIR//PULMONAIRE_EMBOLUS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_RESPIRATOIR//PULMONAIRE_EMBOLUS,v11_value_level_policy,itemid_valueid,high
@@ -2088,7 +2088,7 @@ MEASUREMENT_CATEGORICAL//18671//7,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSI
 MEASUREMENT_CATEGORICAL//9233//13,v11_listitem_values,SNOMED//4287468,metadata_only,False,,SNOMED,4287468.0,397155001,4287468,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//9534//2,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16651//10,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_HOOFDGROEP//NEUROLOGIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_HOOFDGROEP//NEUROLOGIE,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12129//2,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//2,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13125//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_ORTHOPEDISCHE_CHIRURGIE//ORTHOPEDISCHE_CHIRURGIE_RESPIRATOIRE_BEWAKING,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_ORTHOPEDISCHE_CHIRURGIE//ORTHOPEDISCHE_CHIRURGIE_RESPIRATOIRE_BEWAKING,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13132//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_OVERIGE//COMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_OVERIGE//COMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13145//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_KNO_OVERIGE//MOND_KEELHOLTE_KAAK_CHIRURGIE_HEMODYNAMISCHE_BEWAKING,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_KNO_OVERIGE//MOND_KEELHOLTE_KAAK_CHIRURGIE_HEMODYNAMISCHE_BEWAKING,v11_value_level_policy,itemid_valueid,high
@@ -2096,7 +2096,7 @@ MEASUREMENT_CATEGORICAL//17005//11,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18589//3,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_CARDIOVASCULAIR//CORONAIR_LIJDEN,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_CARDIOVASCULAIR//CORONAIR_LIJDEN,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//254,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_ENDARTERECTOMY_OTHER_VESSELS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_ENDARTERECTOMY_OTHER_VESSELS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19254//36,v11_listitem_values,OMOP//OMOP_CONCEPT//4093685,dynamic_event,True,,OMOP_CONCEPT,4093685.0,249955006,Movement against resistance,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//29,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//29,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12132//9,v11_listitem_values,SNOMED//4152283,dynamic_event,True,,SNOMED,4152283.0,370157003,4152283,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13126//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_UROGENITAAL//NEFRECTOMIE_NEOPLASMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_UROGENITAAL//NEFRECTOMIE_NEOPLASMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16179//6,v11_listitem_values,SNOMED//604177,metadata_only,False,,SNOMED,604177.0,69621000052107,604177,AMSTEL,source_code,high
@@ -2118,13 +2118,13 @@ MEASUREMENT_CATEGORICAL//13066//3,v11_listitem_values,OMOP_CONCEPT//LOINC//30131
 MEASUREMENT_CATEGORICAL//13138//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_RENAAL//ACUTE_TUBULUS_NECROSE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_RENAAL//ACUTE_TUBULUS_NECROSE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17009//21,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_GASTRO_INTESTINAL//GI_SURGERY_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_GASTRO_INTESTINAL//GI_SURGERY_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//363,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_NEUROLOGIC_BIOPSY_BRAIN,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_NEUROLOGIC_BIOPSY_BRAIN,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12111//6,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//6,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12834//6,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16179//7,v11_listitem_values,SNOMED//604177,metadata_only,False,,SNOMED,604177.0,69621000052107,604177,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16627//4,v11_listitem_values,SNOMED//37154585,metadata_only,False,,SNOMED,37154585.0,1269557005,37154585,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18671//31,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_RHYTHM_DISTURBANCE_ATRIAL_SUPRAVENTRICULAR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_RHYTHM_DISTURBANCE_ATRIAL_SUPRAVENTRICULAR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19254//32,v11_listitem_values,OMOP//OMOP_CONCEPT//4093683,dynamic_event,True,,OMOP_CONCEPT,4093683.0,249950001,Visible muscle contraction only,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//21,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//21,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18671//123,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_ENCEPHALITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_ENCEPHALITIS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//147,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_ARDS_ADULT_RESPIRATORY_DISTRESS_SYNDROME_NON_CARDIOGENIC_PULMONARY_EDEMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_ARDS_ADULT_RESPIRATORY_DISTRESS_SYNDROME_NON_CARDIOGENIC_PULMONARY_EDEMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//159,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_HYPERTENSION_PULMONARY_PRIMARY_IDIOPATHIC,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_HYPERTENSION_PULMONARY_PRIMARY_IDIOPATHIC,v11_value_level_policy,itemid_valueid,high
@@ -2209,14 +2209,14 @@ MEASUREMENT_CATEGORICAL//16998//38,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//16998//41,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//SHOCK_CARDIOGENIC,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//SHOCK_CARDIOGENIC,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//208,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_HEAD_MULTIPLE_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_HEAD_MULTIPLE_TRAUMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8189//14,v11_listitem_values,OMOP//OMOP_CONCEPT//4235033,dynamic_event,True,,OMOP_CONCEPT,4235033.0,360003007,Guedel airway,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//20,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//20,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13072//2,v11_listitem_values,OMOP_CONCEPT//LOINC//3026549,metadata_only,False,,LOINC,3026549.0,11325-8,3026549,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13124//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_TRAUMA//BUIKTRAUMA_NIET_OPERATIEF,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_TRAUMA//BUIKTRAUMA_NIET_OPERATIEF,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16640//6,v11_listitem_values,OMOP_CONCEPT//LOINC//3013144,metadata_only,False,,LOINC,3013144.0,11326-6,3013144,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//18589//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_CARDIOVASCULAIR//CARDIOVASCULAIR_MULTIPLE_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_CARDIOVASCULAIR//CARDIOVASCULAIR_MULTIPLE_TRAUMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19256//44,v11_listitem_values,OMOP//OMOP_CONCEPT//4093683,dynamic_event,True,,OMOP_CONCEPT,4093683.0,249950001,Visible muscle contraction only,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8733//20,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//19,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//19,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12823//6,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13116//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//CABG_RE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//CABG_RE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16998//35,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//SEPSIS_GI,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//SEPSIS_GI,v11_value_level_policy,itemid_valueid,high
@@ -2270,7 +2270,7 @@ MEASUREMENT_CATEGORICAL//18589//10,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18671//172,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_WEANING_FROM_MECHANICAL_VENTILATION_TRANSFER_FROM_OTHER_UNIT_OR_HOSPITAL_ONLY,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_WEANING_FROM_MECHANICAL_VENTILATION_TRANSFER_FROM_OTHER_UNIT_OR_HOSPITAL_ONLY,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//452,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_TRAUMA_SURGERY_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_TRAUMA_SURGERY_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//6685//5,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//20,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//20,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13141//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_ALGEMEEN//RESPIRATOIRE_INSUFFICIENTIE_NA_OK,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_ALGEMEEN//RESPIRATOIRE_INSUFFICIENTIE_NA_OK,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//257,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_GRAFT_AORTO_FEMORAL_BYPASS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_GRAFT_AORTO_FEMORAL_BYPASS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8731//11,v11_listitem_values,OMOP//OMOP_CONCEPT//4274743,dynamic_event,True,,OMOP_CONCEPT,4274743.0,368209003,Right upper arm structure,AMSTEL,itemid_valueid,high
@@ -2309,7 +2309,7 @@ MEASUREMENT_CATEGORICAL//17014//17,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18596//3,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_GASTR_INTENSTINAAL//GASTRO_INTESTINALE_BLOEDING,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_OPERATIEF_GASTR_INTENSTINAAL//GASTRO_INTESTINALE_BLOEDING,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//272,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_SEPSIS_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_SEPSIS_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10472//16,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//1,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//1,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16665//14,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_SUBGROEP_ALGEMENE_CHIRURGIE//TRANSPLANTATIE_CHIRURGIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_SUBGROEP_ALGEMENE_CHIRURGIE//TRANSPLANTATIE_CHIRURGIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16998//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//ANEURYSM_DISSECTING_AORTIC,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//ANEURYSM_DISSECTING_AORTIC,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16998//31,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//RHYTHM_DISTURBANCE_ATRIAL_SUPRAVENTRICULAR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//RHYTHM_DISTURBANCE_ATRIAL_SUPRAVENTRICULAR,v11_value_level_policy,itemid_valueid,high
@@ -2319,7 +2319,7 @@ MEASUREMENT_CATEGORICAL//16998//33,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18671//428,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_CHEST_SPINAL_TRAUMA_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_CHEST_SPINAL_TRAUMA_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//46,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_VASCULAR_MEDICAL_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_VASCULAR_MEDICAL_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//71,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GENITOURINARY_GENITOURINARY_MEDICAL_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GENITOURINARY_GENITOURINARY_MEDICAL_OTHER,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//4,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//4,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12625//3,v11_listitem_values,SNOMED//4097216,metadata_only,False,,SNOMED,4097216.0,26412008,4097216,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16650//15,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_ALGEMENE_CHIRURGIE_VAATCHIRURGIE//EVAR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_ALGEMENE_CHIRURGIE_VAATCHIRURGIE//EVAR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16650//18,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_ALGEMENE_CHIRURGIE_VAATCHIRURGIE//DIAGNOSE_ANDERS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_ALGEMENE_CHIRURGIE_VAATCHIRURGIE//DIAGNOSE_ANDERS,v11_value_level_policy,itemid_valueid,high
@@ -2420,7 +2420,7 @@ MEASUREMENT_CATEGORICAL//18608//10,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18670//86,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEII_DIAGNOSEN//NON_OPERATIEF_CARDIOVASCULAIR_CORONAIR_LIJDEN,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEII_DIAGNOSEN//NON_OPERATIEF_CARDIOVASCULAIR_CORONAIR_LIJDEN,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//417,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_ABDOMEN_ONLY_TRAUMA_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_ABDOMEN_ONLY_TRAUMA_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//50,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GASTRO_INTESTINAL_BLEEDING_LOWER_GI,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GASTRO_INTESTINAL_BLEEDING_LOWER_GI,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//17,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//17,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13128//12,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROCHIRURGIE_VASCULAIR_CHIRURGISCH//A_V_M_A_V_A,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROCHIRURGIE_VASCULAIR_CHIRURGISCH//A_V_M_A_V_A,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13136//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_INFECTIEZIEKTEN//FASCIITIS_NECROTICANS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_INFECTIEZIEKTEN//FASCIITIS_NECROTICANS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17007//21,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_TRAUMA//HEAD_CHEST_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_TRAUMA//HEAD_CHEST_TRAUMA,v11_value_level_policy,itemid_valueid,high
@@ -2432,7 +2432,7 @@ MEASUREMENT_CATEGORICAL//18671//269,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18671//426,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_CHEST_MULTIPLE_TRAUMA_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_CHEST_MULTIPLE_TRAUMA_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//20148//19,v11_listitem_values,OMOP//OMOP_CONCEPT//45879434,metadata_only,False,,OMOP_CONCEPT,45879434.0,LA17666-1,Stupor,AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//8733//15,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//11,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//11,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12829//3,v11_listitem_values,OMOP//OMOP_CONCEPT//37156240,dynamic_event,True,,OMOP_CONCEPT,37156240.0,1163218009,Pressure injury stage II,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13072//3,v11_listitem_values,OMOP_CONCEPT//LOINC//3026549,metadata_only,False,,LOINC,3026549.0,11325-8,3026549,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//14846//6,v11_listitem_values,DEVICE//CRRT,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CRRT,v11_value_level_policy,itemid_valueid,high
@@ -2446,7 +2446,7 @@ MEASUREMENT_CATEGORICAL//18671//292,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18671//293,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_GASTRO_INTESTINAL_CANCER_STOMACH_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_GASTRO_INTESTINAL_CANCER_STOMACH_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8732//21,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10466//6,v11_listitem_values,OMOP//OMOP_CONCEPT//4147079,metadata_only,False,,OMOP_CONCEPT,4147079.0,309884000,"Muslim, follower of religion",AMSTEL,itemid_valueid,low
-MEASUREMENT_CATEGORICAL//12110//16,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//16,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13121//3,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_BUIKCHIRURGIE//GALBLAAS_GALWEGEN_CHIRURGIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_BUIKCHIRURGIE//GALBLAAS_GALWEGEN_CHIRURGIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13133//10,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//THORACAAL_OF_ABDOMINAAL_ANEURYSMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_CARDIOVASCULAIR//THORACAAL_OF_ABDOMINAAL_ANEURYSMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18611//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_OPERATIEF_GASTR_INTENSTINAAL//GASTRO_INTESTINALE_PERFORATIE_OF_OBSTRUCTIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_OPERATIEF_GASTR_INTENSTINAAL//GASTRO_INTESTINALE_PERFORATIE_OF_OBSTRUCTIE,v11_value_level_policy,itemid_valueid,high
@@ -2511,8 +2511,8 @@ MEASUREMENT_CATEGORICAL//18615//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSI
 MEASUREMENT_CATEGORICAL//18671//185,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_ABDOMEN_ONLY_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_TRAUMA_ABDOMEN_ONLY_TRAUMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//240,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_CABG_WITH_MITRAL_VALVE_REPLACEMENT,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_CABG_WITH_MITRAL_VALVE_REPLACEMENT,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8897//8,v11_listitem_values,SNOMED//4337734,metadata_only,False,,SNOMED,4337734.0,232704006,4337734,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//18,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//7,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//18,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//7,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//14426//27,v11_listitem_values,OMOP_CONCEPT//LOINC//3021707,dynamic_event,True,,LOINC,3021707.0,9205-6,3021707,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//17004//13,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_NEUROLOGIC//MENINGITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_NEUROLOGIC//MENINGITIS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18608//8,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_NON_OPERATIEF_NEUROLOGISCH//DRUG_OVERDOSIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHE_II_NON_OPERATIEF_NEUROLOGISCH//DRUG_OVERDOSIS,v11_value_level_policy,itemid_valueid,high
@@ -2522,7 +2522,7 @@ MEASUREMENT_CATEGORICAL//18671//48,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18673//572,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_COMA_CHANGE_IN_LEVEL_OF_CONSCIOUSNESS_FOR_HEPATIC_SEE_GI_FOR_DIABETIC_SEE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_COMA_CHANGE_IN_LEVEL_OF_CONSCIOUSNESS_FOR_HEPATIC_SEE_GI_FOR_DIABETIC_SEE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18673//827,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_NEUROLOGIC_NEOPLASM_CRANIAL_SURGERY_FOR_EXCLUDING_TRANSPHENOIDAL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_NEUROLOGIC_NEOPLASM_CRANIAL_SURGERY_FOR_EXCLUDING_TRANSPHENOIDAL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10470//11,v11_listitem_values,SNOMED//763892,outcome_metadata,False,,SNOMED,763892.0,448271000124107,763892,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//9,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//9,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12502//2,v11_listitem_values,DEVICE//CHEST_DRAIN,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12824//6,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16675//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_OPNAME_SEPSIS//ONBEKEND,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_OPNAME_SEPSIS//ONBEKEND,v11_value_level_policy,itemid_valueid,high
@@ -2536,7 +2536,7 @@ MEASUREMENT_CATEGORICAL//18671//191,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18671//234,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_CABG_ALONE_REDO,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_CABG_ALONE_REDO,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//20139//4,v11_listitem_values,OMOP//OMOP_CONCEPT//46237393,metadata_only,False,,OMOP_CONCEPT,46237393.0,LA22809-0,Hospital-Cath Lab,AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//8731//18,v11_listitem_values,OMOP//OMOP_CONCEPT//4287390,dynamic_event,True,,OMOP_CONCEPT,4287390.0,69536005,Head structure,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//11,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//11,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12807//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16103//2,v11_listitem_values,OMOP//OMOP_CONCEPT//4233619,dynamic_event,True,,OMOP_CONCEPT,4233619.0,405806007,Pulseless ventricular tachycardia,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16252//3,v11_listitem_values,OMOP_CONCEPT//LOINC//46235663,dynamic_event,True,,LOINC,46235663.0,76447-2,46235663,AMSTEL,source_code,high
@@ -2548,7 +2548,7 @@ MEASUREMENT_CATEGORICAL//18670//109,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18671//26,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_INFARCTION_ACUTE_MYOCARDIAL_MI_NONE_OF_THE_ABOVE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_INFARCTION_ACUTE_MYOCARDIAL_MI_NONE_OF_THE_ABOVE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//317,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_GENITOURINARY_BLADDER_REPAIR_FOR_PERFORATION_RUPTURE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_GENITOURINARY_BLADDER_REPAIR_FOR_PERFORATION_RUPTURE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8733//3,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//27,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//27,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13117//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CARDIO_ANDERS//VRIJE_WAND_RUPTUUR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CARDIO_ANDERS//VRIJE_WAND_RUPTUUR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13129//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROCHIRURGIE_TUMOR_CHIRURGIE//MENINGIOOM_INFRA_TENTORIEEL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROCHIRURGIE_TUMOR_CHIRURGIE//MENINGIOOM_INFRA_TENTORIEEL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16668//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_SUBGROEP_NEUROLOGIE//OVERIGE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_SUBGROEP_NEUROLOGIE//OVERIGE,v11_value_level_policy,itemid_valueid,high
@@ -2582,7 +2582,7 @@ MEASUREMENT_CATEGORICAL//18671//316,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//9593//10,v11_listitem_values,OMOP_CONCEPT//LOINC//3024265,metadata_only,False,,LOINC,3024265.0,8327-9,3024265,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//9,v11_listitem_values,OMOP//OMOP_CONCEPT//581383,outcome_metadata,False,,OMOP_CONCEPT,581383.0,OMOP4822038,Inpatient Cardiac Care Facility,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12099//3,v11_listitem_values,OMOP_CONCEPT//LOINC//3003680,dynamic_event,True,,LOINC,3003680.0,8658-7,3003680,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//3,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//3,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//14772//23,v11_listitem_values,SNOMED//4093203,metadata_only,False,,SNOMED,4093203.0,249956007,4093203,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16998//44,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//THROMBUS_ARTERIAL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_CARDIOVASCULAR//THROMBUS_ARTERIAL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17008//14,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//CABG_ALONE_REDO,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//CABG_ALONE_REDO,v11_value_level_policy,itemid_valueid,high
@@ -2612,10 +2612,10 @@ MEASUREMENT_CATEGORICAL//18673//475,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18673//608,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_EMPHYSEMA_BRONCHITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_RESPIRATORY_EMPHYSEMA_BRONCHITIS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//19644//1,v11_listitem_values,OMOP_CONCEPT//LOINC//43054909,dynamic_event,True,,LOINC,43054909.0,72166-2,43054909,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//9593//4,v11_listitem_values,OMOP_CONCEPT//LOINC//3024265,metadata_only,False,,LOINC,3024265.0,8327-9,3024265,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//10,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//10,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12819//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13119//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//SEGMENT_SLEEVE_RESECTIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//SEGMENT_SLEEVE_RESECTIE,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//13410//6,v11_listitem_values,LOINC//40758173,metadata_only,False,,LOINC,40758173.0,55043-4,40758173,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//13410//6,v11_listitem_values,LOINC//55043-4,metadata_only,False,,LOINC,40758173.0,55043-4,Physical restraints,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//17007//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_TRAUMA//ABDOMEN_ONLY_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_NON_OPERATIVE_TRAUMA//ABDOMEN_ONLY_TRAUMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17008//21,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//CABG_WITH_OTHER_OPERATION,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//CABG_WITH_OTHER_OPERATION,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17014//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_NEUROLOGIC//ABSCESS_INFECTION_CRANIAL_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_NEUROLOGIC//ABSCESS_INFECTION_CRANIAL_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
@@ -2625,8 +2625,8 @@ MEASUREMENT_CATEGORICAL//17019//69,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//17026//38,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHEIV_NON_OPERATIVE_RESPIRATORY//EMPHYSEMA_BRONCHITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//SEC_APACHEIV_NON_OPERATIVE_RESPIRATORY//EMPHYSEMA_BRONCHITIS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//131,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_MYASTHENIA_GRAVIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_MYASTHENIA_GRAVIS,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//57,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GASTRO_INTESTINAL_CHOLANGITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_GASTRO_INTESTINAL_CHOLANGITIS,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12110//1,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//6,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//1,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//6,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13132//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_OVERIGE//NEURO_MUSCULAIRE_ZIEKTEN,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_NEUROLOGIE_OVERIGE//NEURO_MUSCULAIRE_ZIEKTEN,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16634//10,v11_listitem_values,OMOP_CONCEPT//LOINC//3026549,metadata_only,False,,LOINC,3026549.0,11325-8,3026549,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16634//7,v11_listitem_values,OMOP_CONCEPT//LOINC//3026549,metadata_only,False,,LOINC,3026549.0,11325-8,3026549,AMSTEL,source_code,high
@@ -2672,7 +2672,7 @@ MEASUREMENT_CATEGORICAL//17023//14,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18671//449,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_SPINAL_EXTREMITY_TRAUMA_SURGERY_FOR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_TRAUMA_SPINAL_EXTREMITY_TRAUMA_SURGERY_FOR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18673//742,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_GASTRO_INTESTINAL_CANCER_ESOPHAGEAL_SURGERY_FOR_ABDOMINAL_APPROACH,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_GASTRO_INTESTINAL_CANCER_ESOPHAGEAL_SURGERY_FOR_ABDOMINAL_APPROACH,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10472//31,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//10,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//10,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12625//2,v11_listitem_values,SNOMED//4097216,metadata_only,False,,SNOMED,4097216.0,26412008,4097216,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12823//4,v11_listitem_values,OMOP//OMOP_CONCEPT//37156241,dynamic_event,True,,OMOP_CONCEPT,37156241.0,1163221006,Pressure injury stage III,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12834//4,v11_listitem_values,OMOP//OMOP_CONCEPT//37156241,dynamic_event,True,,OMOP_CONCEPT,37156241.0,1163221006,Pressure injury stage III,AMSTEL,itemid_valueid,high
@@ -2702,7 +2702,7 @@ MEASUREMENT_CATEGORICAL//17030//40,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18595//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_RESPIRATOIR//NIET_CARDIOGENE_LONG_OEDEEM,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_II_NON_OPERATIEF_RESPIRATOIR//NIET_CARDIOGENE_LONG_OEDEEM,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18671//82,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_HEMATOLOGICAL_COAGULOPATHY,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//NON_OPERATIVE_HEMATOLOGICAL_COAGULOPATHY,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//20148//18,v11_listitem_values,OMOP//OMOP_CONCEPT//1990543,metadata_only,False,,OMOP_CONCEPT,1990543.0,LA32948-4,Pharmacologically sedated,AMSTEL,itemid_valueid,low
-MEASUREMENT_CATEGORICAL//12111//8,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//8,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12128//21,v11_listitem_values,OMOP//OMOP_CONCEPT//38004467,metadata_only,False,,OMOP_CONCEPT,38004467.0,,Plastic And Reconstructive Surgery,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12132//5,v11_listitem_values,SNOMED//4152283,dynamic_event,True,,SNOMED,4152283.0,370157003,4152283,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13140//1,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_OVERIGE//VERDRINKING,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_INTERNE_GENEESKUNDE_OVERIGE//VERDRINKING,v11_value_level_policy,itemid_valueid,high
@@ -2722,8 +2722,8 @@ MEASUREMENT_CATEGORICAL//18673//484,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//9534//10,v11_listitem_values,OMOP_CONCEPT//LOINC//3004921,metadata_only,False,,LOINC,3004921.0,20124-4,3004921,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10466//7,v11_listitem_values,OMOP//OMOP_CONCEPT//44792789,metadata_only,False,,OMOP_CONCEPT,44792789.0,368271000000101,"Reformed Protestant, follower of religion",AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//10472//29,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//19,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//15,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//19,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//15,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12623//12,v11_listitem_values,OMOP_CONCEPT//LOINC//3046004,metadata_only,False,,LOINC,3046004.0,33444-1,3046004,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12818//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17008//46,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//PERICARDIAL_EFFUSION_TAMPONADE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//PERICARDIAL_EFFUSION_TAMPONADE,v11_value_level_policy,itemid_valueid,high
@@ -2746,7 +2746,7 @@ MEASUREMENT_CATEGORICAL//18671//429,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18673//483,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_RHYTHM_DISTURBANCE_ATRIAL_SUPRAVENTRICULAR,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_RHYTHM_DISTURBANCE_ATRIAL_SUPRAVENTRICULAR,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18673//595,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_SEIZURES_PRIMARY_NO_STRUCTURAL_BRAIN_DISEASE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_NEUROLOGIC_SEIZURES_PRIMARY_NO_STRUCTURAL_BRAIN_DISEASE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10472//2,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//15,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//15,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12290//12,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12833//6,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13116//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//MVR_RE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//MVR_RE,v11_value_level_policy,itemid_valueid,high
@@ -2764,7 +2764,7 @@ MEASUREMENT_CATEGORICAL//18673//716,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//19644//3,v11_listitem_values,OMOP_CONCEPT//LOINC//43054909,dynamic_event,True,,LOINC,43054909.0,72166-2,43054909,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//20148//17,v11_listitem_values,OMOP//OMOP_CONCEPT//46237183,metadata_only,False,,OMOP_CONCEPT,46237183.0,LA23818-0,Somnolent,AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//10466//10,v11_listitem_values,OMOP//OMOP_CONCEPT//4149940,metadata_only,False,,OMOP_CONCEPT,4149940.0,309885004,"Protestant, follower of religion",AMSTEL,itemid_valueid,low
-MEASUREMENT_CATEGORICAL//12110//28,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//28,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12515//3,v11_listitem_values,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16999//20,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_GASTRO_INTESTINAL//HEPATIC_FAILURE_ACUTE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHE_IV_NON_OPERATIVE_GASTRO_INTESTINAL//HEPATIC_FAILURE_ACUTE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//17008//26,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//COMPLICATIONS_OF_PREV_PERIPHERAL_VASC_SURGERY_I_E_LIGATION_OF_BLEEDER_EXPLORATION,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//APACHEIV_POST_OPERATIVE_CARDIOVASCULAR//COMPLICATIONS_OF_PREV_PERIPHERAL_VASC_SURGERY_I_E_LIGATION_OF_BLEEDER_EXPLORATION,v11_value_level_policy,itemid_valueid,high
@@ -2856,7 +2856,7 @@ MEASUREMENT_CATEGORICAL//8189//13,v11_listitem_values,OMOP//OMOP_CONCEPT//416062
 MEASUREMENT_CATEGORICAL//8732//10,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8733//9,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//47,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//2,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//2,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12623//14,v11_listitem_values,OMOP_CONCEPT//LOINC//3046004,metadata_only,False,,LOINC,3046004.0,33444-1,3046004,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13126//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_UROGENITAAL//GYNACOLOGISCHE_CHIRURGIE_RESPIRATOIRE_BEWAKING,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_UROGENITAAL//GYNACOLOGISCHE_CHIRURGIE_RESPIRATOIRE_BEWAKING,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16665//17,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_SUBGROEP_ALGEMENE_CHIRURGIE//ORTHOPEDISCHE_CHIRURGIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_SUBGROEP_ALGEMENE_CHIRURGIE//ORTHOPEDISCHE_CHIRURGIE,v11_value_level_policy,itemid_valueid,high
@@ -2910,7 +2910,7 @@ MEASUREMENT_CATEGORICAL//18673//741,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18673//850,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_RESPIRATORY_THORACOTOMY_FOR_LUNG_CANCER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_RESPIRATORY_THORACOTOMY_FOR_LUNG_CANCER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//6671//7,v11_listitem_values,SNOMED//43020494,dynamic_event,True,,SNOMED,43020494,284941000119107,High degree second degree atrioventricular block,AMSTEL_value_level,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8200//7,v11_listitem_values,OMOP_CONCEPT//LOINC//1989388,metadata_only,False,,LOINC,1989388.0,99684-3,1989388,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//5,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//5,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//14577//4,v11_listitem_values,SNOMED//4202832,metadata_only,False,,SNOMED,4202832.0,52765003,4202832,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16656//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_INTERNE_GENEESKUNDE_METABOOL//INTOXICATIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_INTERNE_GENEESKUNDE_METABOOL//INTOXICATIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16657//6,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_INTERNE_GENEESKUNDE_OVERIGE//DIAGNOSE_ANDERS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//DMC_INTERNE_GENEESKUNDE_OVERIGE//DIAGNOSE_ANDERS,v11_value_level_policy,itemid_valueid,high
@@ -2938,7 +2938,7 @@ MEASUREMENT_CATEGORICAL//18673//830,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//19644//4,v11_listitem_values,OMOP_CONCEPT//LOINC//43054909,dynamic_event,True,,LOINC,43054909.0,72166-2,43054909,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//19913//2,v11_listitem_values,SNOMED//4076975,metadata_only,False,,SNOMED,4076975.0,246106000,4076975,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8731//13,v11_listitem_values,OMOP//OMOP_CONCEPT//4271843,dynamic_event,True,,OMOP_CONCEPT,4271843.0,64262003,Structure of right forearm,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//14,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//14,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12513//5,v11_listitem_values,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12622//3,v11_listitem_values,SNOMED//4302472,metadata_only,False,,SNOMED,4302472.0,78763000,4302472,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//14427//24,v11_listitem_values,OMOP_CONCEPT//LOINC//3021707,dynamic_event,True,,LOINC,3021707.0,9205-6,3021707,AMSTEL,source_code,high
@@ -2964,7 +2964,7 @@ MEASUREMENT_CATEGORICAL//18671//15,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOS
 MEASUREMENT_CATEGORICAL//18671//252,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_EMBOLECTOMY_WITH_GENERAL_ANESTHESIA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_APACHEIV_DIAGNOSEN//POST_OPERATIVE_CARDIOVASCULAR_EMBOLECTOMY_WITH_GENERAL_ANESTHESIA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18673//472,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_HEMORRHAGE_FOR_GASTROINTESTINAL_BLEEDING_SEE_GI_SYSTEM_TRAUMA_SEE_TRAUMA,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_HEMORRHAGE_FOR_GASTROINTESTINAL_BLEEDING_SEE_GI_SYSTEM_TRAUMA_SEE_TRAUMA,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//18673//492,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_SEPSIS_UNKNOWN,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//NON_OPERATIVE_CARDIOVASCULAR_SEPSIS_UNKNOWN,v11_value_level_policy,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//17,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//17,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12132//4,v11_listitem_values,SNOMED//4152283,dynamic_event,True,,SNOMED,4152283.0,370157003,4152283,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12514//4,v11_listitem_values,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//SUCTION_STANDARD,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12515//6,v11_listitem_values,DEVICE//CHEST_DRAIN//WATER_SEAL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//WATER_SEAL,v11_value_level_policy,itemid_valueid,high
@@ -3003,9 +3003,9 @@ MEASUREMENT_CATEGORICAL//10468//13,v11_listitem_values,SNOMED//4087925,metadata_
 MEASUREMENT_CATEGORICAL//10468//18,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10470//7,v11_listitem_values,SNOMED//763892,outcome_metadata,False,,SNOMED,763892.0,448271000124107,763892,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//51,v11_listitem_values,OMOP//OMOP_CONCEPT//8971,outcome_metadata,False,,OMOP_CONCEPT,8971.0,51,Inpatient Psychiatric Facility,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12109//27,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//3,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//9,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//27,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//3,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//9,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12513//7,v11_listitem_values,DEVICE//CHEST_DRAIN//CLAMPED,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//CLAMPED,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13117//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CARDIO_ANDERS//VSD,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CARDIO_ANDERS//VSD,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//14426//39,v11_listitem_values,OMOP_CONCEPT//LOINC//3021707,dynamic_event,True,,LOINC,3021707.0,9205-6,3021707,AMSTEL,source_code,high
@@ -3046,11 +3046,11 @@ MEASUREMENT_CATEGORICAL//18673//754,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//8896//9,v11_listitem_values,OMOP//OMOP_CONCEPT//4088601,dynamic_event,True,,OMOP_CONCEPT,4088601.0,248605009,Dirty sputum,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10472//10,v11_listitem_values,OMOP//OMOP_CONCEPT//32037,outcome_metadata,False,,OMOP_CONCEPT,32037.0,OMOP4822460,Intensive Care,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10472//5,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//2,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//13,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//11,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//20,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//8,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//2,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//13,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//11,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//20,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//8,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13122//2,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_TRANSPLANTATIE_CHIRURGIE//NIER_EN_PANCREASTRANSPLANTATIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_TRANSPLANTATIE_CHIRURGIE//NIER_EN_PANCREASTRANSPLANTATIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//16252//5,v11_listitem_values,OMOP_CONCEPT//LOINC//46235663,dynamic_event,True,,LOINC,46235663.0,76447-2,46235663,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16685//3,v11_listitem_values,OMOP_CONCEPT//LOINC//46237002,metadata_only,False,,LOINC,46237002.0,77160-0,46237002,AMSTEL,source_code,high
@@ -3130,8 +3130,8 @@ MEASUREMENT_CATEGORICAL//18673//757,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//18673//846,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_RESPIRATORY_RESPIRATORY_SURGERY_OTHER,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//NICE_SEC_APACHEIV_DIAGNOSEN//POST_OPERATIVE_RESPIRATORY_RESPIRATORY_SURGERY_OTHER,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8732//13,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8733//5,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//21,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//19,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//21,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//19,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12627//7,v11_listitem_values,OMOP_CONCEPT//LOINC//36305611,metadata_only,False,,LOINC,36305611.0,89086-3,36305611,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//14426//30,v11_listitem_values,OMOP_CONCEPT//LOINC//3021707,dynamic_event,True,,LOINC,3021707.0,9205-6,3021707,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//16102//9,v11_listitem_values,SNOMED//321042,metadata_only,False,,SNOMED,321042.0,410429000,321042,AMSTEL,source_code,high
@@ -3180,10 +3180,10 @@ MEASUREMENT_CATEGORICAL//8732//12,v11_listitem_values,SNOMED//4085985,metadata_o
 MEASUREMENT_CATEGORICAL//10466//4,v11_listitem_values,OMOP//OMOP_CONCEPT//44792789,metadata_only,False,,OMOP_CONCEPT,44792789.0,368271000000101,"Reformed Protestant, follower of religion",AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//10466//9,v11_listitem_values,OMOP//OMOP_CONCEPT//4213200,metadata_only,False,,OMOP_CONCEPT,4213200.0,80587008,"Jehovah's Witness, follower of religion",AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//10472//23,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//17,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//3,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//17,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//3,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12128//24,v11_listitem_values,OMOP//OMOP_CONCEPT//38003905,metadata_only,False,,OMOP_CONCEPT,38003905.0,,Obstetrics,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12129//19,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//19,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12290//11,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12833//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13118//4,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_AORTA_CHIRURGIE//AORTA_DESCENDENS_VERVANGING,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_AORTA_CHIRURGIE//AORTA_DESCENDENS_VERVANGING,v11_value_level_policy,itemid_valueid,high
@@ -3224,8 +3224,8 @@ MEASUREMENT_CATEGORICAL//6685//12,v11_listitem_values,OMOP_CONCEPT//LOINC//30049
 MEASUREMENT_CATEGORICAL//8733//13,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10470//10,v11_listitem_values,SNOMED//763892,outcome_metadata,False,,SNOMED,763892.0,448271000124107,763892,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//32,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//4,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//5,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//4,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//5,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12498//1,v11_listitem_values,OMOP//OMOP_CONCEPT//9191,dynamic_event,True,,OMOP_CONCEPT,9191.0,10828004,Positive,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13119//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//VIDEO_ASSIST_THORACOSCOPIE,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//VIDEO_ASSIST_THORACOSCOPIE,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//14469//4,v11_listitem_values,SNOMED//37154585,metadata_only,False,,SNOMED,37154585.0,1269557005,37154585,AMSTEL,source_code,high
@@ -3274,9 +3274,9 @@ MEASUREMENT_CATEGORICAL//6658//4,v11_listitem_values,SNOMED//4044874,dynamic_eve
 MEASUREMENT_CATEGORICAL//7432//5,v11_listitem_values,OMOP_CONCEPT//LOINC//3053213,metadata_only,False,,LOINC,3053213.0,47938-6,3053213,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//9534//11,v11_listitem_values,OMOP_CONCEPT//LOINC//3004921,metadata_only,False,,LOINC,3004921.0,20124-4,3004921,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10466//2,v11_listitem_values,OMOP//OMOP_CONCEPT//4203579,metadata_only,False,,OMOP_CONCEPT,4203579.0,309687009,"Buddhist, follower of religion",AMSTEL,itemid_valueid,low
-MEASUREMENT_CATEGORICAL//12109//13,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//26,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//1,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//13,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//26,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//1,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12128//28,v11_listitem_values,OMOP//OMOP_CONCEPT//38004491,metadata_only,False,,OMOP_CONCEPT,38004491.0,,Rheumatology,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12132//6,v11_listitem_values,SNOMED//4152283,dynamic_event,True,,SNOMED,4152283.0,370157003,4152283,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12826//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
@@ -3325,8 +3325,8 @@ MEASUREMENT_CATEGORICAL//18673//811,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//10468//17,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10470//9,v11_listitem_values,SNOMED//763892,outcome_metadata,False,,SNOMED,763892.0,448271000124107,763892,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12102//1,v11_listitem_values,OMOP_CONCEPT//LOINC//3003680,dynamic_event,True,,LOINC,3003680.0,8658-7,3003680,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//27,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//16,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//27,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//16,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12290//14,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12499//1,v11_listitem_values,OMOP//OMOP_CONCEPT//9191,dynamic_event,True,,OMOP_CONCEPT,9191.0,10828004,Positive,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12622//1,v11_listitem_values,SNOMED//4302472,metadata_only,False,,SNOMED,4302472.0,78763000,4302472,AMSTEL,source_code,high
@@ -3381,8 +3381,8 @@ MEASUREMENT_CATEGORICAL//18673//876,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//20148//14,v11_listitem_values,OMOP//OMOP_CONCEPT//45881739,dynamic_event,True,,OMOP_CONCEPT,45881739.0,LA16474-1,Restless,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8200//6,v11_listitem_values,OMOP_CONCEPT//LOINC//1989388,metadata_only,False,,LOINC,1989388.0,99684-3,1989388,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//8663//3,v11_listitem_values,OMOP_CONCEPT//LOINC//3024265,metadata_only,False,,LOINC,3024265.0,8327-9,3024265,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//24,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//10,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//24,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//10,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12512//1,v11_listitem_values,OMOP//OMOP_CONCEPT//45878583,dynamic_event,True,,OMOP_CONCEPT,45878583.0,LA6577-6,Negative,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12627//8,v11_listitem_values,OMOP_CONCEPT//LOINC//36305611,metadata_only,False,,LOINC,36305611.0,89086-3,36305611,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13116//13,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//CABG_RE_OFF_PUMP,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_CABG_EN_KLEPCHIRURGIE//CABG_RE_OFF_PUMP,v11_value_level_policy,itemid_valueid,high
@@ -3447,7 +3447,7 @@ MEASUREMENT_CATEGORICAL//18673//887,v11_listitem_values,CLINICAL_CONTEXT//DIAGNO
 MEASUREMENT_CATEGORICAL//8733//16,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10468//16,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12101//3,v11_listitem_values,OMOP_CONCEPT//LOINC//3003680,dynamic_event,True,,LOINC,3003680.0,8658-7,3003680,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//24,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//24,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12128//17,v11_listitem_values,OMOP//OMOP_CONCEPT//38003905,metadata_only,False,,OMOP_CONCEPT,38003905.0,,Obstetrics,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12622//4,v11_listitem_values,SNOMED//4302472,metadata_only,False,,SNOMED,4302472.0,78763000,4302472,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//13122//5,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_TRANSPLANTATIE_CHIRURGIE//TRANSPLANTECTOMIE_RENAAL,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_ALGEMENE_CHIRURGIE_TRANSPLANTATIE_CHIRURGIE//TRANSPLANTECTOMIE_RENAAL,v11_value_level_policy,itemid_valueid,high
@@ -3526,15 +3526,15 @@ MEASUREMENT_CATEGORICAL//19288//3,v11_listitem_values,OMOP//OMOP_CONCEPT//458840
 MEASUREMENT_CATEGORICAL//19291//12,v11_listitem_values,OMOP//OMOP_CONCEPT//45884091,dynamic_event,True,,OMOP_CONCEPT,45884091.0,LA11884-6,Indeterminate,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//8733//19,v11_listitem_values,SNOMED//4085985,metadata_only,False,,SNOMED,4085985.0,246287001,4085985,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12101//2,v11_listitem_values,OMOP_CONCEPT//LOINC//3003680,dynamic_event,True,,LOINC,3003680.0,8658-7,3003680,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//1,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//6,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//22,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//23,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//12,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//26,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//18,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//22,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//26,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//1,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//6,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//22,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//23,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//12,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//26,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//18,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//22,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//26,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12290//4,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12515//2,v11_listitem_values,DEVICE//CHEST_DRAIN//SUCTION_LOW,dynamic_event/device_support,True,,LOCAL,,,DEVICE//CHEST_DRAIN//SUCTION_LOW,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//13119//7,v11_listitem_values,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//MEDIASTINITIS,static_context/diagnosis_context,True,,LOCAL,,,CLINICAL_CONTEXT//DIAGNOSIS_CONTEXT//D_THORAXCHIRURGIE_PULMONALE_CHIRURGIE//MEDIASTINITIS,v11_value_level_policy,itemid_valueid,high
@@ -3628,11 +3628,11 @@ MEASUREMENT_CATEGORICAL//8897//7,v11_listitem_values,OMOP//OMOP_CONCEPT//4035566
 MEASUREMENT_CATEGORICAL//10468//11,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//22,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//48,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//20,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//5,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//8,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//14,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//4,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//20,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//5,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//8,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//14,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//4,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12615//4,v11_listitem_values,OMOP_CONCEPT//LOINC//3016384,dynamic_event/device_support,True,,LOINC,3016384.0,9037-3,3016384,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12624//9,v11_listitem_values,OMOP_CONCEPT//LOINC//21491186,metadata_only,False,,LOINC,21491186.0,79562-5,21491186,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12817//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
@@ -3744,10 +3744,10 @@ MEASUREMENT_CATEGORICAL//19644//2,v11_listitem_values,OMOP_CONCEPT//LOINC//43054
 MEASUREMENT_CATEGORICAL//9534//5,v11_listitem_values,DEVICE//VENTILATION_MODE//SIMV,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//SIMV,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10468//12,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10470//8,v11_listitem_values,SNOMED//763892,outcome_metadata,False,,SNOMED,763892.0,448271000124107,763892,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//3,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//9,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//25,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//10,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//3,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//9,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//25,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//10,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12347//8,v11_listitem_values,DEVICE//VENTILATION_MODE//SPONTANEOUS_PRESSURE_SUPPORT,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//SPONTANEOUS_PRESSURE_SUPPORT,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12625//4,v11_listitem_values,OMOP//OMOP_CONCEPT//4109447,metadata_only,False,,OMOP_CONCEPT,4109447.0,180640008,Approach via tracheostomy,AMSTEL,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12827//5,v11_listitem_values,OMOP//OMOP_CONCEPT//37156242,dynamic_event,True,,OMOP_CONCEPT,37156242.0,1163223009,Pressure injury stage IV,AMSTEL,itemid_valueid,high
@@ -3873,8 +3873,8 @@ MEASUREMENT_CATEGORICAL//10466//11,v11_listitem_values,OMOP//OMOP_CONCEPT//40513
 MEASUREMENT_CATEGORICAL//10468//15,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10468//7,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//26,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//25,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//23,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//25,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//23,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12132//7,v11_listitem_values,SNOMED//4152283,dynamic_event,True,,SNOMED,4152283.0,370157003,4152283,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12290//5,v11_listitem_values,OMOP_CONCEPT//OMOP//3004921,metadata_only,False,,OMOP,3004921.0,20124-4,ventilator_mode,BlendedICU,label_exact,high
 MEASUREMENT_CATEGORICAL//12347//6,v11_listitem_values,DEVICE//VENTILATION_MODE//SIMV,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//SIMV,v11_value_level_policy,itemid_valueid,high
@@ -4036,7 +4036,7 @@ MEASUREMENT_CATEGORICAL//8733//11,v11_listitem_values,SNOMED//4085985,metadata_o
 MEASUREMENT_CATEGORICAL//10104//2,v11_listitem_values,OMOP_CONCEPT//LOINC//40763161,dynamic_event,True,,LOINC,40763161.0,60102-1,40763161,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10466//1,v11_listitem_values,OMOP//OMOP_CONCEPT//4051382,metadata_only,False,,OMOP_CONCEPT,4051382.0,160557009,"Baptist, follower of religion",AMSTEL,itemid_valueid,low
 MEASUREMENT_CATEGORICAL//10468//20,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//10468//21,v11_listitem_values,OMOP//OMOP_CONCEPT//38003584,dynamic_event,True,,OMOP_CONCEPT,38003584.0,2.11,Japanese,AMSTEL,itemid_valueid,high
+MEASUREMENT_CATEGORICAL//10468//21,v11_listitem_values,OMOP//OMOP_CONCEPT//8552,dynamic_event,True,,OMOP_CONCEPT,8552.0,UNK,Unknown,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//10468//4,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10468//6,v11_listitem_values,SNOMED//4087925,metadata_only,False,,SNOMED,4087925.0,186034007,4087925,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//1,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
@@ -4045,18 +4045,18 @@ MEASUREMENT_CATEGORICAL//10472//37,v11_listitem_values,SNOMED//44810687,outcome_
 MEASUREMENT_CATEGORICAL//10472//42,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//10472//50,v11_listitem_values,SNOMED//44810687,outcome_metadata,False,,SNOMED,44810687.0,888671000000103,44810687,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12102//2,v11_listitem_values,OMOP_CONCEPT//LOINC//3003680,dynamic_event,True,,LOINC,3003680.0,8658-7,3003680,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//11,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//18,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12108//7,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12109//12,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12110//25,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//12,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//13,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//21,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12111//24,v11_listitem_values,LOINC//36203284,metadata_only,False,,LOINC,36203284.0,85432-3,36203284,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//11,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//18,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12108//7,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12109//12,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12110//25,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//12,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//13,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//21,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12111//24,v11_listitem_values,LOINC//85432-3,metadata_only,False,,LOINC,36203284.0,85432-3,Contact Relationship to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12128//19,v11_listitem_values,OMOP//OMOP_CONCEPT//38004463,metadata_only,False,,OMOP_CONCEPT,38004463.0,,Ophthalmology,AMSTEL,itemid_valueid,high
-MEASUREMENT_CATEGORICAL//12129//16,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
-MEASUREMENT_CATEGORICAL//12129//18,v11_listitem_values,LOINC//3046359,metadata_only,False,,LOINC,3046359.0,44767-2,3046359,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//16,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
+MEASUREMENT_CATEGORICAL//12129//18,v11_listitem_values,LOINC//44767-2,metadata_only,False,,LOINC,3046359.0,44767-2,Relationship of subject to patient,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12290//15,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high
 MEASUREMENT_CATEGORICAL//12347//1,v11_listitem_values,OMOP_CONCEPT//LOINC//3004921,metadata_only,False,,LOINC,3004921.0,20124-4,3004921,AMSTEL,source_code,high
 MEASUREMENT_CATEGORICAL//12347//3,v11_listitem_values,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,dynamic_event/device_support,True,,LOCAL,,,DEVICE//VENTILATION_MODE//VOLUME_CONTROL,v11_value_level_policy,itemid_valueid,high

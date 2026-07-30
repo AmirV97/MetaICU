@@ -346,6 +346,20 @@ def _prepare_outputs(config: TokenizationConfig) -> None:
     config.metadata_dir.mkdir(parents=True, exist_ok=True)
 
 
+def _copy_cohort_metadata(config: TokenizationConfig) -> dict[str, Path]:
+    """Copy canonical MEDS cohort metadata into the tokenized artifact."""
+    source_dir = config.meds_dir.parent / "metadata"
+    outputs: dict[str, Path] = {}
+    for name in ("subjects.parquet", "admissions.parquet"):
+        source = source_dir / name
+        if not source.is_file():
+            continue
+        destination = config.metadata_dir / name
+        shutil.copy2(source, destination)
+        outputs[name.removesuffix(".parquet") + "_metadata"] = destination
+    return outputs
+
+
 def _timeline_groups(df: pl.DataFrame, config: TokenizationConfig) -> Iterable[pl.DataFrame]:
     group_cols = _timeline_group_columns(config)
     for _, group in df.partition_by(group_cols, as_dict=True, maintain_order=True).items():
@@ -595,6 +609,7 @@ def write_tokenized_outputs(config: TokenizationConfig) -> dict[str, Path]:
         _log(f"  {len(split_timeline_rows):,} timelines, {sum(kept_counts.values()):,} tokens [{_elapsed(step)}]")
 
     _log("3/4 writing metadata and audits")
+    cohort_metadata = _copy_cohort_metadata(config)
     summary_path = _write_audits(config, split_summaries, timeline_rows, unknown_rows, token_count_rows)
 
     _log(f"4/4 done in {_elapsed(total_start)} -> {summary_path}")
@@ -605,6 +620,7 @@ def write_tokenized_outputs(config: TokenizationConfig) -> dict[str, Path]:
         "codes_metadata": codes_metadata,
         "timeline_index": config.metadata_dir / "timeline_index.parquet",
     }
+    outputs.update(cohort_metadata)
     for split in config.splits:
         outputs[f"{split}_dir"] = config.output_dir / split
     return outputs

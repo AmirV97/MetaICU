@@ -61,10 +61,14 @@ The vocabulary is source-preserving: every Amsterdam source token is kept, even 
 - Tokenization defaults to `vocab_scope=train_only`: validation/test codes not present in train are mapped to `UNK` and audited. `vocab_scope=full_data` is available for descriptive/full-cohort inventories, but should not be used for leakage-sensitive model evaluation.
 - Tokenized timelines are ICU admission/stay level by default, keyed by `(subject_id, hadm_id)`. The tokenizer also supports subject-level timelines via `run.analysis_unit=subject`. Patient/admission identity is preserved in the safetensor ID arrays and `timeline_index.parquet`.
 - Medication ATC tokens are stored at the most detailed level in the supplied vocab, but can be truncated at tokenization time, e.g. `MEDICATION//C07//A//B02` -> `MEDICATION//C07//A`.
+- Pre-ICU events belonging to the same hospital/ICU admission remain in that admission's timeline.
+- A recorded death is assigned to at most one ICU admission. In-ICU deaths emit `MEDS_DEATH` at administrative ICU discharge because Amsterdam death dates are day-granular. Post-discharge deaths emit `MEDS_DEATH` only when recorded within 24 hours after discharge; later deaths remain metadata-only.
+- Canonical subject/admission metadata is stored as Parquet in `data/metadata/` and copied to `data/tokenized/metadata/`.
 
 ## Open Runtime Decisions
 
 - Re-run bounded QC after the aggressive rare-dense binning default and inspect any remaining super-long admission/stay timelines before full-scale training.
+- Full split-aware MEDS and tokenization have been run across 23,106 ICU-admission timelines. The full integrity audit validates vocabulary and tensor counts, timestamp ordering, terminal-token behavior, and sampled MEDS-to-token tracebacks; its sequence-length and timeline-duration histograms are full-cohort results.
 
 ## Runtime Notes
 

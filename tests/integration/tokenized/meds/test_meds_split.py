@@ -120,6 +120,16 @@ class SplitMEDSTests(unittest.TestCase):
             )
 
             self.assertTrue(outputs["quantile_boundaries"].exists())
+            self.assertTrue(outputs["subjects_metadata"].exists())
+            self.assertTrue(outputs["admissions_metadata"].exists())
+            self.assertEqual(
+                pl.read_parquet(outputs["subjects_metadata"]).height,
+                3,
+            )
+            self.assertEqual(
+                pl.read_parquet(outputs["admissions_metadata"]).height,
+                3,
+            )
             for split in ["train", "val", "test"]:
                 self.assertTrue((root / f"data/MEDS/{split}/data/0.parquet").exists())
                 self.assertTrue((root / f"data/MEDS/{split}/debug/0.parquet").exists())

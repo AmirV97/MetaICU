@@ -31,6 +31,9 @@ from metaicu.aumcdb.tokenized.meds.numeric import (
     numeric_events,
     numeric_input_table_name,
 )
+from metaicu.aumcdb.tokenized.meds.outcomes import (
+    write_cohort_metadata,
+)
 from metaicu.aumcdb.tokenized.meds.vocab import load_vocab
 from metaicu.aumcdb.common.parquet import parquet_exists, resolve_table_parquet, scan_parquet
 
@@ -43,6 +46,7 @@ class MEDSConfig:
     vocab_path: Path
     output_dir: Path
     audit_dir: Path
+    metadata_dir: Path | None = None
     mode: str = "full"
     num_patients: int | None = None
     seed: int = 20260618
@@ -195,6 +199,24 @@ def write_meds_outputs(config: MEDSConfig) -> dict[str, Path]:
     admission_ids = admissions["admissionid"].to_list()
     _log(f"  {admissions['subject_id'].n_unique()} subjects, {len(admission_ids)} admissions")
 
+    metadata_outputs: dict[str, Path] = {}
+    if config.metadata_dir is not None:
+        patient_path = resolve_table_parquet(config.pre_meds_dir, "patient")
+        patients = (
+            scan_parquet(patient_path).collect(engine="streaming")
+            if parquet_exists(patient_path)
+            else None
+        )
+        if patients is not None:
+            patients = patients.filter(
+                pl.col("subject_id").is_in(admissions["subject_id"].unique())
+            )
+        metadata_outputs = write_cohort_metadata(
+            admissions,
+            config.metadata_dir,
+            patients,
+        )
+
     frames: list[pl.DataFrame] = []
     all_exclusions: list[dict] = []
     all_interval_audit: list[dict] = []
@@ -306,6 +328,7 @@ def write_meds_outputs(config: MEDSConfig) -> dict[str, Path]:
     _log(f"done in {_elapsed(total_start)} -> {summary_path}")
 
     outputs: dict[str, Path] = {"events": events_path, "summary": summary_path}
+    outputs.update(metadata_outputs)
     if debug_path:
         outputs["debug"] = debug_path
     return outputs
@@ -411,6 +434,31 @@ def write_split_meds_outputs(config: SplitMEDSConfig) -> dict[str, Path]:
     boundaries.write_parquet(boundaries_path)
     _log(f"  boundaries: {boundaries.height:,} rows -> {boundaries_path}")
 
+    selected_admissions: list[pl.DataFrame] = []
+    selected_patients: list[pl.DataFrame] = []
+    for split in config.splits:
+        split_dir = config.pre_meds_dir / split
+        split_admissions = sample_admissions(
+            split_dir, config.mode, config.num_patients, config.seed
+        )
+        if "split" not in split_admissions.columns:
+            split_admissions = split_admissions.with_columns(pl.lit(split).alias("split"))
+        selected_admissions.append(split_admissions)
+        patient_path = resolve_table_parquet(split_dir, "patient")
+        if parquet_exists(patient_path):
+            split_patients = scan_parquet(patient_path).collect(engine="streaming")
+            split_patients = split_patients.filter(
+                pl.col("subject_id").is_in(split_admissions["subject_id"].unique())
+            )
+            if "split" not in split_patients.columns:
+                split_patients = split_patients.with_columns(pl.lit(split).alias("split"))
+            selected_patients.append(split_patients)
+    metadata_outputs = write_cohort_metadata(
+        pl.concat(selected_admissions, how="diagonal_relaxed"),
+        config.metadata_dir,
+        pl.concat(selected_patients, how="diagonal_relaxed") if selected_patients else None,
+    )
+
     split_outputs: dict[str, dict[str, Path]] = {}
     for split in config.splits:
         _log(f"split-aware MEDS: converting {split}")
@@ -439,6 +487,7 @@ def write_split_meds_outputs(config: SplitMEDSConfig) -> dict[str, Path]:
         "quantile_boundaries": boundaries_path,
         "split_summary": summary_path,
     }
+    outputs.update(metadata_outputs)
     for split, split_result in split_outputs.items():
         outputs[f"{split}_events"] = split_result["events"]
         outputs[f"{split}_summary"] = split_result["summary"]

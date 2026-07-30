@@ -380,18 +380,26 @@ def _write_binned_numericitems(config: PreMedsConfig, split_values: list[str]) -
     return manifest
 
 
-def _rewrite_partitioned_parquet(df: pl.DataFrame, output_path: Path, partition_rows: int) -> int:
-    """Replace a parquet dataset path with row-partitioned parquet files."""
+def _rewrite_partitioned_parquet(
+    frame: pl.LazyFrame,
+    output_path: Path,
+    partition_rows: int,
+    has_rows: bool,
+) -> int:
+    """Atomically replace a parquet dataset using a streaming lazy sink."""
     tmp_path = output_path.with_name(f"{output_path.name}.__tmp_state_change_dedup")
     if tmp_path.exists():
         shutil.rmtree(tmp_path)
     tmp_path.mkdir(parents=True, exist_ok=True)
 
-    partition_count = 0
-    if not df.is_empty():
-        for start in range(0, df.height, partition_rows):
-            df.slice(start, partition_rows).write_parquet(tmp_path / f"part-{partition_count:05d}.parquet")
-            partition_count += 1
+    partition_count = int(has_rows)
+    if has_rows:
+        frame.sink_parquet(
+            tmp_path / "part-00000.parquet",
+            row_group_size=partition_rows,
+            mkdir=True,
+            engine="streaming",
+        )
 
     if output_path.exists():
         shutil.rmtree(output_path)
@@ -410,20 +418,24 @@ def _state_change_dedup_listitems_dataset(
     if not parquet_exists(dataset_path):
         return {"skipped": f"missing parquet dataset: {dataset_path}"}
 
-    df = pl.scan_parquet(str(dataset_path / "*.parquet")).collect()
-    rows_before = df.height
-    if df.is_empty():
+    frame = pl.scan_parquet(str(dataset_path / "*.parquet"))
+    rows_before = int(
+        frame.select(pl.len().alias("n")).collect(engine="streaming")["n"][0]
+    )
+    if rows_before == 0:
         return {
             "dataset": str(dataset_path),
             "rows_before": 0,
             "rows_after": 0,
             "rows_removed": 0,
             "labels": list(labels),
-            "partition_count": _rewrite_partitioned_parquet(df, dataset_path, partition_rows),
+            "partition_count": _rewrite_partitioned_parquet(
+                frame, dataset_path, partition_rows, has_rows=False
+            ),
         }
 
     required = {"admissionid", "itemid", "valueid", "item", "admission_relative_ms"}
-    missing = sorted(required - set(df.columns))
+    missing = sorted(required - set(frame.collect_schema().names()))
     if missing:
         raise ValueError(f"Cannot state-change deduplicate listitems; missing columns: {missing}")
 
@@ -431,7 +443,7 @@ def _state_change_dedup_listitems_dataset(
     prev_value_col = "__state_change_previous_valueid"
     is_target = pl.col("item").cast(pl.String).is_in(labels)
     deduped = (
-        df.with_row_index(row_order_col)
+        frame.with_row_index(row_order_col)
         .sort(["admissionid", "itemid", "admission_relative_ms", "valueid", row_order_col])
         .with_columns(
             pl.col("valueid")
@@ -443,12 +455,17 @@ def _state_change_dedup_listitems_dataset(
         .sort(row_order_col)
         .drop([row_order_col, prev_value_col])
     )
-    partition_count = _rewrite_partitioned_parquet(deduped, dataset_path, partition_rows)
+    rows_after = int(
+        deduped.select(pl.len().alias("n")).collect(engine="streaming")["n"][0]
+    )
+    partition_count = _rewrite_partitioned_parquet(
+        deduped, dataset_path, partition_rows, has_rows=rows_after > 0
+    )
     return {
         "dataset": str(dataset_path),
         "rows_before": rows_before,
-        "rows_after": deduped.height,
-        "rows_removed": rows_before - deduped.height,
+        "rows_after": rows_after,
+        "rows_removed": rows_before - rows_after,
         "labels": list(labels),
         "partition_count": partition_count,
     }

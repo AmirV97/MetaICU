@@ -1,0 +1,15 @@
+# Dataset-dispatching grid_build_manifest entry point.
+# Minimal invocation:
+#   grid_build_manifest dataset=mimic_iv paths.parent_dir=/path/to/workspace
+#   grid_build_manifest dataset=aumcdb paths.parent_dir=/path/to/workspace   # (default)
+
+defaults:
+  - dataset: aumcdb
+  - _self_
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

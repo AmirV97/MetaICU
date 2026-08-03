@@ -1,0 +1,38 @@
+# @package _global_
+# mimic_iv selection for the dataset-dispatching grid_build_dataset/grid_build_manifest CLIs.
+# No split.unit_of_analysis -- M4_grid's split is unconditionally by subject_id and its
+# shard/metadata output is unconditionally admission-grain (see
+# metaicu.mimiciv.grid.build.build_workflow.GridDatasetConfig's docstring).
+dataset_name: mimic_iv
+
+paths:
+  parent_dir: null
+  raw_data_dir: null
+  raw_shards_dir: null
+  output_dir: null
+  audit_dir: null
+  manifest_path: null
+  admission_ids_file: null
+  output_manifest: null
+  feature_list: null
+
+split:
+  train_frac: 0.8
+  val_frac: 0.1
+  test_frac: 0.1
+  seed: 42
+
+run:
+  build_raw_shards: true
+  rebuild_raw_shards: false
+  raw_shard_rows: 5000000
+  sample_size: null
+  patients_per_file: 1000
+  seed: 42
+  features: null
+  reconstruction_types: null
+  apply_inclusion_criteria: true
+  scale: true
+  impute: true
+  one_hot: true
+  log_level: INFO

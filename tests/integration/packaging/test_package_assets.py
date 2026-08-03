@@ -23,6 +23,12 @@ EXPECTED_POLICY_FILES = {
 }
 
 
+EXPECTED_MIMICIV_GRID_DATA_FILES = {
+    "mimic_grid_feature_manifest_review.md",
+    "icarefm_table_s3_features.csv",
+}
+
+
 class PackageAssetTests(unittest.TestCase):
     def test_policy_manifests_are_declared_as_package_data(self) -> None:
         config = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
@@ -37,6 +43,33 @@ class PackageAssetTests(unittest.TestCase):
         )
         present = {entry.name for entry in root.iterdir() if entry.is_file()}
         self.assertEqual(present, EXPECTED_POLICY_FILES)
+
+    def test_mimiciv_grid_data_is_declared_as_package_data(self) -> None:
+        config = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
+        package_data = config["tool"]["setuptools"]["package-data"]
+        patterns = package_data["metaicu.mimiciv.grid"]
+        self.assertIn("data/*.md", patterns)
+        self.assertIn("data/*.csv", patterns)
+        self.assertIn("configs/*.yaml", patterns)
+
+    def test_every_required_mimiciv_grid_data_file_is_present(self) -> None:
+        root = files("metaicu.mimiciv.grid").joinpath("data")
+        present = {entry.name for entry in root.iterdir() if entry.is_file()}
+        self.assertEqual(present, EXPECTED_MIMICIV_GRID_DATA_FILES)
+
+    def test_dispatcher_dataset_configs_are_declared_as_package_data(self) -> None:
+        config = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
+        package_data = config["tool"]["setuptools"]["package-data"]
+        patterns = package_data["metaicu.grid"]
+        self.assertIn("configs/dataset/*.yaml", patterns)
+
+    def test_dispatcher_has_a_dataset_config_for_every_registered_dataset(self) -> None:
+        from metaicu.grid.cli.grid_build_dataset import _DATASETS
+
+        root = files("metaicu.grid").joinpath("configs/dataset")
+        present = {entry.name for entry in root.iterdir() if entry.is_file()}
+        expected = {f"{name}.yaml" for name in _DATASETS}
+        self.assertEqual(present, expected)
 
 
 if __name__ == "__main__":

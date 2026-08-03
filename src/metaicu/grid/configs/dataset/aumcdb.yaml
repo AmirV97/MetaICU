@@ -1,0 +1,42 @@
+# @package _global_
+# aumcdb selection for the dataset-dispatching grid_build_dataset/grid_build_manifest CLIs.
+# Union of both commands' paths/split/run keys -- each command's own _build_config only reads
+# the subset it needs (grid_build_manifest ignores split.*/run.*, grid_build_dataset ignores
+# paths.output_manifest/paths.feature_list's manifest-specific siblings, etc).
+dataset_name: aumcdb
+
+paths:
+  parent_dir: null
+  raw_data_dir: null
+  raw_shards_dir: null
+  output_dir: null
+  audit_dir: null
+  manifest_path: null
+  admission_ids_file: null
+  output_manifest: null
+  feature_list: null
+  source_vocab: null
+  supplied_vocab: null
+  openicu_root: null
+
+split:
+  unit_of_analysis: admission
+  train_frac: 0.8
+  val_frac: 0.1
+  test_frac: 0.1
+  seed: 42
+
+run:
+  build_raw_shards: true
+  rebuild_raw_shards: false
+  raw_shard_rows: 5000000
+  sample_size: null
+  patients_per_file: 1000
+  seed: 42
+  features: null
+  reconstruction_types: null
+  apply_inclusion_criteria: true
+  scale: true
+  impute: true
+  one_hot: true
+  log_level: INFO

@@ -1,0 +1,22 @@
+# Hydra config for iCareFM-style MIMIC-IV grid feature-manifest construction.
+#
+# Minimal invocation:
+#   grid_build_manifest paths.parent_dir=/path/to/workspace
+#
+# This stage searches MIMIC-IV's own raw item catalogs (icu/d_items.csv.gz, hosp/d_labitems.csv.gz)
+# by label keyword -- see metaicu.mimiciv.grid.manifest's module docstring for why this differs
+# from AUMC's own vocab-chaining builder (no source_vocab/supplied_vocab/openicu_root here).
+
+paths:
+  parent_dir: null
+  output_manifest: null    # defaults to parent_dir/grid/mimic_grid_feature_manifest.csv
+  audit_dir: null          # defaults to parent_dir/audits/grid_manifest
+  raw_data_dir: null       # defaults to parent_dir/data/raw
+  feature_list: null       # defaults to packaged iCareFM Table S3 seed CSV
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

@@ -129,7 +129,44 @@ def write_bounded_aumc_raw(raw_dir: Path) -> None:
                 "solutionadministeredunit": "",
                 "fluidin": 0.0,
                 "iscontinuous": 1,
-            }
+            },
+            {
+                # a real clinical value that collides with pandas' default na_values vocabulary
+                # (confirmed present in real AmsterdamUMCdb data: 1,677 drugitems rows) --
+                # regression fixture for read_latin1_csv_batches' keep_default_na fix: must
+                # round-trip as the literal string "None", not become an actual null.
+                "admissionid": 20,
+                "orderid": 2,
+                "ordercategoryid": 24,
+                "ordercategory": "Injecties",
+                "itemid": 3,
+                "item": "Dobutamine",
+                "isadditive": 0,
+                "isconditional": 0,
+                "rate": 1.0,
+                "rateunit": "ml/h",
+                "rateunitid": 1,
+                "ratetimeunitid": 1,
+                "doserateperkg": 0,
+                "dose": None,
+                "doseunit": "None",
+                "doserateunit": "",
+                "doseunitid": 1,
+                "doserateunitid": 0,
+                "administered": None,
+                "administeredunit": "None",
+                "administeredunitid": 1,
+                "action": "start",
+                "start": 600_000,
+                "stop": 1_800_000,
+                "duration": 1_200,
+                "solutionitemid": 0,
+                "solutionitem": "",
+                "solutionadministered": 0.0,
+                "solutionadministeredunit": "",
+                "fluidin": 0.0,
+                "iscontinuous": 1,
+            },
         ],
     )
 

@@ -23,13 +23,24 @@ def read_latin1_csv_batches(
     partition_rows: int,
     max_rows: int | None = None,
 ) -> Iterator[pl.DataFrame]:
-    """Read one large raw CSV in bounded, schema-cast Latin-1 batches."""
+    """Read one large raw CSV in bounded, schema-cast Latin-1 batches.
+
+    keep_default_na=False + na_values=[""]: pandas' default na_values list treats "None"/"NA"/
+    "NULL"/"n/a"/etc. as missing -- but these are real AmsterdamUMCdb values (e.g. drugitems'
+    doseunit/administeredunit is literally "None" for ~1,677 real rows when no dose unit
+    applies), not encoding conventions for missing data. Found via the equivalent MIMIC-IV bug
+    (metaicu.mimiciv.common.raw_shards) and confirmed present here too by scanning real raw
+    AmsterdamUMCdb CSVs directly. Only a genuinely empty field is treated as missing, matching
+    polars' own scan_csv/read_csv semantics exactly.
+    """
     for chunk in pd.read_csv(
         raw_path,
         encoding="latin1",
         chunksize=partition_rows,
         nrows=max_rows,
         low_memory=False,
+        keep_default_na=False,
+        na_values=[""],
     ):
         yield cast_raw_schema(table, pl.from_pandas(chunk))
 

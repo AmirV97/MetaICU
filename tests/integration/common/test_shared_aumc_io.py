@@ -58,6 +58,21 @@ class SharedAumcIoTests(unittest.TestCase):
         reused = self._build_shards()
         self.assertEqual(reused["numericitems"]["action"], "reused")
 
+    def test_literal_none_and_na_strings_are_not_corrupted_to_null(self) -> None:
+        # regression test for a real bug: pandas' default na_values treats "None"/"NA"/etc. as
+        # missing, silently nulling real AmsterdamUMCdb values (drugitems' doseunit/
+        # administeredunit is literally "None" for ~1,677 real rows) -- see
+        # read_latin1_csv_batches' docstring.
+        self._build_shards()
+        drug = pl.scan_parquet(str(self.raw_shards_dir / "drugitems/*.parquet")).collect()
+        none_row = drug.filter(pl.col("admissionid") == 20)
+        self.assertEqual(none_row.height, 1)
+        self.assertEqual(none_row["doseunit"].to_list(), ["None"])
+        self.assertEqual(none_row["administeredunit"].to_list(), ["None"])
+        self.assertFalse(none_row["doseunit"].is_null().any())
+        # a genuinely empty field (dose, for this same row) must still be a real null.
+        self.assertTrue(none_row["dose"].is_null().all())
+
     def test_grid_hourly_extraction_matches_csv_and_shared_shards(self) -> None:
         self._build_shards()
         admissions = load_admissions(self.raw_dir)

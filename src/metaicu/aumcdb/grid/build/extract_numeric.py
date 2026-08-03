@@ -265,8 +265,13 @@ def extract_numeric_categorical(
         raw_shards_dir,
     )
     if categorical_raw is not None:
+        # mode().first() alone is nondeterministic on ties under engine="streaming" (which of the
+        # tied labels comes "first" depends on parallel scan order -- confirmed on the MIMIC-IV
+        # side, 2026-08-03: re-running the identical extraction twice flipped 0.01-0.09% of hours
+        # per categorical tag). sort() before first() breaks ties alphabetically instead,
+        # deterministic regardless of scan order.
         categorical_long = categorical_raw.group_by(["tag", "admissionid", "hour"]).agg(
-            pl.col("label").mode().first().alias("agg_label")
+            pl.col("label").mode().sort().first().alias("agg_label")
         )
         log.info(f"categorical_long: {categorical_long.height} rows, {categorical_long['tag'].n_unique()} tags")
 

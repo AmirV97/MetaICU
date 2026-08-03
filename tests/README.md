@@ -2,7 +2,7 @@
 
 GitHub Actions runs the unit and integration suites below on every push and
 pull request. The `real_data` suite is deliberately excluded because hosted CI
-does not have access to AmsterdamUMCdb.
+does not have access to AmsterdamUMCdb or MIMIC-IV.
 
 Run the CI lint check locally:
 
@@ -44,5 +44,10 @@ Run the Amsterdam full-data vocabulary regression explicitly:
 python -m unittest tests.real_data.tokenized.vocab.test_vocab_build_regression -v
 ```
 
-Future datasets, including MIMIC-IV, should mirror the same subsystem layout instead of
-adding flat `test_*.py` files at the root.
+Run the MIMIC-IV transformed-grid determinism regression explicitly:
+
+```bash
+METAICU_MIMICIV_REGRESSION_RAW_DIR=/path/to/pre_MEDS \
+METAICU_MIMICIV_REGRESSION_RAW_SHARDS_DIR=/path/to/raw_shards \
+python -m unittest tests.real_data.mimiciv.grid.test_grid_build_regression -v
+```

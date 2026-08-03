@@ -24,6 +24,7 @@ logs/
 
 # SLURM submission scripts -- user-local infra, not library code
 *.sh
+!scripts/run_grid_build_*.sh
 
 # User-provided external/data folders
 AUMC_raw/

@@ -62,6 +62,7 @@ def _build_config(cfg: DictConfig) -> GridDatasetConfig:
         scale=bool(OmegaConf.select(cfg, "run.scale", default=True)),
         impute=bool(OmegaConf.select(cfg, "run.impute", default=True)),
         one_hot=bool(OmegaConf.select(cfg, "run.one_hot", default=True)),
+        overwrite=bool(OmegaConf.select(cfg, "run.overwrite", default=False)),
     )
 
 

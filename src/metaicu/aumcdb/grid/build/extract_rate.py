@@ -44,9 +44,14 @@ def _explode_interval_mean(df):
     row's interval into one entry per covered hour."""
     df = df.with_columns(
         pl.col("start_h").floor().cast(pl.Int64).alias("hour_start"),
-        pl.col("stop_h").floor().cast(pl.Int64).alias("hour_end"),
     )
-    df = df.with_columns(pl.int_ranges(pl.col("hour_start"), pl.col("hour_end") + 1).alias("hour"))
+    df = df.with_columns(
+        pl.when(pl.col("stop_h") <= pl.col("start_h"))
+        .then(pl.col("hour_start") + 1)
+        .otherwise(pl.col("stop_h").ceil().cast(pl.Int64))
+        .alias("hour_stop")
+    )
+    df = df.with_columns(pl.int_ranges(pl.col("hour_start"), pl.col("hour_stop")).alias("hour"))
     return df.select(["admissionid", "tag", "match_key", "hour", "converted_value"]).explode("hour")
 
 

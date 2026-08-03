@@ -1,9 +1,10 @@
 # MetaICU
 
-A multi-database ICU data-processing library. AmsterdamUMCdb currently has two sibling pipelines under `src/metaicu/aumcdb/`:
+A multi-database ICU data-processing library. AmsterdamUMCdb and MIMIC-IV share the iCareFM-style hourly-grid interface; AmsterdamUMCdb also provides the MEDS/tokenized pipeline.
 
 - `tokenized/`: supplied vocabulary, pre-MEDS, MEDS-like events, and ETHOS-style tokenization.
 - `grid/`: iCareFM-style raw CSV to split-aware hourly grid construction.
+- `mimiciv/grid/`: MIMIC-IV implementation of the same reviewed feature and output contracts.
 
 ## Quick Start
 
@@ -24,7 +25,7 @@ Implemented:
 - iCareFM-style grid feature manifest and reviewed-manifest parser
 - shared Latin-1-preserving raw parquet cache for the grid and tokenized pipelines
 - raw CSV to hourly grid extraction with unit harmonization, broad physiological outlier removal, train-fitted scaling, imputation, and categorical encoding
-- grid per-feature presence masks (`{tag}__observed`), derived TTE targets (P/F ratio, urine-rate-per-weight), static-demographic prepend onto every hourly row, always subject-level splits, and an emitted K=34 TTE-target manifest (`tte_targets.json`)
+- grid per-feature presence masks (`{tag}__observed`), derived TTE targets (P/F ratio, urine-rate-per-weight), static-demographic prepend onto every hourly row, deterministic physical column order, subject-exclusive splits, emitted TTE-target manifests, and post-write integrity audits
 - deterministic subject splits as a pre-MEDS substage
 - source-preserving pre-MEDS extraction
 - train-derived high-frequency numeric inventory

@@ -90,9 +90,9 @@ class GridBuildRegressionTests(unittest.TestCase):
                 patients_per_file=200,
                 seed=42,
                 split_seed=42,
-                scale=False,
-                impute=False,
-                one_hot=False,
+                scale=True,
+                impute=True,
+                one_hot=True,
             )
 
         cls.outputs_a = write_grid_dataset_outputs(_config("run_a"))
@@ -105,7 +105,7 @@ class GridBuildRegressionTests(unittest.TestCase):
     def test_two_runs_of_the_same_sample_are_byte_identical(self) -> None:
         grid_a = _load_grid(self.outputs_a["output_dir"])
         grid_b = _load_grid(self.outputs_b["output_dir"])
-        assert_frame_equal(grid_a, grid_b, check_column_order=False)
+        assert_frame_equal(grid_a, grid_b, check_column_order=True)
 
     def test_run_produced_a_nonempty_grid_with_expected_shard_layout(self) -> None:
         grid = _load_grid(self.outputs_a["output_dir"])

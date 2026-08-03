@@ -61,14 +61,14 @@ def capture_presence_mask(grid, matches):
 ZERO_FILL_TAG_OVERRIDE = {"supp_o2_vent"}
 
 
-def impute_grid(grid, matches, scaled=True):
+def impute_grid(grid, matches, scaled_numeric_tags=()):
     """grid: wide DataFrame from grid.assemble_grid (ideally already passed through
     grid.scale.scale_grid). matches: tag -> feature info dict, from
     grid.manifest.parse_manifest() -- used to look up each column's reconstruction_type.
-    scaled: whether numeric observation columns have already been standardized -- controls
-    whether their post-forward-fill remaining nulls get the final 0-fill (0 = population mean,
-    only valid once scaled). Pass False if calling this on raw, unscaled values (e.g. QA/
-    inspection of the pre-scaling grid) to keep those nulls as null instead."""
+    scaled_numeric_tags: exact direct_numeric/derived_output_rate tags for which scale_grid
+    successfully fitted and applied a scaler. Only those columns receive the final 0-fill
+    (0 = training mean). Sparse columns skipped by scale_grid remain null before their first
+    observation rather than silently mixing raw units with scaled-space imputation."""
     grid = grid.sort(["admissionid", "hour"])
 
     numeric_ffill_cols, categorical_ffill_cols, zerofill_cols = [], [], []
@@ -97,9 +97,10 @@ def impute_grid(grid, matches, scaled=True):
         grid = grid.with_columns([pl.col(c).fill_null(0) for c in zerofill_cols])
         log.info(f"zero-filled {len(zerofill_cols)} treatment_indicator/treatment_rate columns")
 
-    if scaled and numeric_ffill_cols:
-        grid = grid.with_columns([pl.col(c).fill_null(0) for c in numeric_ffill_cols])
-        log.info(f"0-filled {len(numeric_ffill_cols)} numeric observation columns' remaining "
+    scaled_numeric_cols = [c for c in numeric_ffill_cols if c in set(scaled_numeric_tags)]
+    if scaled_numeric_cols:
+        grid = grid.with_columns([pl.col(c).fill_null(0) for c in scaled_numeric_cols])
+        log.info(f"0-filled {len(scaled_numeric_cols)} scaled numeric observation columns' remaining "
                  f"pre-first-observation nulls (A.4.3, valid since these are already scaled)")
 
     n_still_null = sum(grid[c].null_count() for c in categorical_ffill_cols)

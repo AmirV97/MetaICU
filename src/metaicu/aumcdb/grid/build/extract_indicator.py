@@ -57,10 +57,14 @@ def _interval_on_hours(df, tag_expr):
         pl.max_horizontal(pl.col("start_admission_relative_ms"), 0).alias("start_ms"),
     ).with_columns(
         (pl.col("start_ms") // HOUR_MS).alias("hour_start"),
-        (pl.col("stop_admission_relative_ms") // HOUR_MS).alias("hour_end"),
     )
     df = df.with_columns(
-        pl.int_ranges(pl.col("hour_start"), pl.col("hour_end") + 1).alias("hour")
+        pl.when(pl.col("stop_admission_relative_ms") <= pl.col("start_ms"))
+        .then(pl.col("hour_start") + 1)
+        .otherwise((pl.col("stop_admission_relative_ms") + HOUR_MS - 1) // HOUR_MS)
+        .alias("hour_stop")
+    ).with_columns(
+        pl.int_ranges(pl.col("hour_start"), pl.col("hour_stop")).alias("hour")
     )
     return df.select(["admissionid", tag_expr, "hour"]).explode("hour")
 

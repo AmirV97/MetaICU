@@ -129,7 +129,8 @@ The manifest is stage 1 of the iCareFM-style hourly-grid fork. It has one row pe
 ## Grid Dataset
 
 ```bash
-grid_build_dataset paths.parent_dir=/path/to/aumc_workspace
+grid_build_dataset dataset=aumcdb paths.parent_dir=/path/to/aumc_workspace
+grid_build_dataset dataset=mimic_iv paths.parent_dir=/path/to/mimic_workspace
 ```
 
 The grid and tokenized pipelines share the Latin-1-preserving cache under
@@ -137,6 +138,8 @@ The grid and tokenized pipelines share the Latin-1-preserving cache under
 for `numericitems`, `listitems`, and `drugitems`; later grid or pre-MEDS runs
 reuse them. Set `run.rebuild_raw_shards=true` only when the raw source files or
 canonical raw schemas have changed.
+
+MIMIC-IV accepts explicit `paths.raw_data_dir`, `paths.raw_shards_dir`, `paths.output_dir`, and `paths.audit_dir` in the same dispatcher. Both datasets refuse to reuse an output containing generated grid artifacts unless `run.overwrite=true`; overwrite removes only known grid artifacts and preserves unrelated files.
 
 The build runs the full A.4.1-A.4.3 pipeline (hourly gridding, unit harmonization,
 plausibility-bound outlier removal, train-fitted scaling, forward-/zero-fill
@@ -163,6 +166,8 @@ tte_targets.json                      canonical K=34 TTE target list and order
 scalers.pkl / scalers.summary.json    train-fitted scalers
 categorical_encoding.csv              one-hot column layout (static + grid)
 ```
+
+`feature_schema.json` also records each logical feature's `physical_columns`, including one-hot expansions and an empty list for a declared feature with no physical column. Every successful build writes `grid_integrity_summary.json` under `paths.audit_dir`; the build fails on split leakage, shard/metadata disagreement, duplicate or non-dense hour keys, schema-order drift, invalid masks/one-hot groups, non-finite values, or inconsistent TTE declarations.
 
 ## Pre-MEDS
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -16,8 +17,9 @@ import polars as pl
 
 from metaicu.aumcdb.common.raw_shards import build_raw_shards_for_tables
 from metaicu.aumcdb.common.raw_tables import raw_table_input_mode
+from metaicu.grid.integrity import audit_grid_dataset
 
-from .assemble import assemble_grid
+from .assemble import assemble_grid, canonical_column_order
 from .derive_targets import K34_TTE_TARGETS, DERIVED_TARGET_SOURCES, add_derived_tte_targets
 from .encode import one_hot_encode_categorical, one_hot_encode_columns, save_categorical_encoding
 from .extract_indicator import extract_treatment_indicator
@@ -62,6 +64,26 @@ class GridDatasetConfig:
     scale: bool = True
     impute: bool = True
     one_hot: bool = True
+    overwrite: bool = False
+
+
+_GENERATED_FILES = {
+    "metadata.csv", "feature_schema.json", "tte_targets.json", "scalers.pkl",
+    "scalers.summary.json", "categorical_encoding.csv",
+}
+
+
+def _prepare_output_dir(output_dir: Path, overwrite: bool) -> None:
+    generated = [output_dir / split for split in ("train", "val", "test") if (output_dir / split).exists()]
+    generated += [output_dir / name for name in _GENERATED_FILES if (output_dir / name).exists()]
+    if generated and not overwrite:
+        raise FileExistsError(f"Grid output already contains generated artifacts: {output_dir}; set run.overwrite=true")
+    for path in generated:
+        if path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+    output_dir.mkdir(parents=True, exist_ok=True)
 
 
 def _write_shards(
@@ -201,7 +223,7 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     if config.unit_of_analysis not in ("admission", "subject"):
         raise ValueError(f"unit_of_analysis must be 'admission' or 'subject', got {config.unit_of_analysis!r}")
 
-    config.output_dir.mkdir(parents=True, exist_ok=True)
+    _prepare_output_dir(config.output_dir, config.overwrite)
     config.audit_dir.mkdir(parents=True, exist_ok=True)
 
     matches, manifest_report = _select_matches(config)
@@ -311,11 +333,16 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         scalers.update(grid_scalers)
         save_scalers(scalers, config.output_dir / "scalers.pkl")
     if config.impute:
-        grid = impute_grid(grid, matches_with_derived, scaled=config.scale)
+        scaled_numeric_tags = {
+            tag for tag, scaler in scalers.items() if scaler["type"] == "observation"
+        }
+        grid = impute_grid(grid, matches_with_derived, scaled_numeric_tags=scaled_numeric_tags)
+    encoding_schema = list(static_categorical_encoding)
     if config.one_hot:
         grid, grid_encoding, _ = one_hot_encode_categorical(grid, matches, start_pos=next_categorical_pos)
+        encoding_schema += grid_encoding
         save_categorical_encoding(
-            static_categorical_encoding + grid_encoding, config.output_dir / "categorical_encoding.csv"
+            encoding_schema, config.output_dir / "categorical_encoding.csv"
         )
 
     # Prepend the 5 available static/demographic features (age, weight, height, sex, adm --
@@ -336,8 +363,10 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     demo_cols = numeric_static_cols + categorical_static_cols
 
     grid = grid.join(demo_frame, on="admissionid")
-    other_cols = [c for c in grid.columns if c not in demo_cols and c not in ("admissionid", "hour")]
-    grid = grid.select(["admissionid", "hour"] + demo_cols + other_cols)
+    column_order, tag_to_physical = canonical_column_order(
+        grid.columns, matches_with_derived, encoding_schema, presence_mask_cols, demo_cols
+    )
+    grid = grid.select(column_order)
 
     shard_info: dict[int, dict[str, int | str]] = {}
     split_counts = {}
@@ -379,6 +408,15 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "sex": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
         "adm": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
     })
+    static_physical = dict(zip(("age", "weight", "height"), ([column] for column in numeric_static_cols)))
+    for tag in ("sex", "adm"):
+        static_physical[tag] = (
+            [row["column_name"] for row in static_categorical_encoding if row["feature"] == tag]
+            if config.one_hot else [tag]
+        )
+    for tag in schema:
+        physical = static_physical.get(tag, tag_to_physical.get(tag, []))
+        schema[tag]["physical_columns"] = [column for column in physical if column in grid.columns]
     schema_path.write_text(json.dumps(schema, indent=2, sort_keys=True))
 
     # K=34 TTE pretraining target manifest (see derive_targets.K34_TTE_TARGETS) -- lets a Dataset
@@ -395,6 +433,10 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "derived": DERIVED_TARGET_SOURCES,
         "excluded": {"bili_dir": "not present in AmsterdamUMCdb (context.md Q3)"},
     }, indent=2))
+
+    integrity_path = audit_grid_dataset(
+        config.output_dir, config.audit_dir, grid.columns, subject_column="patientid"
+    )
 
     summary_path = config.audit_dir / "grid_build_summary.json"
     summary_path.write_text(json.dumps({
@@ -421,4 +463,5 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "feature_schema": schema_path,
         "tte_targets": tte_targets_path,
         "summary": summary_path,
+        "integrity": integrity_path,
     }

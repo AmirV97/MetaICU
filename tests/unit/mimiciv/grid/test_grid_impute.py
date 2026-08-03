@@ -51,7 +51,7 @@ class PresenceMaskTests(unittest.TestCase):
 
     def test_mask_captured_before_impute_still_shows_0_where_value_gets_filled(self) -> None:
         grid, mask_cols = capture_presence_mask(self.grid, MATCHES)
-        grid = impute_grid(grid, MATCHES, scaled=True)
+        grid = impute_grid(grid, MATCHES, scaled_numeric_tags={"hr", "urine_rate"})
         grid = grid.sort("hour")
         # hour 1: forward-filled from hour 0's real 80.0 -- value present, but observed=0.
         self.assertEqual(grid["hr"].to_list(), [80.0, 80.0, 80.0, 80.0])
@@ -59,6 +59,10 @@ class PresenceMaskTests(unittest.TestCase):
         # urine_rate: 0-filled for hours 0-2 (pre-first-observation), real reading at hour 3.
         self.assertEqual(grid["urine_rate"].to_list(), [0.0, 0.0, 0.0, 50.0])
         self.assertEqual(grid["urine_rate__observed"].to_list(), [0, 0, 0, 1])
+
+    def test_unscaled_sparse_numeric_keeps_pre_first_nulls(self) -> None:
+        grid = impute_grid(self.grid, MATCHES, scaled_numeric_tags={"hr"}).sort("hour")
+        self.assertEqual(grid["urine_rate"].to_list(), [None, None, None, 50.0])
 
 
 if __name__ == "__main__":

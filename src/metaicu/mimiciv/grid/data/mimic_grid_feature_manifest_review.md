@@ -3311,8 +3311,8 @@ match 9:
 - Match method: `omop_concept_match`
 
 match 0 (added by hand):
-  - decision: `keep`
-  - decision reason: `real Troponin I itemid (51002 is 0 rows/deprecated, this is the active one) -- low volume but correct analyte`
+  - decision: `reject`
+  - decision reason: `correct analyte but unavailable to this ICU grid: all 670 labevents rows have null hadm_id, so the required (subject_id, hadm_id) ICU-stay join emits zero rows; keep this source limitation explicit instead of declaring a physically absent feature`
   - table: `labs`
   - itemid: `52642`
   - raw label: `Troponin I`

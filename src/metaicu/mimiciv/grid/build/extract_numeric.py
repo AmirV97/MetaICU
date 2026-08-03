@@ -166,7 +166,7 @@ def extract_numeric_categorical(matches, raw_data_dir, admissions, admission_ids
     log.info(f"plausibility bounds resolved for {len(bounds)} tags")
 
     numeric_parts = []
-    for table in {t for _, t, _ in numeric_pairs}:
+    for table in sorted({t for _, t, _ in numeric_pairs}):
         pairs = [(tag, itemid) for tag, tb, itemid in numeric_pairs if tb == table]
         part = _build_numeric_for_table(raw_data_dir, table, pairs, admissions, admission_ids, bounds, raw_shards_dir)
         if part is not None:
@@ -179,7 +179,7 @@ def extract_numeric_categorical(matches, raw_data_dir, admissions, admission_ids
         log.info(f"numeric_long: {numeric_long.height} rows, {numeric_long['tag'].n_unique()} tags")
 
     categorical_parts = []
-    for table in {t for _, t, _ in categorical_pairs}:
+    for table in sorted({t for _, t, _ in categorical_pairs}):
         pairs = [(tag, itemid) for tag, tb, itemid in categorical_pairs if tb == table]
         part = _build_categorical_for_table(raw_data_dir, table, pairs, admissions, admission_ids, label_map, raw_shards_dir)
         if part is not None:

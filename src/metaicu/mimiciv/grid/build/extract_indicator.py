@@ -76,9 +76,14 @@ def _interval_on_hours(raw_data_dir, table, pairs, admissions, admission_ids, ra
         pl.max_horizontal(pl.col("start_admission_relative_ms"), 0).alias("start_ms"),
     ).with_columns(
         (pl.col("start_ms") // HOUR_MS).alias("hour_start"),
-        (pl.col("stop_admission_relative_ms") // HOUR_MS).alias("hour_end"),
     )
-    df = df.with_columns(pl.int_ranges(pl.col("hour_start"), pl.col("hour_end") + 1).alias("hour")).explode("hour")
+    df = df.with_columns(
+        pl.when((pl.col("tag") == "samp") | (pl.col("stop_admission_relative_ms") <= pl.col("start_ms")))
+        .then(pl.col("hour_start") + 1)
+        .otherwise((pl.col("stop_admission_relative_ms") + HOUR_MS - 1) // HOUR_MS)
+        .alias("hour_stop")
+    )
+    df = df.with_columns(pl.int_ranges(pl.col("hour_start"), pl.col("hour_stop")).alias("hour")).explode("hour")
     log.info(f"{table} (interval) treatment_indicator rows: {df.height}")
     return df.select(["admissionid", "tag", "hour"])
 

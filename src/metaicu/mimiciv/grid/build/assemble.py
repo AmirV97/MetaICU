@@ -66,3 +66,42 @@ def assemble_grid(admissions, numeric_long, categorical_long, indicator_on_hours
 
     log.info(f"assembled grid: {grid.height} rows x {grid.width} columns")
     return grid
+
+
+def canonical_column_order(grid_columns, matches_with_derived, encoding_schema, presence_mask_cols,
+                           demo_cols, keys=("admissionid", "hour")):
+    """Return deterministic physical columns and each manifest tag's actual columns."""
+    if len(set(grid_columns)) != len(grid_columns):
+        raise ValueError("grid has duplicate column names; refusing to guess an order")
+    available = set(grid_columns)
+    onehot_by_tag = {}
+    for row in encoding_schema or []:
+        onehot_by_tag.setdefault(row["feature"], []).append(row)
+    onehot_by_tag = {
+        tag: [row["column_name"] for row in sorted(rows, key=lambda row: row["position_global"])]
+        for tag, rows in onehot_by_tag.items()
+    }
+    statics = [column for column in demo_cols if column in available]
+    claimed = set(keys) | set(statics)
+    tag_to_physical, feature_columns = {}, []
+    for tag in matches_with_derived:
+        columns = [
+            column for column in onehot_by_tag.get(tag, [tag])
+            if column in available and column not in claimed
+        ]
+        tag_to_physical[tag] = columns
+        feature_columns.extend(columns)
+        claimed.update(columns)
+    mask_columns = []
+    wanted_masks = set(presence_mask_cols)
+    for tag in matches_with_derived:
+        column = f"{tag}__observed"
+        if column in available and column in wanted_masks and column not in claimed:
+            mask_columns.append(column)
+            claimed.add(column)
+    ordered = [column for column in keys if column in available] + statics + feature_columns + mask_columns
+    leftovers = sorted(available - set(ordered))
+    ordered += leftovers
+    if len(ordered) != len(available) or len(set(ordered)) != len(ordered):
+        raise ValueError("canonical order is not a permutation of the grid columns")
+    return ordered, tag_to_physical

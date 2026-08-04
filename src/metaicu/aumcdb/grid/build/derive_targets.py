@@ -34,16 +34,18 @@ DERIVED_TARGET_SOURCES = {
     "urine_rate_per_weight": ["urine_rate", "weight"],
 }
 
-# K=35 TTE pretraining target set (Supplement B.2.1; iCareFM_replicate/context.md sec 5.2),
-# minus bili_dir (not present in AmsterdamUMCdb -- context.md's Q3, resolved 2026-07-16). Order
-# fixes the canonical column order a Dataset class should use for its Ztargets tensor.
-K34_TTE_TARGETS = [
+# K=35 TTE pretraining target set. AUMC bili_dir is derived from the exact-time conjugated
+# fraction and total bilirubin, so both datasets now use the same target contract and order.
+K35_TTE_TARGETS = [
     "lact", "map", "sbp", "hr", "tnt", "po2", "pco2", "fio2", "spo2", "resp",
     "pf_ratio",
     "crea", "bun", "urine_rate", "urine_rate_per_weight",
-    "bili", "ast", "alt", "plt", "wbc", "rbc", "hct", "inr_pt", "temp", "crp",
+    "bili", "bili_dir", "ast", "alt", "plt", "wbc", "rbc", "hct", "inr_pt", "temp", "crp",
     "ph", "na", "k", "ca", "mg", "cl", "glu", "ck", "ckmb",
 ]
+
+# Compatibility alias for callers that imported the old name before direct bilirubin was recovered.
+K34_TTE_TARGETS = K35_TTE_TARGETS
 
 
 def add_derived_tte_targets(grid, admissions):

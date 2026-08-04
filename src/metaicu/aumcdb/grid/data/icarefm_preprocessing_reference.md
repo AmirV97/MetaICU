@@ -144,7 +144,7 @@ per Supplement B.2.1):
   censoring signal for the TTE loss. Categorical missingness is already recoverable from
   the one-hot `{tag}__missing` class, and treatments carry no unknown-vs-absent
   distinction, so neither gets a mask.
-- **Static-demographic prepend**: the 5 static features (age/weight/height + sex/adm
+- **Static-demographic prepend**: the 6 static fields (age/weight/height + sex/adm/ethnic
   one-hot) are prepended as leading columns on every hourly row, so each per-timestep
   sample carries patient context directly (numeric 0-filled when scaled = population
   mean; `ethnic` has no AmsterdamUMCdb source).

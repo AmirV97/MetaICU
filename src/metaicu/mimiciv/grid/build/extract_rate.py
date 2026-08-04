@@ -11,20 +11,21 @@ not an infusion rate), so it's handled like a direct_numeric value (median per h
 special-case AUMC gave its own chartevents-sourced treatment_rate exception (ufilt's raw
 fluid-output measurement there too).
 
-Per-kg-of-bodyweight rate rows (norepi, dobu, dopa, epi, milrin, prop) and wrong-time-base rows
-(adh) are converted to each tag's absolute target unit via
-grid.unit_conversion_overrides.PER_KG_RATE_MASS_SCALE / RATE_TIME_SCALE -- see that module's
-docstring for how this was found (a full pre-training sweep across every treatment_rate tag,
-not just the ones that ranked in the statistical divergence audit) and why hep/benzdia/loop_diur
-didn't need it. Everything else is still the known v1 gap (target_unit vs each itemid's actual
-rateuom hasn't been fully cross-checked beyond that sweep).
+Per-kg-of-bodyweight rate rows, combined per-kg/time rows (aminophylline), and wrong-time-base
+rows (vasopressin) are converted to each tag's absolute target unit via the explicit maps in
+grid.unit_conversion_overrides. Everything else is still the known v1 gap (target_unit vs each
+itemid's actual rateuom hasn't been fully cross-checked beyond that sweep).
 """
 import logging
 
 import polars as pl
 
 from .raw_csv import scan_raw_table, admission_filter
-from .unit_conversion_overrides import PER_KG_RATE_MASS_SCALE, RATE_TIME_SCALE
+from .unit_conversion_overrides import (
+    PER_KG_RATE_MASS_SCALE,
+    PER_KG_RATE_TIME_SCALE,
+    RATE_TIME_SCALE,
+)
 
 HOUR_MS = 3_600_000
 log = logging.getLogger(__name__)
@@ -47,6 +48,17 @@ def _apply_rate_unit_conversions(df):
                 )
                 log.info(f"{tag} itemid {itemid}: converted {n} per-kg rows (rateuom={rateuom}, "
                          f"mass_scale={mass_scale}) to absolute rate via x patientweight")
+    for (tag, itemid), scale_map in PER_KG_RATE_TIME_SCALE.items():
+        for rateuom, rate_scale in scale_map.items():
+            mask = (pl.col("tag") == tag) & (pl.col("itemid") == itemid) & (pl.col("rateuom") == rateuom)
+            n = df.filter(mask).height
+            if n:
+                df = df.with_columns(
+                    pl.when(mask).then(pl.col("rate") * rate_scale * pl.col("patientweight"))
+                    .otherwise(pl.col("rate")).alias("rate")
+                )
+                log.info(f"{tag} itemid {itemid}: converted {n} per-kg/time rows "
+                         f"(rateuom={rateuom}, rate_scale={rate_scale}) via x patientweight")
     for (tag, itemid), scale_map in RATE_TIME_SCALE.items():
         for rateuom, scale in scale_map.items():
             mask = (pl.col("tag") == tag) & (pl.col("itemid") == itemid) & (pl.col("rateuom") == rateuom)

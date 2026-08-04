@@ -22,6 +22,7 @@ EXPECTED_TABLE = {
     "treatment_rate": "drugitems",
 }
 ALL_RECONSTRUCTION_TYPES = frozenset(EXPECTED_TABLE)
+STRUCTURAL_ZERO_TAGS = {"tri", "pt", "milrin", "adh", "milrin_ind", "adh_ind"}
 
 # Every table each reconstruction type's extractor actually consumes (not just its primary/
 # most-common one, EXPECTED_TABLE above) -- used to tell a genuinely unhandled cross-table
@@ -97,11 +98,16 @@ def parse_manifest(manifest_path: Path | None = None, reconstruction_types=None)
             continue
         features[m.group(1)] = _parse_feature_block(b)
 
-    in_scope, skipped_wrong_type, skipped_zero_keep, anomalies = {}, [], [], []
+    in_scope, skipped_wrong_type, skipped_zero_keep, structural_zero, anomalies = {}, [], [], [], []
     for tag, info in features.items():
         rt = info["reconstruction_type"]
         if rt not in reconstruction_types:
             skipped_wrong_type.append((tag, rt))
+            continue
+        if info["n_keep"] == 0 and tag in STRUCTURAL_ZERO_TAGS:
+            info["structural_zero"] = True
+            structural_zero.append(tag)
+            in_scope[tag] = info
             continue
         if info["n_keep"] == 0:
             skipped_zero_keep.append(tag)
@@ -116,6 +122,7 @@ def parse_manifest(manifest_path: Path | None = None, reconstruction_types=None)
         "n_total_blocks": len(features),
         "skipped_wrong_type": skipped_wrong_type,
         "skipped_zero_keep": skipped_zero_keep,
+        "structural_zero": structural_zero,
         "anomalies": anomalies,
     }
     return in_scope, report
@@ -127,6 +134,8 @@ def log_report(report):
              f"{sorted(set(rt for _, rt in report['skipped_wrong_type']), key=lambda x: (x is None, x))}")
     log.info(f"Skipped (in-scope type but 0 keep matches -- {len(report['skipped_zero_keep'])}): "
              f"{report['skipped_zero_keep']}")
+    log.info(f"Retained as structural-zero shared-schema features "
+             f"({len(report['structural_zero'])}): {report['structural_zero']}")
     log.info(f"Cross-table anomalies flagged ({len(report['anomalies'])}) -- table not in "
              f"SUPPORTED_TABLES for this reconstruction_type, i.e. genuinely unhandled by "
              f"grid/extract_*.py, NOT auto-fixed:")

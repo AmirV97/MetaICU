@@ -27,6 +27,11 @@ import polars as pl
 log = logging.getLogger(__name__)
 
 MISSING_CATEGORY_LABEL = "(missing)"
+# Preserve full-detail source labels in the reviewed manifest, but emit the original AUMC
+# eight-level RASS schema until broader multi-dataset support makes rare +3/+4 levels useful.
+CATEGORY_COLLAPSE = {
+    "rass": {"+3 Very agitated": "+2 Agitated", "+4 Combative": "+2 Agitated"},
+}
 
 
 def _sanitize(label):
@@ -45,7 +50,12 @@ def get_categorical_vocab(matches):
     for tag, info in matches.items():
         if info["reconstruction_type"] != "categorical":
             continue
-        labels = sorted({m["standardized_label"] for m in info["keep_matches"] if m["standardized_label"]})
+        collapse = CATEGORY_COLLAPSE.get(tag, {})
+        labels = sorted({
+            collapse.get(m["standardized_label"], m["standardized_label"])
+            for m in info["keep_matches"]
+            if m["standardized_label"]
+        })
         vocab[tag] = labels
     return vocab
 
@@ -116,6 +126,9 @@ def one_hot_encode_categorical(grid, matches, start_pos=0):
     one_hot_encode_columns. Returns (grid, encoding_schema) -- see save_categorical_encoding for
     how encoding_schema is persisted."""
     vocab = get_categorical_vocab(matches)
+    for tag, collapse in CATEGORY_COLLAPSE.items():
+        if tag in grid.columns:
+            grid = grid.with_columns(pl.col(tag).replace(collapse).alias(tag))
     grid, encoding_schema, _ = one_hot_encode_columns(grid, vocab, start_pos=start_pos)
     return grid, encoding_schema
 

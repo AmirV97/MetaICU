@@ -32,6 +32,40 @@ from .unit_conversion_overrides import (
 HOUR_MS = 3_600_000
 log = logging.getLogger(__name__)
 
+DIRECT_BILI_FRACTION_ITEMID = 12079
+DIRECT_BILI_TOTAL_ITEMIDS = (9945, 6813)
+UMOL_L_PER_MG_DL_BILIRUBIN = 17.1
+
+
+def _derive_direct_bilirubin(raw):
+    """Derive direct bilirubin from an exact-time conjugated fraction and total bilirubin."""
+    fraction = (
+        raw.filter(pl.col("itemid") == DIRECT_BILI_FRACTION_ITEMID)
+        .group_by(["admissionid", "admission_relative_ms"])
+        .agg(pl.col("value").median().alias("fraction"))
+    )
+    total = (
+        raw.filter(pl.col("itemid").is_in(DIRECT_BILI_TOTAL_ITEMIDS))
+        .group_by(["admissionid", "admission_relative_ms"])
+        .agg(pl.col("value").median().alias("total_umol_l"))
+    )
+    joined = fraction.join(total, on=["admissionid", "admission_relative_ms"], how="inner")
+    valid = joined.filter(
+        pl.col("fraction").is_between(0.0, 1.0) & (pl.col("total_umol_l") >= 0)
+    )
+    log.info(
+        f"bili_dir derivation: {fraction.height} fraction timestamps -> {joined.height} exact-time "
+        f"total-bilirubin matches -> {valid.height} valid rows; dropped "
+        f"{joined.height - valid.height} out-of-range rows"
+    )
+    return valid.select(
+        "admissionid",
+        pl.lit("bili_dir").alias("tag"),
+        (pl.col("admission_relative_ms") // HOUR_MS).alias("hour"),
+        (pl.col("fraction") * pl.col("total_umol_l") / UMOL_L_PER_MG_DL_BILIRUBIN)
+        .alias("converted_value"),
+    )
+
 
 def _load_matches(matches):
     """matches: tag -> feature info dict (from grid.build.manifest_parser.parse_manifest), restricted to
@@ -75,17 +109,33 @@ def _build_numeric_from_numericitems(
     bounds is left unfiltered (currently just `pt`, see that module's docstring)."""
     if not pairs:
         return None
-    itemids = list({int(itemid) for _, itemid in pairs})
-    lookup = pl.DataFrame({"itemid": [int(itemid) for _, itemid in pairs], "tag": [tag for tag, _ in pairs]}).unique()
+    derive_direct_bili = any(
+        tag == "bili_dir" and int(itemid) == DIRECT_BILI_FRACTION_ITEMID for tag, itemid in pairs
+    )
+    ordinary_pairs = [
+        (tag, itemid) for tag, itemid in pairs
+        if not (tag == "bili_dir" and int(itemid) == DIRECT_BILI_FRACTION_ITEMID)
+    ]
+    itemids = {int(itemid) for _, itemid in ordinary_pairs}
+    if derive_direct_bili:
+        itemids.update((DIRECT_BILI_FRACTION_ITEMID, *DIRECT_BILI_TOTAL_ITEMIDS))
+    itemids = list(itemids)
+    lookup = pl.DataFrame(
+        {"itemid": [int(itemid) for _, itemid in ordinary_pairs],
+         "tag": [tag for tag, _ in ordinary_pairs]},
+        schema={"itemid": pl.Int64, "tag": pl.String},
+    ).unique()
 
     lf = scan_raw_table(raw_data_dir, "numericitems", admissions, raw_shards_dir).filter(
         pl.col("itemid").is_in(itemids) & (pl.col("admission_relative_ms") >= 0) & _admission_filter(admission_ids)
     ).select(["admissionid", "itemid", "value", "admission_relative_ms"])
 
-    df = lf.collect(engine="streaming")
-    log.info(f"numericitems rows scanned (post-itemid-filter): {df.height}")
+    raw = lf.collect(engine="streaming")
+    log.info(f"numericitems rows scanned (post-itemid-filter): {raw.height}")
 
-    df = df.with_columns((pl.col("admission_relative_ms") // HOUR_MS).alias("hour"))
+    derived_direct_bili = _derive_direct_bilirubin(raw) if derive_direct_bili else None
+
+    df = raw.with_columns((pl.col("admission_relative_ms") // HOUR_MS).alias("hour"))
     df = df.join(lookup, on="itemid", how="inner")
 
     # sentinel-value exclusion (raw device/error codes disguised as data -- see
@@ -154,7 +204,10 @@ def _build_numeric_from_numericitems(
         log.info(f"plausibility filter: dropped {before - df.height} of {before} rows "
                  f"outside their tag's bound ({len(tag_bounds)} tags bounded)")
 
-    return df.select(["admissionid", "tag", "hour", "converted_value"])
+    parts = [df.select(["admissionid", "tag", "hour", "converted_value"])]
+    if derived_direct_bili is not None:
+        parts.append(derived_direct_bili)
+    return pl.concat(parts)
 
 
 def _build_numeric_from_listitems_const(

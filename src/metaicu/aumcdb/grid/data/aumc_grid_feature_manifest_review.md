@@ -1562,10 +1562,11 @@ match 2:
 - Reconstruction type: `direct_numeric`
 - Mapping status: `source_candidates_found`
 - OpenICU evidence: mapping file `config/datasets/aumc/1.5.0/mappings/bilirubin_direct.yml`; OMOP concept IDs `3043744`
+- Notes: `DERIVED SOURCE (confirmed 2026-08-04): itemid 12079 is the conjugated/direct fraction of total bilirubin, not a concentration. Join it at the exact raw timestamp to total-bilirubin itemids 9945/6813, require fraction in [0,1], and derive mg/dL as fraction * total_bilirubin_umol_l / 17.1 before hourly aggregation. Full audit: 4,317 fraction rows -> 4,315 exact-time total-bilirubin matches -> 4,309 valid derived rows across 1,648 admissions.`
 
 match 1:
-  - decision: `unsure`
-  - decision reason: `Confirmed: 'Gecon.Bili (bloed)' = geconjugeerd (conjugated) bilirubin in blood, which is the standard clinical proxy for 'direct' bilirubin (diazo-direct-reacting ~ conjugated fraction) and correct compartment -- concept and specimen match are sound. But raw_unit 'x TOT' is not a recognized concentration unit (not umol/L or mg/dL); it plausibly denotes a dimensionless ratio/fraction of total bilirubin (a real secondary lab metric some Dutch labs report alongside the absolute value), which would be a wrong-dimension candidate per the physical-quantity-mismatch rule rather than a direct_numeric concentration. Cannot confirm from the label alone whether 'x TOT' is a genuine ratio channel or a data-dictionary artifact for a mislabeled molar unit -- this needs inspection of the actual value distribution (ratio would cluster ~0-1; a molar concentration would show typical bilirubin ranges) before treating it as a valid mg/dL source. Draft's 'unsure' call is correct and is kept as final.`
+  - decision: `keep`
+  - decision reason: `Confirmed dimensionless conjugated/direct fraction. This match is handled only by the dedicated derived-direct-bilirubin path: it is never interpreted as a concentration by itself. The raw audit found median 0.60 and 4,309/4,315 exact-time matched fractions in [0,1].`
   - table: `numericitems`
   - itemid: `12079`
   - source token: `LAB//12079//x TOT`
@@ -3968,11 +3969,11 @@ match 2:
 - Target unit: `ng/mL`
 - Reconstruction type: `direct_numeric`
 - Mapping status: `needs_policy`
-- Notes: `No Troponin I assay exists anywhere in AmsterdamUMCdb -- checked supplied_vocab.csv, the official AmsterdamUMCdb OMOP dictionary_map.csv, and the raw amsterdamumcdb/dictionary/dictionary.csv. All troponin items below are officially dictionary-mapped to Troponin T (LOINC 6598-7 / 48425-3), including itemid 8115 whose raw label is the generic "Troponine". This is consistent with Troponin T (not I) being the standard assay in Dutch hospital labs. Needs a policy decision: accept Troponin T as a cross-assay substitute for this feature, or leave AUMC unmapped for tri.`
+- Notes: `RESOLVED 2026-08-04: no Troponin I assay exists in AmsterdamUMCdb. Do not duplicate Troponin T under the tri name. Retain the correctly named tnt feature and emit tri as a structural-zero direct_numeric feature with tri__observed=0.`
 
 match 1:
-  - decision: `keep`
-  - decision reason: `mirrors tnt match 1 -- Troponin I doesn't exist in AmsterdamUMCdb (confirmed absent in supplied_vocab.csv, the OMOP dictionary_map, and the raw AmsterdamUMCdb dictionary.csv); Troponin T accepted as the cross-assay substitute.`
+  - decision: `reject`
+  - decision reason: `Wrong analyte for tri: this is Troponin T and is already retained by tnt. Cross-assay duplication was explicitly rejected in the 2026-08-04 schema audit.`
   - table: `numericitems`
   - itemid: `10407`
   - source token: `LAB//10407//µg/l`
@@ -3983,8 +3984,8 @@ match 1:
   - raw unit: `µg/l (=ng/mL) -- Troponin T, not I`
 
 match 2:
-  - decision: `keep`
-  - decision reason: `mirrors tnt match 2, same substitution rationale.`
+  - decision: `reject`
+  - decision reason: `Dictionary-mapped Troponin T, not Troponin I; already retained by tnt.`
   - table: `numericitems`
   - itemid: `8115`
   - source token: `LAB//8115//ng/ml`
@@ -4327,6 +4328,7 @@ match 1:
   geplande IC-opname)" ["...only for unplanned ICU admission"] has 140/217 (65%) rows marked
   urgency=Elective, contradicting its own label -- a pre-existing AmsterdamUMCdb data-quality
   issue, out of scope to correct here.`
+- Schema harmonization (2026-08-04): `The model-facing vocabulary is the shared urgency x {ed, icu_ccu, missing, other, transfer, ward_same_hospital} union. AUMC ED and ICU/CCU drop the redundant _same_hospital suffix. ward_same_hospital remains distinct from MIMIC transfer because internal ward escalation and external-facility referral are not equivalent; AUMC transfer columns are structural zeros. MIMIC's PACU-derived icu_ccu is only a coarse correspondence to AUMC's actual ICU/CCU source.`
 
 No itemid-vocabulary match applies here -- source is `admissions.csv:urgency` and
 `admissions.csv:origin` directly, see Notes for the exact category collapse and cross-tab

@@ -16,7 +16,7 @@ import logging
 
 import polars as pl
 
-from .raw_csv import scan_raw_table, admission_filter
+from .raw_csv import admission_filter, load_prescription_intervals, scan_raw_table
 
 HOUR_MS = 3_600_000
 POINT_TABLES = {"chartevents"}
@@ -33,16 +33,71 @@ def _collect_matches(matches):
     """Returns table -> list[(tag, itemid)] for treatment_indicator matches, grouped by
     normalized physical table."""
     by_table = {}
+    prescription_pairs = []
     for tag, info in matches.items():
         if info["reconstruction_type"] != "treatment_indicator":
             continue
         for m in info["keep_matches"]:
+            if m["table"] == "prescriptions" and m.get("ndc_codes"):
+                prescription_pairs.extend((tag, ndc) for ndc in m["ndc_codes"])
+                continue
             table = TABLE_ALIASES.get(m["table"])
             if table is None:
                 log.warning(f"SKIPPED (unrecognized table for treatment_indicator): {tag} {m}")
                 continue
             by_table.setdefault(table, []).append((tag, int(m["itemid"])))
-    return by_table
+    return by_table, prescription_pairs
+
+
+def _prescription_on_hours(raw_data_dir, pairs, admissions, admission_ids):
+    if not pairs:
+        return None
+    ndcs = sorted({ndc for _, ndc in pairs})
+    lookup = pl.DataFrame(
+        {"ndc": [ndc for _, ndc in pairs], "tag": [tag for tag, _ in pairs]},
+        schema={"ndc": pl.String, "tag": pl.String},
+    ).unique()
+    df = load_prescription_intervals(raw_data_dir, admissions, ndcs, admission_ids).join(
+        lookup, on="ndc", how="inner"
+    )
+
+    reverse = pl.col("stop_admission_relative_ms").is_not_null() & (
+        pl.col("stop_admission_relative_ms") < pl.col("start_admission_relative_ms")
+    )
+    reversed_rows = df.filter(reverse).height
+    df = df.filter(~reverse)
+    overlaps_icu = (
+        pl.col("start_admission_relative_ms").is_not_null()
+        & (pl.col("start_admission_relative_ms") < pl.col("los_ms"))
+        & (
+            pl.col("stop_admission_relative_ms").is_null()
+            | (pl.col("stop_admission_relative_ms") > 0)
+        )
+    )
+    df = df.filter(overlaps_icu)
+    null_stop_rows = df.filter(pl.col("stop_admission_relative_ms").is_null()).height
+    log.info(
+        f"prescriptions treatment_indicator: rejected {reversed_rows} reversed intervals; "
+        f"retained {df.height} ICU-overlapping rows ({null_stop_rows} null-stop point rows)"
+    )
+
+    df = df.with_columns(
+        pl.max_horizontal(pl.col("start_admission_relative_ms"), 0).alias("start_ms")
+    ).with_columns(
+        (pl.col("start_ms") // HOUR_MS).alias("hour_start"),
+        pl.when(pl.col("stop_admission_relative_ms").is_null())
+        .then(None)
+        .otherwise(pl.min_horizontal(pl.col("stop_admission_relative_ms"), pl.col("los_ms")))
+        .alias("stop_ms"),
+    ).with_columns(
+        pl.when(pl.col("stop_ms").is_null() | (pl.col("stop_ms") <= pl.col("start_ms")))
+        .then(pl.col("hour_start") + 1)
+        .otherwise((pl.col("stop_ms") + HOUR_MS - 1) // HOUR_MS)
+        .alias("hour_stop")
+    ).with_columns(
+        pl.int_ranges(pl.col("hour_start"), pl.col("hour_stop")).alias("hour")
+    ).explode("hour")
+    return df.select("admissionid", "tag", "hour")
 
 
 def _point_on_hours(raw_data_dir, table, pairs, admissions, admission_ids, raw_shards_dir=None):
@@ -93,7 +148,7 @@ def extract_treatment_indicator(matches, raw_data_dir, admissions, admission_ids
     DataFrame from grid.raw_csv.load_admissions(). admission_ids: optional iterable to restrict
     to; None = full population. Returns a single (admissionid, tag, hour) DataFrame of distinct
     "On" hours, or None if no matches at all."""
-    by_table = _collect_matches(matches)
+    by_table, prescription_pairs = _collect_matches(matches)
     log.info(f"treatment_indicator tables in scope: {sorted(by_table)}")
 
     parts = []
@@ -102,6 +157,12 @@ def extract_treatment_indicator(matches, raw_data_dir, admissions, admission_ids
         part = builder(raw_data_dir, table, pairs, admissions, admission_ids, raw_shards_dir)
         if part is not None:
             parts.append(part)
+
+    prescription_part = _prescription_on_hours(
+        raw_data_dir, prescription_pairs, admissions, admission_ids
+    )
+    if prescription_part is not None:
+        parts.append(prescription_part)
 
     if not parts:
         return None

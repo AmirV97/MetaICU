@@ -28,7 +28,7 @@ from .extract_indicator import extract_treatment_indicator
 from .extract_numeric import extract_numeric_categorical
 from .extract_rate import extract_treatment_rate
 from .extract_static import STATIC_CATEGORICAL_VOCAB, extract_static_features
-from .impute import capture_presence_mask, impute_grid
+from .impute import capture_presence_mask, impute_grid, materialize_structural_zero_columns
 from .manifest_parser import ALL_RECONSTRUCTION_TYPES, parse_manifest
 from .sampling import apply_inclusion_criteria, get_admission_ids, load_valid_admissions
 from .scale import save_scalers, scale_grid, scale_static_features
@@ -129,7 +129,7 @@ def _write_metadata(admissions: pl.DataFrame, shard_info: dict[int, dict[str, in
     filtering, e.g. "age > 65") plus, if grid.scale.scale_static_features ran (config.scale), a
     f"{tag}_scaled" column alongside each. outcome = hospital_expire_flag (died during THIS
     hospitalization) -- MIMIC's closest admission-scoped analog to AUMC's patient-level
-    dateofdeath. ethnic (admissions.race) is informational-only, no AUMCdb source to mirror."""
+    dateofdeath. ethnic is the reviewed five-group collapse of admissions.race plus missing."""
     scaled_cols = [c for c in ("age_scaled", "weight_scaled", "height_scaled") if c in admissions.columns]
     rows = []
     for row in admissions.iter_rows(named=True):
@@ -232,9 +232,9 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         admissions, static_scalers = scale_static_features(admissions, train_ids)
         scalers.update(static_scalers)
 
-    # sex/adm one-hot encoded on a side copy (demo_source), never on `admissions` itself --
-    # metadata.csv (via _write_metadata) still needs the original human-readable sex/adm values.
-    demo_source = admissions.select(["admissionid", "sex", "adm"])
+    # sex/adm/ethnic one-hot encoded on a side copy (demo_source), never on `admissions` itself --
+    # metadata.csv (via _write_metadata) still needs the human-readable collapsed values.
+    demo_source = admissions.select(["admissionid", "sex", "adm", "ethnic"])
     static_categorical_encoding: list[dict] = []
     next_categorical_pos = 0
     if config.one_hot:
@@ -250,6 +250,7 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     grid = assemble_grid(admissions, numeric_long, categorical_long, indicator_on_hours, rate_long)
     grid, derived_target_matches = add_derived_tte_targets(grid, admissions)
     matches_with_derived = {**matches, **derived_target_matches}
+    grid = materialize_structural_zero_columns(grid, matches_with_derived)
     grid, presence_mask_cols = capture_presence_mask(grid, matches_with_derived)
     if config.scale:
         grid, grid_scalers = scale_grid(grid, matches_with_derived, train_ids)
@@ -276,7 +277,8 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     # are left as-is.
     numeric_static_cols = [f"{tag}_scaled" if config.scale else tag for tag in ("age", "weight", "height")]
     categorical_static_cols = (
-        [row["column_name"] for row in static_categorical_encoding] if config.one_hot else ["sex", "adm"]
+        [row["column_name"] for row in static_categorical_encoding]
+        if config.one_hot else ["sex", "adm", "ethnic"]
     )
     demo_numeric = admissions.select(
         ["admissionid"] + [(pl.col(c).fill_null(0.0) if config.scale else pl.col(c)) for c in numeric_static_cols]
@@ -321,9 +323,10 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "height": {"reconstruction_type": "static_numeric", "target_unit": "cm"},
         "sex": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
         "adm": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+        "ethnic": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
     })
     static_physical = dict(zip(("age", "weight", "height"), ([column] for column in numeric_static_cols)))
-    for tag in ("sex", "adm"):
+    for tag in ("sex", "adm", "ethnic"):
         static_physical[tag] = (
             [row["column_name"] for row in static_categorical_encoding if row["feature"] == tag]
             if config.one_hot else [tag]
@@ -335,7 +338,7 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
 
     # MIMIC's own K=35 TTE pretraining target manifest (grid.derive_targets.MIMIC_K35_TTE_TARGETS
     # -- AUMC's K=34 list plus bili_dir, which MIMIC-IV has and AUMCdb doesn't).
-    tte_present = set(matches_with_derived) | {"age", "weight", "height", "sex", "adm"}
+    tte_present = set(matches_with_derived) | {"age", "weight", "height", "sex", "adm", "ethnic"}
     tte_missing = [tag for tag in MIMIC_K35_TTE_TARGETS if tag not in tte_present or tag not in grid.columns]
     tte_targets_path = config.output_dir / "tte_targets.json"
     tte_targets_path.write_text(json.dumps({

@@ -137,6 +137,8 @@ def scale_grid(grid, matches, train_admission_ids):
     for tag, info in matches.items():
         if tag not in grid.columns:
             continue
+        if info.get("structural_zero"):
+            continue
         rt = info["reconstruction_type"]
         if rt not in ("direct_numeric", "derived_output_rate", "treatment_rate"):
             continue

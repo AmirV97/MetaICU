@@ -29,6 +29,7 @@ ALL_RECONSTRUCTION_TYPES = frozenset({
     "direct_numeric", "derived_output_rate", "categorical", "treatment_indicator", "treatment_rate",
 })
 DROPPED_TABLES = {"prescriptions", "diagnoses", "procedures_icd"}
+STRUCTURAL_ZERO_TAGS = {"tri"}
 
 DEFAULT_REVIEWED_MANIFEST = Path(
     str(files("metaicu.mimiciv.grid").joinpath("data/mimic_grid_feature_manifest_review.md"))
@@ -41,6 +42,7 @@ def _field(text, name):
 
 
 def _parse_match_block(m_text):
+    ndc_codes = _field(m_text, "NDC codes")
     return {
         "decision": _field(m_text, "decision"),
         "table": _field(m_text, "table"),
@@ -48,6 +50,7 @@ def _parse_match_block(m_text):
         "raw_label": _field(m_text, "raw label"),
         "raw_value": _field(m_text, "raw value"),
         "standardized_label": _field(m_text, "standardized label"),
+        "ndc_codes": ndc_codes.split("|") if ndc_codes else [],
     }
 
 
@@ -58,8 +61,10 @@ def _parse_feature_block(block_text):
     mapping_status = re.search(r"- Mapping status: `([^`]*)`", block_text)
     match_blocks = re.split(r"\nmatch \d+[^\n:]*:\n", block_text)[1:]
     matches = [_parse_match_block(mb) for mb in match_blocks]
-    keep_matches = [m for m in matches if m["decision"] == "keep" and m["table"] not in DROPPED_TABLES]
-    dropped_bulk = [m for m in matches if m["decision"] == "keep" and m["table"] in DROPPED_TABLES]
+    keep_matches = [m for m in matches if m["decision"] == "keep" and
+                    (m["table"] not in DROPPED_TABLES or m["ndc_codes"])]
+    dropped_bulk = [m for m in matches if m["decision"] == "keep" and
+                    m["table"] in DROPPED_TABLES and not m["ndc_codes"]]
     return {
         "reconstruction_type": rt_value,
         "target_unit": tu.group(1) if tu else None,
@@ -75,7 +80,7 @@ def parse_manifest(review_md_path=None, reconstruction_types=None):
     """Returns (in_scope: dict[tag -> feature info], report: dict) -- report has
     skipped_wrong_type / skipped_zero_keep / dropped_bulk_tables lists for logging by the caller."""
     reconstruction_types = set(reconstruction_types or ALL_RECONSTRUCTION_TYPES)
-    text = open(review_md_path or DEFAULT_REVIEWED_MANIFEST).read()
+    text = Path(review_md_path or DEFAULT_REVIEWED_MANIFEST).read_text()
     blocks = re.split(r"\n(?=### )", text)
 
     features = {}
@@ -85,7 +90,7 @@ def parse_manifest(review_md_path=None, reconstruction_types=None):
             continue
         features[m.group(1)] = _parse_feature_block(b)
 
-    in_scope, skipped_wrong_type, skipped_zero_keep, dropped_bulk_tables = {}, [], [], []
+    in_scope, skipped_wrong_type, skipped_zero_keep, structural_zero, dropped_bulk_tables = {}, [], [], [], []
     for tag, info in features.items():
         rt = info["reconstruction_type"]
         if rt not in reconstruction_types:
@@ -93,6 +98,11 @@ def parse_manifest(review_md_path=None, reconstruction_types=None):
             continue
         if info["n_dropped_bulk"]:
             dropped_bulk_tables.append((tag, info["n_dropped_bulk"]))
+        if info["n_keep"] == 0 and tag in STRUCTURAL_ZERO_TAGS:
+            info["structural_zero"] = True
+            structural_zero.append(tag)
+            in_scope[tag] = info
+            continue
         if info["n_keep"] == 0:
             skipped_zero_keep.append(tag)
             continue
@@ -102,6 +112,7 @@ def parse_manifest(review_md_path=None, reconstruction_types=None):
         "n_total_blocks": len(features),
         "skipped_wrong_type": skipped_wrong_type,
         "skipped_zero_keep": skipped_zero_keep,
+        "structural_zero": structural_zero,
         "dropped_bulk_tables": dropped_bulk_tables,
     }
     return in_scope, report
@@ -115,6 +126,8 @@ def log_report(report):
              f"{sorted(set(rt for _, rt in report['skipped_wrong_type']), key=lambda x: (x is None, x))}")
     log.info(f"Skipped (0 keep matches after dropping prescriptions/diagnoses/procedures_icd, "
              f"{len(report['skipped_zero_keep'])}): {report['skipped_zero_keep']}")
+    log.info(f"Retained as structural-zero shared-schema features "
+             f"({len(report['structural_zero'])}): {report['structural_zero']}")
     if report["dropped_bulk_tables"]:
         log.warning(f"Tags with dropped bulk (prescriptions/diagnoses/procedures_icd) matches "
                     f"(itemid-based candidates for these tags, if any, are still extracted -- "

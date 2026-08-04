@@ -20,13 +20,13 @@ from metaicu.aumcdb.common.raw_tables import raw_table_input_mode
 from metaicu.grid.integrity import audit_grid_dataset
 
 from .assemble import assemble_grid, canonical_column_order
-from .derive_targets import K34_TTE_TARGETS, DERIVED_TARGET_SOURCES, add_derived_tte_targets
+from .derive_targets import K35_TTE_TARGETS, DERIVED_TARGET_SOURCES, add_derived_tte_targets
 from .encode import one_hot_encode_categorical, one_hot_encode_columns, save_categorical_encoding
 from .extract_indicator import extract_treatment_indicator
 from .extract_numeric import extract_numeric_categorical
 from .extract_rate import extract_treatment_rate
 from .extract_static import STATIC_CATEGORICAL_VOCAB, extract_static_features
-from .impute import capture_presence_mask, impute_grid
+from .impute import capture_presence_mask, impute_grid, materialize_structural_zero_columns
 from .manifest_parser import ALL_RECONSTRUCTION_TYPES, parse_manifest
 from .sampling import apply_inclusion_criteria, get_admission_ids, load_valid_admissions
 from .scale import save_scalers, scale_grid, scale_static_features
@@ -149,6 +149,7 @@ def _write_metadata_by_admission(
             "height": row["height"],
             "sex": row["sex"],
             "adm": row["adm"],
+            "ethnic": row["ethnic"],
         }
         for column in scaled_columns:
             record[column] = row[column]
@@ -188,6 +189,7 @@ def _write_metadata_by_subject(
             "height": first["height"],
             "sex": first["sex"],
             "adm": ",".join(str(a) for a in group["adm"].to_list()),
+            "ethnic": first["ethnic"],
         }
         for column in scaled_columns:
             record[column] = first[column]
@@ -297,10 +299,10 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         admissions, static_scalers = scale_static_features(admissions, train_ids)
         scalers.update(static_scalers)
 
-    # sex/adm one-hot encoded on a side copy (demo_source), never on `admissions` itself --
+    # sex/adm/ethnic one-hot encoded on a side copy (demo_source), never on `admissions` itself --
     # metadata.csv (via _write_metadata_by_admission/_write_metadata_by_subject) still needs the
-    # original human-readable sex/adm values.
-    demo_source = admissions.select(["admissionid", "sex", "adm"])
+    # original human-readable categorical values.
+    demo_source = admissions.select(["admissionid", "sex", "adm", "ethnic"])
     static_categorical_encoding: list[dict] = []
     next_categorical_pos = 0
     if config.one_hot:
@@ -327,6 +329,7 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     grid = assemble_grid(admissions, numeric_long, categorical_long, indicator_on_hours, rate_long)
     grid, derived_target_matches = add_derived_tte_targets(grid, admissions)
     matches_with_derived = {**matches, **derived_target_matches}
+    grid = materialize_structural_zero_columns(grid, matches_with_derived)
     grid, presence_mask_cols = capture_presence_mask(grid, matches_with_derived)
     if config.scale:
         grid, grid_scalers = scale_grid(grid, matches_with_derived, train_ids)
@@ -345,15 +348,16 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
             encoding_schema, config.output_dir / "categorical_encoding.csv"
         )
 
-    # Prepend the 5 available static/demographic features (age, weight, height, sex, adm --
-    # `ethnic` has no AmsterdamUMCdb source, see extract_static.py) onto every hourly row of
+    # Prepend the static/demographic features (age, weight, height, sex, adm, plus the
+    # structurally missing ethnic field) onto every hourly row of
     # their admission, so each per-timestep sample carries patient context directly rather than
     # only living in metadata.csv. Numeric columns 0-fill remaining nulls when scaled (0 =
     # population mean post-standardization, same A.4.3 convention as the rest of the grid);
     # unscaled, real nulls are left as-is.
     numeric_static_cols = [f"{tag}_scaled" if config.scale else tag for tag in ("age", "weight", "height")]
     categorical_static_cols = (
-        [row["column_name"] for row in static_categorical_encoding] if config.one_hot else ["sex", "adm"]
+        [row["column_name"] for row in static_categorical_encoding]
+        if config.one_hot else ["sex", "adm", "ethnic"]
     )
     demo_numeric = admissions.select(
         ["admissionid"]
@@ -407,9 +411,10 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "height": {"reconstruction_type": "static_numeric", "target_unit": "cm"},
         "sex": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
         "adm": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+        "ethnic": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
     })
     static_physical = dict(zip(("age", "weight", "height"), ([column] for column in numeric_static_cols)))
-    for tag in ("sex", "adm"):
+    for tag in ("sex", "adm", "ethnic"):
         static_physical[tag] = (
             [row["column_name"] for row in static_categorical_encoding if row["feature"] == tag]
             if config.one_hot else [tag]
@@ -419,11 +424,11 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         schema[tag]["physical_columns"] = [column for column in physical if column in grid.columns]
     schema_path.write_text(json.dumps(schema, indent=2, sort_keys=True))
 
-    # K=34 TTE pretraining target manifest (see derive_targets.K34_TTE_TARGETS) -- lets a Dataset
+    # Shared K=35 TTE pretraining target manifest -- lets a Dataset
     # class read the canonical target list/order and each target's presence_mask_column directly
     # from the dataset artifacts, rather than hardcoding or re-deriving it from context.md.
-    available_targets = [tag for tag in K34_TTE_TARGETS if tag in schema]
-    missing_targets = [tag for tag in K34_TTE_TARGETS if tag not in schema]
+    available_targets = [tag for tag in K35_TTE_TARGETS if tag in schema]
+    missing_targets = [tag for tag in K35_TTE_TARGETS if tag not in schema]
     if missing_targets:
         log.warning(f"TTE targets not resolved in this build (feature-restricted run?): {missing_targets}")
     tte_targets_path = config.output_dir / "tte_targets.json"
@@ -431,7 +436,7 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "targets": available_targets,
         "missing": missing_targets,
         "derived": DERIVED_TARGET_SOURCES,
-        "excluded": {"bili_dir": "not present in AmsterdamUMCdb (context.md Q3)"},
+        "excluded": {},
     }, indent=2))
 
     integrity_path = audit_grid_dataset(

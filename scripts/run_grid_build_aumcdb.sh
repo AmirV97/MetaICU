@@ -3,7 +3,7 @@
 #SBATCH --partition=cpu
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=72G
-#SBATCH --time=00:15:00
+#SBATCH --time=00:06:00
 #SBATCH --output=/msc/home/avahda55/MetaICU_outputs/logs/%x_%j.out
 #SBATCH --error=/msc/home/avahda55/MetaICU_outputs/logs/%x_%j.err
 
@@ -16,11 +16,10 @@ cd "$REPO"
 export PYTHONPATH="$REPO/src"
 export POLARS_MAX_THREADS="${SLURM_CPUS_PER_TASK:-4}"
 
-"$PYTHON" -m metaicu.grid.cli.grid_build_dataset \
-  dataset=aumcdb \
+"$PYTHON" -m metaicu.aumcdb.grid.cli.grid_build_dataset \
   paths.raw_data_dir=/msc/home/avahda55/Datasets/AmsterdamUMCdb \
   paths.raw_shards_dir=/msc/home/avahda55/Datasets/AUMCdb_tokenized_temp/data/raw_shards \
   paths.output_dir=/msc/home/avahda55/MetaICU_outputs/aumcdb \
   paths.audit_dir=/msc/home/avahda55/MetaICU_outputs/audits/aumcdb \
   run.build_raw_shards=false \
-  run.overwrite=false
+  run.overwrite=true

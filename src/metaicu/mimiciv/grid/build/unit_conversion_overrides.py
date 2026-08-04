@@ -79,6 +79,12 @@ PER_KG_RATE_MASS_SCALE = {
     ("prop", 222168): {"mcg/kg/min": 1.0},
 }
 
+# Aminophylline is recorded per kg and per hour, while the shared theophylline target is an
+# absolute mg/min rate. The factor combines hour->minute conversion with the weight expansion.
+PER_KG_RATE_TIME_SCALE = {
+    ("teophyllin", 221342): {"mg/kg/hour": 1.0 / 60.0},
+}
+
 # Wrong-time-base treatment_rate rows -- same 2026-08-03 sweep (job 547592). adh (Vasopressin,
 # itemid 222315) is 37,160/37,163 rows (99.99%) "units/hour" against a target unit of U/min (per
 # both this manifest and AUMC's own, though AUMC itself has zero Vasopressin source data to

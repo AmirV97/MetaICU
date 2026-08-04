@@ -1,6 +1,6 @@
 """
-admission_context raw extraction: the 5 resolved static/demographic features (age, weight,
-height, sex, adm) plus ethnic, recovered directly from admissions/patients/icustays columns
+admission_context raw extraction: six resolved static/demographic features (age, weight,
+height, sex, adm, ethnic), recovered directly from admissions/patients/icustays columns
 (age/sex/adm/ethnic) and a small chartevents admission-weight/height scan (weight/height) --
 per the manifest review's ADMISSION_CONTEXT_FIXED notes. No itemid-vocabulary matching applies
 to age/sex/adm/ethnic (static admissions-table columns, not vocab-matched observations), same
@@ -11,15 +11,16 @@ caller folds this into metadata.csv, not the hourly grid, same convention as AUM
 does NOT impute (weight/height/sex blanks stay null) -- imputation is a model-layer concern,
 same design decision AUMC made.
 
-`adm` is collapsed to a bounded urgency x origin scheme (2026-07-30), mirroring AUMC's own
-structural pattern (grid.extract_static.STATIC_CATEGORICAL_VOCAB's ADM_CATEGORIES: urgency x
-origin, both coarse, small, one-hot-friendly) -- NOT a semantic 1:1 mapping of category NAMES
-across datasets, since MIMIC's admission_location (referral source) and AUMC's origin
-(within-hospital department transferred from) aren't the same underlying construct. `adm` is
-dataset-specific administrative vocabulary, unlike GCS/RASS which are universal clinical scales
-that DO need identical category names across datasets (see mgcs/vgcs/egcs/rass manifest blocks).
-`ethnic` (MIMIC's admissions.race) is left uncollapsed -- not one-hot encoded, informational only
-in metadata.csv, matching AUMC (which has no ethnicity field to collapse at all).
+`adm` uses a shared fixed output vocabulary for dimensional parity, but it is not treated as
+a fully unified clinical concept: MIMIC's admission_location is a hospital referral source,
+whereas AUMC's origin is the preceding department within the same hospital. ED, other, and
+missing use shared names. Both expose `icu_ccu`, with the recorded caveat that MIMIC derives it
+from PACU while AUMC derives it from an actual ICU/CCU. AUMC `ward_same_hospital` and MIMIC
+`transfer` remain separate dataset-exclusive columns and are structurally zero in the other
+dataset. This differs from universal clinical scales such as GCS/RASS, whose labels are directly
+harmonized.
+`ethnic` (MIMIC's admissions.race) is collapsed to five broad reported groups plus missing.
+The mapping enumerates every reviewed source label so new labels fail visibly during extraction.
 """
 import logging
 
@@ -31,6 +32,8 @@ log = logging.getLogger(__name__)
 
 WEIGHT_ITEMID = 226512  # Admission Weight (Kg)
 HEIGHT_ITEMID = 226730  # Height (cm)
+WEIGHT_VALID_RANGE_KG = (30.0, 300.0)
+HEIGHT_VALID_RANGE_CM = (100.0, 250.0)
 
 # admission_type -> urgency bucket (elective/emergency), mirroring AUMC's URGENCY_LABEL
 URGENCY_LABEL = {
@@ -54,9 +57,65 @@ ORIGIN_COLLAPSED = {
 }
 
 SEX_CATEGORIES = ["F", "M"]
+ADM_ORIGIN_CATEGORIES = ["ed", "icu_ccu", "missing", "other", "transfer", "ward_same_hospital"]
 ADM_CATEGORIES = sorted(f"{u}_{o}" for u in set(URGENCY_LABEL.values())
-                        for o in set(ORIGIN_COLLAPSED.values()) | {"missing"})
-STATIC_CATEGORICAL_VOCAB = {"sex": SEX_CATEGORIES, "adm": ADM_CATEGORIES}
+                        for o in ADM_ORIGIN_CATEGORIES)
+ETHNIC_CATEGORIES = ["ASIAN", "BLACK", "HISPANIC_LATINO", "OTHER", "WHITE"]
+RACE_GROUP_BY_SOURCE_LABEL = {
+    None: None,
+    "UNKNOWN": None,
+    "UNABLE TO OBTAIN": None,
+    "PATIENT DECLINED TO ANSWER": None,
+    "WHITE": "WHITE",
+    "WHITE - OTHER EUROPEAN": "WHITE",
+    "WHITE - RUSSIAN": "WHITE",
+    "WHITE - EASTERN EUROPEAN": "WHITE",
+    "WHITE - BRAZILIAN": "WHITE",
+    "BLACK/AFRICAN AMERICAN": "BLACK",
+    "BLACK/CAPE VERDEAN": "BLACK",
+    "BLACK/CARIBBEAN ISLAND": "BLACK",
+    "BLACK/AFRICAN": "BLACK",
+    "HISPANIC OR LATINO": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - PUERTO RICAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - DOMINICAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - GUATEMALAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - SALVADORAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - CUBAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - COLUMBIAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - MEXICAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - HONDURAN": "HISPANIC_LATINO",
+    "HISPANIC/LATINO - CENTRAL AMERICAN": "HISPANIC_LATINO",
+    "ASIAN": "ASIAN",
+    "ASIAN - CHINESE": "ASIAN",
+    "ASIAN - SOUTH EAST ASIAN": "ASIAN",
+    "ASIAN - ASIAN INDIAN": "ASIAN",
+    "ASIAN - KOREAN": "ASIAN",
+    "OTHER": "OTHER",
+    "PORTUGUESE": "OTHER",
+    "AMERICAN INDIAN/ALASKA NATIVE": "OTHER",
+    "NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER": "OTHER",
+    "SOUTH AMERICAN": "OTHER",
+    "MULTIPLE RACE/ETHNICITY": "OTHER",
+}
+STATIC_CATEGORICAL_VOCAB = {
+    "sex": SEX_CATEGORIES,
+    "adm": ADM_CATEGORIES,
+    "ethnic": ETHNIC_CATEGORIES,
+}
+
+
+def _filter_plausible_weight_height(rows: pl.DataFrame) -> pl.DataFrame:
+    """Reject implausible raw measurements before calculating each stay's median."""
+    return rows.filter(
+        (
+            (pl.col("itemid") == WEIGHT_ITEMID)
+            & pl.col("valuenum").is_between(*WEIGHT_VALID_RANGE_KG, closed="both")
+        )
+        | (
+            (pl.col("itemid") == HEIGHT_ITEMID)
+            & pl.col("valuenum").is_between(*HEIGHT_VALID_RANGE_CM, closed="both")
+        )
+    )
 
 
 def _extract_weight_height(raw_data_dir, admissions, admission_ids, raw_shards_dir=None):
@@ -65,6 +124,7 @@ def _extract_weight_height(raw_data_dir, admissions, admission_ids, raw_shards_d
         pl.col("itemid").is_in([WEIGHT_ITEMID, HEIGHT_ITEMID]) & admission_filter(admission_ids)
     )
     df = lf.select(["admissionid", "itemid", "valuenum"]).collect(engine="streaming")
+    df = _filter_plausible_weight_height(df)
     if df.height == 0:
         return None
     wide = df.group_by(["admissionid", "itemid"]).agg(pl.col("valuenum").median().alias("value")).pivot(
@@ -93,7 +153,9 @@ def extract_static_features(raw_data_dir, admissions, admission_ids=None, raw_sh
         (pl.col("admittime").dt.year() - pl.col("year_of_birth").cast(pl.Int64, strict=False)).alias("age"),
         pl.when(pl.col("gender") == "").then(None).otherwise(pl.col("gender")).alias("sex"),
         (urgency + "_" + origin).alias("adm"),
-        pl.col("race").alias("ethnic"),
+        pl.col("race").replace_strict(
+            RACE_GROUP_BY_SOURCE_LABEL, return_dtype=pl.String
+        ).alias("ethnic"),
     )
 
     wh = _extract_weight_height(raw_data_dir, admissions, admission_ids, raw_shards_dir)

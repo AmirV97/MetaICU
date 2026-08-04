@@ -28,6 +28,28 @@ import polars as pl
 log = logging.getLogger(__name__)
 
 
+def materialize_structural_zero_columns(grid, matches):
+    """Add manifest features absent from this cohort, preserving the shared physical schema."""
+    expressions = []
+    for tag, info in matches.items():
+        if tag in grid.columns:
+            continue
+        reconstruction_type = info["reconstruction_type"]
+        if reconstruction_type == "treatment_indicator":
+            expressions.append(pl.lit(0, dtype=pl.Int32).alias(tag))
+        elif reconstruction_type == "treatment_rate":
+            expressions.append(pl.lit(0, dtype=pl.Float64).alias(tag))
+        elif reconstruction_type in ("direct_numeric", "derived_output_rate"):
+            value = 0.0 if info.get("structural_zero") else None
+            expressions.append(pl.lit(value, dtype=pl.Float64).alias(tag))
+        elif reconstruction_type == "categorical":
+            expressions.append(pl.lit(None, dtype=pl.String).alias(tag))
+    if expressions:
+        grid = grid.with_columns(expressions)
+        log.info(f"materialized {len(expressions)} manifest feature columns absent from this cohort")
+    return grid
+
+
 def capture_presence_mask(grid, matches):
     """grid: wide DataFrame from grid.assemble_grid (plus any derived targets already merged --
     see grid.derive_targets), pre-scale/pre-impute so nulls are still the real ones. matches:
@@ -44,7 +66,9 @@ def capture_presence_mask(grid, matches):
         if info["reconstruction_type"] not in ("direct_numeric", "derived_output_rate"):
             continue
         col_name = f"{tag}__observed"
-        new_cols.append(pl.col(tag).is_not_null().cast(pl.Int8).alias(col_name))
+        observed = (pl.lit(0, dtype=pl.Int8) if info.get("structural_zero")
+                    else pl.col(tag).is_not_null().cast(pl.Int8))
+        new_cols.append(observed.alias(col_name))
         mask_cols.append(col_name)
     if new_cols:
         grid = grid.with_columns(new_cols)

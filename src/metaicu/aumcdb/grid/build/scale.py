@@ -46,7 +46,7 @@ LOG_TRANSFORM_TAGS = {
     "crea": "log1p", "bun": "log1p", "glu": "log1p", "mg": "log1p", "phos": "log1p",
     "urine_rate": "log1p",
     "plt": "log1p", "wbc": "log1p", "ptt": "log1p", "inr_pt": "log1p",
-    "alp": "log1p", "alt": "log1p", "ast": "log1p", "bili": "log1p", "ck": "log1p",
+    "alp": "log1p", "alt": "log1p", "ast": "log1p", "bili": "log1p", "bili_dir": "log1p", "ck": "log1p",
     "ckmb": "log1p", "tnt": "log1p", "tri": "log1p", "amyl": "log1p", "lip": "log1p",
     "ygt": "log1p", "amm": "log1p",
     "crp": "log1p", "hbco": "log1p", "methb": "log1p", "bnd": "log1p", "lymph": "log1p",
@@ -145,6 +145,8 @@ def scale_grid(grid, matches, train_admission_ids):
 
     for tag, info in matches.items():
         if tag not in grid.columns:
+            continue
+        if info.get("structural_zero"):
             continue
         rt = info["reconstruction_type"]
         if rt not in ("direct_numeric", "derived_output_rate", "treatment_rate"):

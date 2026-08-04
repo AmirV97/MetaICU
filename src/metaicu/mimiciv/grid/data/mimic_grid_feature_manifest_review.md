@@ -68,7 +68,7 @@ match 1:
 - Reconstruction type: `admission_context`
 - Target unit: `kg`
 - Match method: `admission_context_fixed`
-- Notes: `omr.result_name='Weight (Lbs)' (outpatient, sparse) or chartevents admission-weight itemids (226512 Kg, 224639 lbs) -- candidates only, not yet decided which to prefer.`
+- Notes: `RESOLVED: chartevents itemid 226512 (Admission Weight, kg); reject raw values outside 30-300 kg before taking the per-stay median. Invalid-only stays remain missing. Full included-cohort audit rejected 196/81,535 measurements and made 196 stays missing; retained medians span 30.0-297.7 kg.`
 
 ### sex, Sex, demographic, not specified
 - Mapping status: `admission_context`
@@ -82,7 +82,7 @@ match 1:
 - Reconstruction type: `admission_context`
 - Target unit: `cm`
 - Match method: `admission_context_fixed`
-- Notes: `omr.result_name='Height (Inches)' (outpatient, sparse) or chartevents itemid 226730 (Height (cm)) -- candidates only, not yet decided which to prefer.`
+- Notes: `RESOLVED: chartevents itemid 226730 (Height, cm); reject raw values outside 100-250 cm before taking the per-stay median. Invalid-only stays remain missing. Full included-cohort audit rejected 234/40,815 measurements and made 234 stays missing; retained medians span 102-249 cm.`
 
 ### hr, Heart Rate, observation, circulatory
 - Mapping status: `source_candidates_found`
@@ -536,7 +536,7 @@ match 1:
 - Reconstruction type: `unavailable`
 - Target unit: `categorical`
 - Match method: `admission_context_fixed`
-- Notes: `MIMIC-IV admissions.race is available (unlike AUMCdb, which had no reliable ethnicity field) -- this can be resolved, unlike AUMC's 'unavailable'.`
+- Notes: `MIMIC-IV admissions.race is collapsed by a reviewed exhaustive mapping to WHITE, BLACK, HISPANIC_LATINO, ASIAN, OTHER, or missing. UNKNOWN, UNABLE TO OBTAIN, and PATIENT DECLINED TO ANSWER map to missing. AUMCdb emits only missing because it has no reliable ethnicity source.`
 
 ### alb, Albumin, observation, gastrointestinal
 - Mapping status: `source_candidates_found`
@@ -3309,6 +3309,7 @@ match 9:
 - Reconstruction type: `direct_numeric`
 - Target unit: `ng/mL`
 - Match method: `omop_concept_match`
+- Notes: `RESOLVED 2026-08-04: MIMIC's genuine Troponin I sources do not yield an ICU-joinable measurement (51002 has zero rows; all 670 rows for 52642 have null hadm_id). Retain tnt and emit tri as a structural-zero feature with tri__observed=0.`
 
 match 0 (added by hand):
   - decision: `reject`
@@ -3740,7 +3741,7 @@ match 18:
 - Reconstruction type: `admission_context`
 - Target unit: `categorical`
 - Match method: `admission_context_fixed`
-- Notes: `admissions.admission_type (urgency analogue) x admission_location (origin analogue) -- collapsing policy (top-N + Other) still to be decided, same as AUMC's adm.`
+- Notes: `RESOLVED: admissions.admission_type x admission_location uses the shared urgency x {ed, icu_ccu, missing, other, transfer, ward_same_hospital} union schema for dimensional parity. MIMIC transfer means external transfer; AUMC ward_same_hospital means internal ward escalation, so they remain separate dataset-exclusive columns and MIMIC's ward columns are structural zeros. MIMIC icu_ccu is derived from PACU, unlike AUMC's actual ICU/CCU source; that caveat is retained despite the shared coarse name.`
 
 ### hba1c, Hemoglobin A1C, observation, metabolic_renal
 - Mapping status: `source_candidates_found`
@@ -5131,9 +5132,28 @@ match 43:
 - Reconstruction type: `direct_numeric`
 - Target unit: `%`
 - Match method: `label_keyword_match`
-- Notes: `HAND-REVIEWED (label_keyword_match tier -- no shared OMOP concept, decisions below made by hand against raw-table stats, see match blocks).`
+- Notes: `RESOLVED 2026-08-04: mirror AUMC's established construction exactly. supp_o2_vent uses the same raw FiO2 measurements as fio2, but is zero-filled rather than forward-filled. This intentionally makes the observed values and observation mask identical while preserving the treatment-style imputation distinction.`
 
-NOTE: no clean single MIMIC itemid represents "supplemental O2 delivered via ventilator" directly -- same ambiguity likely existed in AUMC's own construction of this feature. A derived definition (FiO2 gated by ventilator-mode indicating active ventilation) was considered but not built -- out of scope for a manifest-level fix; revisit as a dedicated derived feature (see grid/derive_targets.py) if this concept turns out to matter downstream.
+match 15:
+  - decision: `keep`
+  - decision reason: `Same primary FiO2 source as fio2; supp_o2_vent differs only by its explicit zero-fill policy.`
+  - table: `chartevents`
+  - itemid: `223835`
+  - raw label: `Inspired O2 Fraction`
+
+match 16:
+  - decision: `keep`
+  - decision reason: `Same ECMO-context FiO2 source as fio2; same analyte and unit.`
+  - table: `chartevents`
+  - itemid: `229280`
+  - raw label: `FiO2 (ECMO)`
+
+match 17:
+  - decision: `keep`
+  - decision reason: `Same CH/ECMO-context FiO2 source as fio2; same analyte and unit.`
+  - table: `chartevents`
+  - itemid: `229841`
+  - raw label: `FiO2 (CH)`
 
 match 1:
   - decision: `reject`
@@ -5586,6 +5606,14 @@ match 1:
 - Reconstruction type: `treatment_rate`
 - Target unit: `mg/min`
 - Match method: `omop_concept_match`
+
+match 0 (added by hand):
+  - decision: `keep`
+  - decision reason: `ICU administration source missed by the original prescriptions-only concept match; Aminophylline is theophylline's ethylenediamine salt. All 20 rate-bearing rows use mg/kg/hour and are converted to the mg/min target using patientweight/60.`
+  - table: `inputevents`
+  - itemid: `221342`
+  - raw label: `Aminophylline`
+  - stats: `row_count=20, distinct_stays=3, units=mg/kg/hour`
 
 match 1 (bulk, 9 distinct NDC codes in `prescriptions`, class-level decision):
   - decision: `keep`
@@ -6510,7 +6538,23 @@ match 2:
 - Target unit: `indicator`
 - Match method: `omop_concept_match`
 
-match 1 (bulk, 12 distinct NDC codes in `prescriptions`, class-level decision):
+match 0 (added by hand):
+  - decision: `keep`
+  - decision reason: `direct ICU administration source; Albumin 25% is an unambiguous albumin infusion.`
+  - table: `inputevents`
+  - itemid: `220862`
+  - raw label: `Albumin 25%`
+  - stats: `row_count=26470, distinct_stays=5253, units=mL/hour`
+
+match 1 (added by hand):
+  - decision: `keep`
+  - decision reason: `direct ICU administration source; Albumin 5% is an unambiguous albumin infusion.`
+  - table: `inputevents`
+  - itemid: `220864`
+  - raw label: `Albumin 5%`
+  - stats: `row_count=30906, distinct_stays=10579, units=mL/hour|mL/min`
+
+match 2 (bulk, 12 distinct NDC codes in `prescriptions`, class-level decision):
   - decision: `keep`
   - decision reason: `broad drug-class indicator -- MIMIC's prescriptions table is NDC-keyed (much finer granularity than AUMC's per-drug itemids), so individual NDCs are not itemized here; kept as a class -- any prescription in this NDC set counts as an 'On' hour for this indicator. Total observed prescription row count across the set: 79987.`
   - table: `prescriptions`
@@ -6548,6 +6592,7 @@ match 1 (bulk, 29 distinct NDC codes in `prescriptions`, class-level decision):
   - decision reason: `broad drug-class indicator -- MIMIC's prescriptions table is NDC-keyed (much finer granularity than AUMC's per-drug itemids), so individual NDCs are not itemized here; kept as a class -- any prescription in this NDC set counts as an 'On' hour for this indicator. Total observed prescription row count across the set: 74080.`
   - table: `prescriptions`
   - itemid (NDC list, first 10 of 29): `68084020601|904692761|51079010320|60687048701|63739054410|51079098020|143950301|51285075402|55390046001|25021081710`
+  - NDC codes: `143950301|16729018201|16729018301|16729018401|182055789|25021081710|378253701|39822019001|49999006600|50742023301|51079010320|51079093520|51079098020|51285075402|51672402301|55390046001|591042405|603385521|60687048701|63739012810|63739054410|67457085350|68084008601|68084020601|68084040121|69315015501|7365021|781100813|904692761`
 
 ### anti_coag, Other Anticoagulants, treatment, circulatory
 - Mapping status: `source_candidates_found`
@@ -6783,6 +6828,14 @@ match 1:
 - Reconstruction type: `treatment_indicator`
 - Target unit: `indicator`
 - Match method: `omop_concept_match`
+
+match 0 (added by hand):
+  - decision: `keep`
+  - decision reason: `ICU administration source missed by the original prescriptions-only concept match; interval presence supplies the indicator independently of rate conversion.`
+  - table: `inputevents`
+  - itemid: `221342`
+  - raw label: `Aminophylline`
+  - stats: `row_count=20, distinct_stays=3, units=mg/kg/hour`
 
 match 1 (bulk, 9 distinct NDC codes in `prescriptions`, class-level decision):
   - decision: `keep`

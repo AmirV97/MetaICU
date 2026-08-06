@@ -31,7 +31,6 @@ import numpy as np
 import polars as pl
 
 from metaicu.aumcdb.grid.build.build_workflow import GridDatasetConfig as AumcConfig
-from metaicu.aumcdb.grid.build.build_workflow import write_grid_dataset_outputs as write_aumcdb_outputs
 from metaicu.mimiciv.grid.build.build_workflow import GridDatasetConfig as MimicConfig
 from metaicu.mimiciv.grid.build.build_workflow import finish_grid_dataset as finish_mimiciv
 from metaicu.grid.pool_scale import compute_cohort_weights, pooled_mean_std

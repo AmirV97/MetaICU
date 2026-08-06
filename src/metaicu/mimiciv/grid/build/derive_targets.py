@@ -33,8 +33,8 @@ MIMIC_K35_TTE_TARGETS = [
 
 DERIVED_TARGET_SOURCES = {"pf_ratio": ["po2", "fio2"], "urine_rate_per_weight": ["urine_rate", "weight"]}
 DERIVED_TARGET_MATCHES = {
-    "pf_ratio": {"reconstruction_type": "direct_numeric", "target_unit": "mm Hg", "keep_matches": []},
-    "urine_rate_per_weight": {"reconstruction_type": "direct_numeric", "target_unit": "mL/kg/hr", "keep_matches": []},
+    "pf_ratio": {"reconstruction_type": "direct_numeric", "target_unit": "mmHg", "keep_matches": []},
+    "urine_rate_per_weight": {"reconstruction_type": "direct_numeric", "target_unit": "mL/h/kg", "keep_matches": []},
 }
 
 

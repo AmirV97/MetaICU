@@ -1,4 +1,9 @@
-"""Hydra CLI for raw AmsterdamUMCdb to iCareFM-style hourly grid construction."""
+"""Hydra CLI for raw AmsterdamUMCdb to iCareFM-style hourly grid construction.
+
+Prefer metaicu.grid.cli.grid_build_joint_dataset (grid_build_joint_dataset) for new work, even for
+a single dataset -- this command stays exactly as-is (byte-identical, Int64 admissionid) for
+callers that specifically need that legacy single-dataset output shape.
+"""
 
 from __future__ import annotations
 

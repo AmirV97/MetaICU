@@ -18,6 +18,7 @@ import polars as pl
 from metaicu.aumcdb.common.raw_shards import build_raw_shards_for_tables
 from metaicu.aumcdb.common.raw_tables import raw_table_input_mode
 from metaicu.grid.integrity import audit_grid_dataset
+from metaicu.grid.pre_scale import PreScaleGrid
 
 from .assemble import assemble_grid, canonical_column_order
 from .derive_targets import K35_TTE_TARGETS, DERIVED_TARGET_SOURCES, add_derived_tte_targets
@@ -138,7 +139,7 @@ def _write_metadata_by_admission(
         info = shard_info.get(admission_id, {"shard_file": None, "n_rows": 0})
         record = {
             "admissionid": admission_id,
-            "patientid": row["patientid"],
+            "subject_id": row["patientid"],
             "split": row["split"],
             "shard_file": info["shard_file"],
             "los_hours": row["true_los_hours"],
@@ -176,7 +177,7 @@ def _write_metadata_by_subject(
         admission_ids = [int(a) for a in group["admissionid"].to_list()]
         n_rows = sum(shard_info.get(aid, {"n_rows": 0})["n_rows"] for aid in admission_ids)
         record = {
-            "patientid": patientid,
+            "subject_id": patientid,
             "split": first["split"],
             "admission_ids": ",".join(str(a) for a in admission_ids),
             "n_admissions": len(admission_ids),
@@ -211,9 +212,16 @@ def _select_matches(config: GridDatasetConfig) -> tuple[dict[str, dict], dict]:
     return {tag: info for tag, info in matches.items() if tag in requested_features}, report
 
 
-def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
-    """Build a split-aware hourly grid and write data, metadata, and audit summaries."""
+def build_pre_scale_grid(config: GridDatasetConfig) -> PreScaleGrid:
+    """Extraction and assembly through presence-mask capture -- everything write_grid_dataset_outputs
+    always did up to (not including) scaling. Config validation stays here, unchanged, so a failing
+    config still fails before any extraction runs, same as before this function existed.
 
+    Static feature scaling (scale_static_features) is deliberately NOT done here even though it
+    used to run before this point in the pre-split code -- nothing between its old call site and
+    scale_grid's ever reads the `_scaled` columns or mutates the raw age/weight/height columns it's
+    based on, so moving it into finish_grid_dataset (alongside scale_grid) is behavior-preserving
+    and lets both static and grid scaling take the same external_scalers path uniformly."""
     if config.patients_per_file <= 0:
         raise ValueError("patients_per_file must be positive")
     if config.raw_shard_rows <= 0:
@@ -294,11 +302,6 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     admissions = admissions.join(extract_static_features(admissions), on="admissionid")
     train_ids = admissions.filter(pl.col("split") == "train")["admissionid"].to_list()
 
-    scalers = {}
-    if config.scale:
-        admissions, static_scalers = scale_static_features(admissions, train_ids)
-        scalers.update(static_scalers)
-
     # sex/adm/ethnic one-hot encoded on a side copy (demo_source), never on `admissions` itself --
     # metadata.csv (via _write_metadata_by_admission/_write_metadata_by_subject) still needs the
     # original human-readable categorical values.
@@ -331,8 +334,55 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     matches_with_derived = {**matches, **derived_target_matches}
     grid = materialize_structural_zero_columns(grid, matches_with_derived)
     grid, presence_mask_cols = capture_presence_mask(grid, matches_with_derived)
+
+    return PreScaleGrid(
+        grid=grid,
+        matches=matches,
+        matches_with_derived=matches_with_derived,
+        derived_target_matches=derived_target_matches,
+        admissions=admissions,
+        train_admission_ids=train_ids,
+        demo_source=demo_source,
+        static_categorical_encoding=static_categorical_encoding,
+        next_categorical_pos=next_categorical_pos,
+        presence_mask_cols=presence_mask_cols,
+        manifest_report=manifest_report,
+        raw_shard_summary=raw_shard_summary,
+        admissions_before_inclusion=admissions_before_inclusion,
+    )
+
+
+def finish_grid_dataset(
+    config: GridDatasetConfig, pre_scale_grid: PreScaleGrid, external_scalers: dict | None = None
+) -> dict[str, Path]:
+    """Scale (using external_scalers per tag when supplied -- e.g. a pooled cross-cohort fit from
+    metaicu.grid.pool_scale -- instead of fitting on this cohort's own train split), impute,
+    one-hot, and write every output artifact. external_scalers=None reproduces exactly what
+    write_grid_dataset_outputs always did.
+
+    config.output_dir is (re-)ensured here rather than assumed from build_pre_scale_grid's own
+    _prepare_output_dir call -- callers may build a PreScaleGrid some other way (e.g. a hand-built
+    one in a test) and call this function directly, without ever going through
+    build_pre_scale_grid; mkdir with exist_ok=True is a no-op for the normal wrapper path, where
+    the directory already exists by this point."""
+    config.output_dir.mkdir(parents=True, exist_ok=True)
+    grid = pre_scale_grid.grid
+    matches = pre_scale_grid.matches
+    matches_with_derived = pre_scale_grid.matches_with_derived
+    derived_target_matches = pre_scale_grid.derived_target_matches
+    admissions = pre_scale_grid.admissions
+    train_ids = pre_scale_grid.train_admission_ids
+    demo_source = pre_scale_grid.demo_source
+    static_categorical_encoding = list(pre_scale_grid.static_categorical_encoding)
+    next_categorical_pos = pre_scale_grid.next_categorical_pos
+    presence_mask_cols = pre_scale_grid.presence_mask_cols
+
+    scalers = {}
     if config.scale:
-        grid, grid_scalers = scale_grid(grid, matches_with_derived, train_ids)
+        admissions, static_scalers = scale_static_features(admissions, train_ids, external_scalers=external_scalers)
+        scalers.update(static_scalers)
+    if config.scale:
+        grid, grid_scalers = scale_grid(grid, matches_with_derived, train_ids, external_scalers=external_scalers)
         scalers.update(grid_scalers)
         save_scalers(scalers, config.output_dir / "scalers.pkl")
     if config.impute:
@@ -342,7 +392,7 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         grid = impute_grid(grid, matches_with_derived, scaled_numeric_tags=scaled_numeric_tags)
     encoding_schema = list(static_categorical_encoding)
     if config.one_hot:
-        grid, grid_encoding, _ = one_hot_encode_categorical(grid, matches, start_pos=next_categorical_pos)
+        grid, grid_encoding, _ = one_hot_encode_categorical(grid, matches_with_derived, start_pos=next_categorical_pos)
         encoding_schema += grid_encoding
         save_categorical_encoding(
             encoding_schema, config.output_dir / "categorical_encoding.csv"
@@ -353,15 +403,25 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     # their admission, so each per-timestep sample carries patient context directly rather than
     # only living in metadata.csv. Numeric columns 0-fill remaining nulls when scaled (0 =
     # population mean post-standardization, same A.4.3 convention as the rest of the grid);
-    # unscaled, real nulls are left as-is.
-    numeric_static_cols = [f"{tag}_scaled" if config.scale else tag for tag in ("age", "weight", "height")]
+    # unscaled, real nulls are left as-is. A tag is only actually scaled if scale_static_features
+    # found >= MIN_TRAIN_VALUES train values to fit on (see its own "not scaled" skip) -- checking
+    # scalers itself, not just config.scale, avoids both a ColumnNotFoundError on the never-created
+    # f"{tag}_scaled" column and 0-filling raw-unit nulls as if they were a population mean in
+    # standardized space.
+    numeric_static_cols = [
+        f"{tag}_scaled" if config.scale and scalers.get(tag, {}).get("type") == "static" else tag
+        for tag in ("age", "weight", "height")
+    ]
     categorical_static_cols = (
         [row["column_name"] for row in static_categorical_encoding]
         if config.one_hot else ["sex", "adm", "ethnic"]
     )
     demo_numeric = admissions.select(
         ["admissionid"]
-        + [(pl.col(c).fill_null(0.0) if config.scale else pl.col(c)) for c in numeric_static_cols]
+        + [
+            (pl.col(c).fill_null(0.0) if c.endswith("_scaled") else pl.col(c))
+            for c in numeric_static_cols
+        ]
     )
     demo_frame = demo_numeric.join(demo_source, on="admissionid")
     demo_cols = numeric_static_cols + categorical_static_cols
@@ -440,12 +500,12 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
     }, indent=2))
 
     integrity_path = audit_grid_dataset(
-        config.output_dir, config.audit_dir, grid.columns, subject_column="patientid"
+        config.output_dir, config.audit_dir, grid.columns, subject_column="subject_id"
     )
 
     summary_path = config.audit_dir / "grid_build_summary.json"
     summary_path.write_text(json.dumps({
-        "admissions_before_inclusion": admissions_before_inclusion,
+        "admissions_before_inclusion": pre_scale_grid.admissions_before_inclusion,
         "admissions_after_inclusion": admissions.height,
         "grid_rows": grid.height,
         "features": sorted(matches),
@@ -454,12 +514,12 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "scaled": config.scale,
         "imputed": config.impute,
         "one_hot_encoded": config.one_hot,
-        "raw_shards": raw_shard_summary,
+        "raw_shards": pre_scale_grid.raw_shard_summary,
         "large_table_input_modes": {
             table: raw_table_input_mode(table, config.raw_shards_dir)
             for table in _LARGE_TABLES
         },
-        "manifest_report": manifest_report,
+        "manifest_report": pre_scale_grid.manifest_report,
     }, indent=2, sort_keys=True, default=str))
 
     return {
@@ -470,3 +530,8 @@ def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
         "summary": summary_path,
         "integrity": integrity_path,
     }
+
+
+def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
+    """Build a split-aware hourly grid and write data, metadata, and audit summaries."""
+    return finish_grid_dataset(config, build_pre_scale_grid(config))

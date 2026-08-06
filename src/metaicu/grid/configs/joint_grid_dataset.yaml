@@ -1,0 +1,92 @@
+# Joint (pooled-statistics) AUMCdb + MIMIC-IV grid build.
+# Minimal invocation (single dataset, still goes through the flat/namespaced joint layout):
+#   grid_build_joint_dataset datasets=[mimic_iv] \
+#     dataset_configs.mimic_iv.paths.parent_dir=/path/to/mimic_workspace \
+#     joint.output_dir=/path/to/joint/data joint.audit_dir=/path/to/joint/audits
+#
+# Two-dataset pooled invocation:
+#   grid_build_joint_dataset datasets=[mimic_iv,aumcdb] \
+#     dataset_configs.mimic_iv.paths.parent_dir=/path/to/mimic_workspace \
+#     dataset_configs.aumcdb.paths.parent_dir=/path/to/aumc_workspace \
+#     joint.output_dir=/path/to/joint/data joint.audit_dir=/path/to/joint/audits
+#
+# Each dataset_configs.<name> block is that dataset's own per-cohort STAGING build (own paths,
+# own split, own run settings) -- written in full via that pipeline's existing finish_grid_dataset,
+# same as a standalone grid_build_dataset run. The joint.* block controls only the final,
+# flat-layout, namespaced dataset assembled from those staging outputs (metaicu.grid.joint_assemble).
+
+datasets: [mimic_iv]  # [mimic_iv] | [aumcdb] | [mimic_iv, aumcdb] -- existing dataset tokens only
+
+dataset_configs:
+  aumcdb:
+    paths:
+      parent_dir: null
+      raw_data_dir: null        # defaults to parent_dir/data/raw
+      raw_shards_dir: null      # defaults to parent_dir/data/raw_shards
+      output_dir: null          # defaults to parent_dir/data/grid  (per-cohort STAGING output)
+      audit_dir: null           # defaults to parent_dir/audits/grid_dataset
+      manifest_path: null       # defaults to the packaged reviewed AUMC feature manifest
+      admission_ids_file: null
+    split:
+      unit_of_analysis: admission  # "subject" is not supported for a joint build
+      train_frac: 0.8
+      val_frac: 0.1
+      test_frac: 0.1
+      seed: 42
+    run:
+      build_raw_shards: true
+      rebuild_raw_shards: false
+      raw_shard_rows: 5000000
+      sample_size: null
+      patients_per_file: 1000
+      seed: 42
+      features: null
+      reconstruction_types: null
+      apply_inclusion_criteria: true
+      scale: true
+      impute: true
+      one_hot: true
+      overwrite: false
+
+  mimic_iv:
+    paths:
+      parent_dir: null
+      raw_data_dir: null
+      raw_shards_dir: null
+      output_dir: null
+      audit_dir: null
+      manifest_path: null
+      admission_ids_file: null
+    split:
+      # No unit_of_analysis -- M4_grid's shard/metadata output is unconditionally admission-grain.
+      train_frac: 0.8
+      val_frac: 0.1
+      test_frac: 0.1
+      seed: 42
+    run:
+      build_raw_shards: true
+      rebuild_raw_shards: false
+      raw_shard_rows: 5000000
+      sample_size: null
+      patients_per_file: 1000
+      seed: 42
+      features: null
+      reconstruction_types: null
+      apply_inclusion_criteria: true
+      scale: true
+      impute: true
+      one_hot: true
+      overwrite: false
+
+joint:
+  output_dir: null   # required -- final flat train/val/test + metadata.csv (source column) + sidecars
+  audit_dir: null    # required -- joint_grid_build_summary.json + grid_integrity_summary.json
+  patients_per_file: 1000
+  log_level: INFO
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

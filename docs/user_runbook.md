@@ -133,6 +133,9 @@ grid_build_dataset dataset=aumcdb paths.parent_dir=/path/to/aumc_workspace
 grid_build_dataset dataset=mimic_iv paths.parent_dir=/path/to/mimic_workspace
 ```
 
+Prefer `grid_build_joint_dataset` (below) for new work, including single-dataset builds. This
+command remains for exactly byte-identical, Int64-`admissionid` single-dataset output.
+
 The grid and tokenized pipelines share the Latin-1-preserving cache under
 `data/raw_shards/`. The first pipeline to run builds schema-cast parquet shards
 for `numericitems`, `listitems`, and `drugitems`; later grid or pre-MEDS runs
@@ -168,6 +171,51 @@ categorical_encoding.csv              one-hot column layout (static + grid)
 ```
 
 `feature_schema.json` also records each logical feature's `physical_columns`, including one-hot expansions and an empty list for a declared feature with no physical column. Every successful build writes `grid_integrity_summary.json` under `paths.audit_dir`; the build fails on split leakage, shard/metadata disagreement, duplicate or non-dense hour keys, schema-order drift, invalid masks/one-hot groups, non-finite values, or inconsistent TTE declarations.
+
+## Joint Grid Dataset (pooled AUMCdb + MIMIC-IV)
+
+```bash
+grid_build_joint_dataset datasets=[mimic_iv,aumcdb] \
+  dataset_configs.mimic_iv.paths.parent_dir=/path/to/mimic_workspace \
+  dataset_configs.aumcdb.paths.parent_dir=/path/to/aumc_workspace \
+  joint.output_dir=/path/to/joint/data joint.audit_dir=/path/to/joint/audits
+```
+
+`datasets` selects `[mimic_iv]`, `[aumcdb]`, or `[mimic_iv, aumcdb]`. Each `dataset_configs.<name>`
+block is that cohort's own per-cohort **staging** build (same `paths`/`split`/`run` shape as the
+standalone `grid_build_dataset`, written in full to its own `paths.output_dir`/`paths.audit_dir`).
+With more than one dataset selected, every scaled tag (static age/weight/height and every grid
+`direct_numeric`/`derived_output_rate`/`treatment_rate` tag with real data in at least one cohort)
+is fit on **pooled, weighted** train-split statistics instead of each cohort's own split alone --
+weight `w_c = 1/sqrt(n_train_admissions_c)`, normalized to sum to 1, the same weighting the
+training repo uses for its per-cohort loss.
+
+The final joint output under `joint.output_dir` always uses one flat layout, regardless of how
+many datasets were selected:
+
+```text
+train|val|test/N.parquet   re-sharded hourly grid shards, concatenated across cohorts
+metadata.csv               one row per admission, plus a `source` column ("aumcdb"/"mimic_iv")
+feature_schema.json        identical across cohorts by construction (data-content invariant)
+tte_targets.json           union of every cohort's own TTE target list
+scalers.pkl                fitted normalizers (z-score mean/std, QuantileTransformer objects) --
+                            with >1 dataset selected, every pooled tag's entry here is the exact
+                            fit applied to BOTH cohorts; keep this alongside the joint output to
+                            preprocess a future inference-time subject the same way
+scalers.summary.json       human-readable provenance for scalers.pkl (pooled tags, contributing
+                            cohorts, weights)
+```
+
+`admissionid`/`subject_id` are always `f"{cohort}_{id}"` **strings** (not the raw Int64 IDs) --
+this is intentional even for a single selected dataset, so a consumer never needs to special-case
+dataset count. `metadata.csv` also carries `native_admissionid`/`native_subject_id` -- the
+original per-cohort numeric ID, before namespacing -- so tracing an admission back to its source
+system never requires parsing the namespaced string yourself (`source` + `.removeprefix()` would
+work, but note "mimic_iv" itself contains an underscore, so a naive split on the first "_" gives
+the wrong answer). Note `outcome`'s definition differs by cohort despite matching string values
+(AUMCdb: patient-level any-time death; MIMIC-IV: in-hospital-this-admission death) -- always key
+off `source` before comparing `outcome` across rows. `split.unit_of_analysis=subject` (AUMCdb
+only) is not supported for a joint build.
 
 ## Pre-MEDS
 

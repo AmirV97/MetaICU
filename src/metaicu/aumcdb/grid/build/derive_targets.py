@@ -25,7 +25,7 @@ import polars as pl
 log = logging.getLogger(__name__)
 
 DERIVED_TARGET_MATCHES = {
-    "pf_ratio": {"reconstruction_type": "direct_numeric", "target_unit": "ratio"},
+    "pf_ratio": {"reconstruction_type": "direct_numeric", "target_unit": "mmHg"},
     "urine_rate_per_weight": {"reconstruction_type": "direct_numeric", "target_unit": "mL/h/kg"},
 }
 

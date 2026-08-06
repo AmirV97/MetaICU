@@ -37,7 +37,12 @@ build-aumc-meds = "metaicu.aumcdb.tokenized.cli.build_amsterdam_meds:main"
 build-aumc-tokenized = "metaicu.aumcdb.tokenized.cli.build_amsterdam_tokenized:main"
 retrieve-aumc-externals = "metaicu.aumcdb.tokenized.cli.retrieve_externals:main"
 grid_build_manifest = "metaicu.grid.cli.grid_build_manifest:main"
+# grid_build_dataset (and the per-pipeline metaicu.{aumcdb,mimiciv}.grid.cli.grid_build_dataset
+# entry points it wraps) is the exactly byte-identical, Int64-ID, single-dataset build. Prefer
+# grid_build_joint_dataset for new work (including single-dataset runs) unless that exact legacy
+# output shape is specifically required -- see grid_build_joint_dataset.py's module docstring.
 grid_build_dataset = "metaicu.grid.cli.grid_build_dataset:main"
+grid_build_joint_dataset = "metaicu.grid.cli.grid_build_joint_dataset:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

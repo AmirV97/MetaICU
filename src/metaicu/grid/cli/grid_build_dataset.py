@@ -5,6 +5,10 @@ cfg.dataset_name (set by the composed dataset=<name> config group -- see configs
 metaicu.aumcdb.grid.cli.grid_build_dataset and metaicu.mimiciv.grid.cli.grid_build_dataset
 remain independently invocable and untouched; this module is the shared multi-dataset entry
 point pyproject.toml's grid_build_dataset console script points at.
+
+Prefer grid_build_joint_dataset (metaicu.grid.cli.grid_build_joint_dataset) for new work, even for
+a single dataset -- this command stays exactly as-is (byte-identical, Int64 admissionid) for
+callers that specifically need that legacy single-dataset output shape.
 """
 
 from __future__ import annotations

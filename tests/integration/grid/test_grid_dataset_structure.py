@@ -271,7 +271,7 @@ class GridDatasetStructureTests(unittest.TestCase):
         patient_100_rows = shard.filter(pl.col("admissionid").is_in([1, 2]))
         self.assertEqual(patient_100_rows["admissionid"].to_list(), [1, 1, 2])
 
-        row_100 = metadata.filter(pl.col("patientid") == 100).row(0, named=True)
+        row_100 = metadata.filter(pl.col("subject_id") == 100).row(0, named=True)
         self.assertEqual(row_100["admission_ids"], "1,2")
         self.assertEqual(row_100["n_admissions"], 2)
         self.assertEqual(row_100["outcome"], "died")  # from admission 2, the later one
@@ -280,7 +280,7 @@ class GridDatasetStructureTests(unittest.TestCase):
         self.assertAlmostEqual(row_100["los_hours"], 8.0)
         self.assertEqual(row_100["n_rows"], 3)
 
-        row_200 = metadata.filter(pl.col("patientid") == 200).row(0, named=True)
+        row_200 = metadata.filter(pl.col("subject_id") == 200).row(0, named=True)
         self.assertEqual(row_200["admission_ids"], "3")
         self.assertEqual(row_200["n_admissions"], 1)
         self.assertEqual(row_200["outcome"], "alive")

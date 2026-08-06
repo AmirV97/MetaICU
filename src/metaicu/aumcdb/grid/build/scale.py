@@ -46,6 +46,12 @@ LOG_TRANSFORM_TAGS = {
     "crea": "log1p", "bun": "log1p", "glu": "log1p", "mg": "log1p", "phos": "log1p",
     "urine_rate": "log1p",
     "plt": "log1p", "wbc": "log1p", "ptt": "log1p", "inr_pt": "log1p",
+    # "pt" is structural_zero for AUMC (no source item) so this entry is never exercised by a
+    # solo AUMC run -- but metaicu.grid.cli.grid_build_joint_dataset's pooled-scaler code imports
+    # LOG_TRANSFORM_TAGS from THIS module only, so a missing entry here silently dropped the
+    # log1p transform for "pt"'s pooled fit even though it's 100% MIMIC-derived and MIMIC's own
+    # LOG_TRANSFORM_TAGS already has it. Kept in sync with MIMIC's dict for that reason.
+    "pt": "log1p",
     "alp": "log1p", "alt": "log1p", "ast": "log1p", "bili": "log1p", "bili_dir": "log1p", "ck": "log1p",
     "ckmb": "log1p", "tnt": "log1p", "tri": "log1p", "amyl": "log1p", "lip": "log1p",
     "ygt": "log1p", "amm": "log1p",
@@ -128,11 +134,15 @@ def _apply_treatment_scaler(col, qt):
     return pl.Series(col.name, out).fill_nan(None)
 
 
-def scale_grid(grid, matches, train_admission_ids):
+def scale_grid(grid, matches, train_admission_ids, external_scalers=None):
     """grid: wide DataFrame from grid.assemble_grid (pre-imputation -- still has true nulls
     where a hour was never observed). matches: tag -> feature info dict from
     grid.build.manifest_parser.parse_manifest(). train_admission_ids: iterable of admissionids in the train
-    split -- scaling parameters are fit on these rows' non-null values only.
+    split -- scaling parameters are fit on these rows' non-null values only. external_scalers:
+    optional {tag: scaler_entry} (same shape as this function's own return value's `scalers`,
+    e.g. from a pooled cross-cohort fit in metaicu.grid.pool_scale) -- when a tag has an entry
+    here, its own fit is skipped and this scaler is applied instead, via the same
+    _apply_observation_scaler/_apply_treatment_scaler used for a locally-fit tag.
 
     Returns (grid, scalers): grid with every direct_numeric/derived_output_rate/treatment_rate
     column transformed in place (nulls left as null, for grid.impute to resolve next); scalers
@@ -141,6 +151,7 @@ def scale_grid(grid, matches, train_admission_ids):
     object under "transformer" (not JSON-serializable -- see save_scalers)."""
     train_ids = set(train_admission_ids)
     train_mask = pl.col("admissionid").is_in(list(train_ids))
+    external_scalers = external_scalers or {}
     scalers = {}
 
     for tag, info in matches.items():
@@ -153,23 +164,33 @@ def scale_grid(grid, matches, train_admission_ids):
             continue
 
         col = grid[tag]
-        train_values = grid.filter(train_mask)[tag].drop_nulls().to_numpy()
+        external = external_scalers.get(tag)
 
         if rt in ("direct_numeric", "derived_output_rate"):
-            if len(train_values) < MIN_TRAIN_VALUES:
-                log.warning(f"{tag}: fewer than {MIN_TRAIN_VALUES} non-null training values "
-                            f"({len(train_values)}) -- not scaled")
-                continue
-            log_kind, mean, std = _fit_observation_scaler(train_values, tag)
+            if external is not None:
+                log_kind, mean, std = external["log"], external["mean"], external["std"]
+            else:
+                train_values = grid.filter(train_mask)[tag].drop_nulls().to_numpy()
+                if len(train_values) < MIN_TRAIN_VALUES:
+                    log.warning(f"{tag}: fewer than {MIN_TRAIN_VALUES} non-null training values "
+                                f"({len(train_values)}) -- not scaled")
+                    continue
+                log_kind, mean, std = _fit_observation_scaler(train_values, tag)
             grid = grid.with_columns(_apply_observation_scaler(col, log_kind, mean, std))
             scalers[tag] = {"type": "observation", "log": log_kind, "mean": mean, "std": std}
-            log.info(f"{tag}: observation scaler (log={log_kind}, mean={mean:.4g}, std={std:.4g})")
+            log.info(f"{tag}: observation scaler (log={log_kind}, mean={mean:.4g}, std={std:.4g}"
+                     f"{', external' if external is not None else ''})")
 
         elif rt == "treatment_rate":
-            qt = _fit_treatment_scaler(train_values, tag)
+            if external is not None:
+                qt = external["transformer"]
+            else:
+                train_values = grid.filter(train_mask)[tag].drop_nulls().to_numpy()
+                qt = _fit_treatment_scaler(train_values, tag)
             grid = grid.with_columns(_apply_treatment_scaler(col, qt))
             scalers[tag] = {"type": "treatment", "transformer": qt}
-            log.info(f"{tag}: treatment quantile-transform ({'fit' if qt is not None else 'NOT fit -- too few positive values'})")
+            log.info(f"{tag}: treatment quantile-transform ("
+                     f"{'external' if external is not None else 'fit' if qt is not None else 'NOT fit -- too few positive values'})")
 
     return grid, scalers
 
@@ -177,10 +198,12 @@ def scale_grid(grid, matches, train_admission_ids):
 STATIC_NUMERIC_TAGS = ["age", "weight", "height"]
 
 
-def scale_static_features(admissions, train_admission_ids):
+def scale_static_features(admissions, train_admission_ids, external_scalers=None):
     """admissions: DataFrame already carrying age/weight/height (from
     grid.extract_static.extract_static_features, joined onto the main admissions frame).
-    train_admission_ids: iterable of admissionids in the train split.
+    train_admission_ids: iterable of admissionids in the train split. external_scalers: optional
+    {tag: scaler_entry} (e.g. a pooled cross-cohort fit) -- when a tag has an entry here, its own
+    fit is skipped and this mean/std is applied instead.
 
     Adds f"{tag}_scaled" columns (nulls preserved -- these are the same real, un-imputed nulls
     extract_static_features leaves behind, see its docstring) alongside the existing raw
@@ -195,25 +218,30 @@ def scale_static_features(admissions, train_admission_ids):
     scalers.pkl covering the whole pipeline."""
     train_ids = set(train_admission_ids)
     train_mask = pl.col("admissionid").is_in(list(train_ids))
+    external_scalers = external_scalers or {}
     scalers = {}
 
     for tag in STATIC_NUMERIC_TAGS:
         if tag not in admissions.columns:
             continue
-        train_values = admissions.filter(train_mask)[tag].drop_nulls().to_numpy()
-        if len(train_values) < MIN_TRAIN_VALUES:
-            log.warning(f"{tag} (static): fewer than {MIN_TRAIN_VALUES} non-null training "
-                        f"values ({len(train_values)}) -- not scaled")
-            continue
-        mean = float(np.mean(train_values))
-        std = float(np.std(train_values))
-        if std == 0.0:
-            log.warning(f"{tag} (static): zero training-split variance -- std floored at 1.0")
-            std = 1.0
+        external = external_scalers.get(tag)
+        if external is not None:
+            mean, std = external["mean"], external["std"]
+        else:
+            train_values = admissions.filter(train_mask)[tag].drop_nulls().to_numpy()
+            if len(train_values) < MIN_TRAIN_VALUES:
+                log.warning(f"{tag} (static): fewer than {MIN_TRAIN_VALUES} non-null training "
+                            f"values ({len(train_values)}) -- not scaled")
+                continue
+            mean = float(np.mean(train_values))
+            std = float(np.std(train_values))
+            if std == 0.0:
+                log.warning(f"{tag} (static): zero training-split variance -- std floored at 1.0")
+                std = 1.0
         scaled_col = _apply_observation_scaler(admissions[tag], None, mean, std).rename(f"{tag}_scaled")
         admissions = admissions.with_columns(scaled_col)
         scalers[tag] = {"type": "static", "log": None, "mean": mean, "std": std}
-        log.info(f"{tag} (static): mean={mean:.4g}, std={std:.4g}")
+        log.info(f"{tag} (static): mean={mean:.4g}, std={std:.4g}{' (external)' if external is not None else ''}")
 
     return admissions, scalers
 

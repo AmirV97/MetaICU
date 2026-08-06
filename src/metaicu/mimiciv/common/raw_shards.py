@@ -1,8 +1,8 @@
 """Source-preserving UTF-8 gzip-CSV to parquet sharding for large MIMIC-IV tables. Mirrors
 metaicu.aumcdb.common.raw_shards's role; differs only where MIMIC's own source files differ --
-UTF-8 (not Latin-1), gzip-compressed .csv.gz (not plain .csv, pandas' chunked C-parser handles
-gzip decompression incrementally, bounded by chunksize, the same property zcat|awk streaming
-was substituting for in grid.build.raw_csv's per-run version)."""
+UTF-8 (not Latin-1, which polars' CSV reader cannot decode natively -- aumcdb's own raw_shards.py
+stays on pandas for that reason), gzip-compressed .csv.gz (not plain .csv; polars' native reader
+decompresses .csv.gz directly, no separate zcat/gzip step needed)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
 
-import pandas as pd
 import polars as pl
 
 from metaicu.mimiciv.common.raw_schema import LARGE_TABLE_RAW_SCHEMAS, cast_raw_schema
@@ -27,25 +26,35 @@ def read_gzip_csv_batches(
     partition_rows: int,
     max_rows: int | None = None,
 ) -> Iterator[pl.DataFrame]:
-    """Read one large raw .csv.gz in bounded, schema-cast batches.
+    """Read one large raw .csv.gz in bounded, schema-cast batches, natively via polars (multi-
+    threaded Rust CSV parser + built-in gzip decompression) -- no pandas round-trip.
 
-    keep_default_na=False + na_values=[""]: pandas' default na_values list treats "None"/"NA"/
-    "NULL"/"n/a"/etc. as missing -- but these are real MIMIC-IV clinical values (e.g. chartevents'
-    "None" meaning "no O2 delivery device"), not encoding conventions for missing data. Confirmed
-    by diffing a real extraction against the pre-shard-cache raw_csv.py baseline: airway/egcs
-    silently nulled wherever their raw/standardized label was literally "None" or "E1 None".
-    polars' own scan_csv only ever treats a genuinely empty field as null, so this restores that
-    exact behavior -- only na_values=[""] (the empty field) is treated as missing, nothing else."""
-    for chunk in pd.read_csv(
+    schema_overrides={every column: pl.String}: reads every column as a plain string, deferring
+    all real type conversion (including "None"/"NA"/"NULL" string-vs-null handling) to
+    cast_raw_schema's own explicit per-column .cast(...)/.str.to_datetime(...) calls -- the exact
+    same division of labor the pandas version used (pandas' keep_default_na=False + na_values=[""]
+    was itself only there to match polars' own default null semantics: only a genuinely empty
+    field is null, e.g. chartevents' literal string "None" meaning "no O2 delivery device" must
+    survive as data, not become null). null_values="": explicit for clarity, since a missing
+    schema_overrides entry (a raw column not in LARGE_TABLE_RAW_SCHEMAS) would otherwise fall back
+    to polars' own type inference on that column."""
+    schema_overrides = {column: pl.String for column in LARGE_TABLE_RAW_SCHEMAS[table]}
+    reader = pl.read_csv_batched(
         raw_path,
-        compression="gzip",
-        chunksize=partition_rows,
-        nrows=max_rows,
-        low_memory=False,
-        keep_default_na=False,
-        na_values=[""],
-    ):
-        yield cast_raw_schema(table, pl.from_pandas(chunk))
+        schema_overrides=schema_overrides,
+        null_values="",
+        batch_size=partition_rows,
+    )
+    rows_read = 0
+    while max_rows is None or rows_read < max_rows:
+        batches = reader.next_batches(1)
+        if not batches:
+            break
+        chunk = batches[0]
+        if max_rows is not None and rows_read + chunk.height > max_rows:
+            chunk = chunk.head(max_rows - rows_read)
+        rows_read += chunk.height
+        yield cast_raw_schema(table, chunk)
 
 
 def parquet_shards(table_dir: Path) -> list[Path]:

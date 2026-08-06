@@ -3770,9 +3770,9 @@ match 2:
 ### samp, Body Fluid Sampling, Detected Bacterial Growth, observation, infection
 - Mapping status: `source_candidates_found`
 - Reconstruction type: `treatment_indicator`
-- Target unit: `categorical`
+- Target unit: `indicator`
 - Match method: `omop_concept_match`
-- Notes: `RECLASSIFIED 2026-07-29, mirroring AUMC's own review.md precedent (2026-07-10): microbiology -> treatment_indicator. Point-event handling (any kept-match row in an hour = On, no forward-fill) is mechanically identical to abx/sed/ins_ind, so this flows through the existing extract_treatment_indicator.py pipeline instead of needing a bespoke reconstruction type. M4's manifest had inherited "microbiology" from AUMC's own summary CSV, which was itself stale relative to AUMC's review.md.`
+- Notes: `RECLASSIFIED 2026-07-29, mirroring AUMC's own review.md precedent (2026-07-10): microbiology -> treatment_indicator. Point-event handling (any kept-match row in an hour = On, no forward-fill) is mechanically identical to abx/sed/ins_ind, so this flows through the existing extract_treatment_indicator.py pipeline instead of needing a bespoke reconstruction type. M4's manifest had inherited "microbiology" from AUMC's own summary CSV, which was itself stale relative to AUMC's review.md. Target unit corrected 2026-08-04 from a stale pre-reclassification `categorical` to `indicator`, matching AUMC's own 2026-07-10 precedent and every other treatment_indicator tag.`
 
 match 1:
   - decision: `keep`

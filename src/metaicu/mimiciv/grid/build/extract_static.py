@@ -1,24 +1,28 @@
 """
-admission_context raw extraction: six resolved static/demographic features (age, weight,
-height, sex, adm, ethnic), recovered directly from admissions/patients/icustays columns
-(age/sex/adm/ethnic) and a small chartevents admission-weight/height scan (weight/height) --
-per the manifest review's ADMISSION_CONTEXT_FIXED notes. No itemid-vocabulary matching applies
-to age/sex/adm/ethnic (static admissions-table columns, not vocab-matched observations), same
-reasoning as AUMC_grid_pipeline/grid/extract_static.py.
+admission_context raw extraction: seven resolved static/demographic features (age, weight,
+height, sex, adm_urgency, adm_origin, ethnic), recovered directly from admissions/patients/
+icustays columns (age/sex/adm_urgency/adm_origin/ethnic) and a small chartevents admission-
+weight/height scan (weight/height) -- per the manifest review's ADMISSION_CONTEXT_FIXED notes.
+No itemid-vocabulary matching applies to these (static admissions-table columns, not
+vocab-matched observations), same reasoning as AUMC_grid_pipeline/grid/extract_static.py.
 
 Per-admission (not per-hour) values -- one row per admission, not a grid contribution; the
 caller folds this into metadata.csv, not the hourly grid, same convention as AUMC. Deliberately
 does NOT impute (weight/height/sex blanks stay null) -- imputation is a model-layer concern,
 same design decision AUMC made.
 
-`adm` uses a shared fixed output vocabulary for dimensional parity, but it is not treated as
-a fully unified clinical concept: MIMIC's admission_location is a hospital referral source,
-whereas AUMC's origin is the preceding department within the same hospital. ED, other, and
-missing use shared names. Both expose `icu_ccu`, with the recorded caveat that MIMIC derives it
-from PACU while AUMC derives it from an actual ICU/CCU. AUMC `ward_same_hospital` and MIMIC
-`transfer` remain separate dataset-exclusive columns and are structurally zero in the other
-dataset. This differs from universal clinical scales such as GCS/RASS, whose labels are directly
-harmonized.
+`adm` splits into two independent categorical dims -- `adm_urgency` and `adm_origin` -- rather
+than one combined urgency x origin cross-product, so each is estimated independently and a rare
+combination doesn't dilute either dim's statistics. Both use a shared fixed output vocabulary for
+dimensional parity, but `adm_origin` is not treated as a fully unified clinical concept: MIMIC's
+admission_location is a hospital referral source, whereas AUMC's origin is the preceding
+department within the same hospital. `ed` and `other` use shared names. Both expose `icu_ccu`,
+with the recorded caveat that MIMIC derives it from PACU while AUMC derives it from an actual
+ICU/CCU. AUMC's intra-hospital ward transfer and MIMIC's inter-facility transfer are merged into
+one shared `transferred` bucket -- a deliberate, accepted looseness (they are not the same
+clinical event) made specifically to avoid a perfectly cohort-exclusive category; kept separate
+would let a model infer cohort identity directly from this one dim. This differs from universal
+clinical scales such as GCS/RASS, whose labels are directly harmonized without any such merge.
 `ethnic` (MIMIC's admissions.race) is collapsed to five broad reported groups plus missing.
 The mapping enumerates every reviewed source label so new labels fail visibly during extraction.
 """
@@ -45,21 +49,24 @@ URGENCY_LABEL = {
 }
 
 # admission_location -> origin bucket, mirroring AUMC's ORIGIN_TOP4-style collapse (a small,
-# bounded set of buckets rather than MIMIC's 11 raw locations)
+# bounded set of buckets rather than MIMIC's 11 raw locations). transfer categories are merged
+# into the shared "transferred" bucket with AUMC's intra-hospital ward transfer -- not the same
+# clinical concept (see module docstring), but a deliberate, accepted merge to avoid a perfectly
+# cohort-exclusive category. "INFORMATION NOT AVAILABLE" is deliberately absent: it now falls
+# through to the replace_strict default of null, same as any other unmapped value, rather than a
+# manually-baked "missing" string (which would collide with encode.py's generic missing column).
 ORIGIN_COLLAPSED = {
     "EMERGENCY ROOM": "ed",
     "PACU": "icu_ccu",
-    "TRANSFER FROM HOSPITAL": "transfer", "TRANSFER FROM SKILLED NURSING FACILITY": "transfer",
-    "AMBULATORY SURGERY TRANSFER": "transfer",
+    "TRANSFER FROM HOSPITAL": "transferred", "TRANSFER FROM SKILLED NURSING FACILITY": "transferred",
+    "AMBULATORY SURGERY TRANSFER": "transferred",
     "CLINIC REFERRAL": "other", "PHYSICIAN REFERRAL": "other", "PROCEDURE SITE": "other",
     "WALK-IN/SELF REFERRAL": "other", "INTERNAL TRANSFER TO OR FROM PSYCH": "other",
-    "INFORMATION NOT AVAILABLE": "missing",
 }
 
 SEX_CATEGORIES = ["F", "M"]
-ADM_ORIGIN_CATEGORIES = ["ed", "icu_ccu", "missing", "other", "transfer", "ward_same_hospital"]
-ADM_CATEGORIES = sorted(f"{u}_{o}" for u in set(URGENCY_LABEL.values())
-                        for o in ADM_ORIGIN_CATEGORIES)
+ADM_URGENCY_CATEGORIES = ["elective", "emergency"]
+ADM_ORIGIN_CATEGORIES = ["ed", "icu_ccu", "other", "transferred"]
 ETHNIC_CATEGORIES = ["ASIAN", "BLACK", "HISPANIC_LATINO", "OTHER", "WHITE"]
 RACE_GROUP_BY_SOURCE_LABEL = {
     None: None,
@@ -99,7 +106,8 @@ RACE_GROUP_BY_SOURCE_LABEL = {
 }
 STATIC_CATEGORICAL_VOCAB = {
     "sex": SEX_CATEGORIES,
-    "adm": ADM_CATEGORIES,
+    "adm_urgency": ADM_URGENCY_CATEGORIES,
+    "adm_origin": ADM_ORIGIN_CATEGORIES,
     "ethnic": ETHNIC_CATEGORIES,
 }
 
@@ -146,13 +154,16 @@ def extract_static_features(raw_data_dir, admissions, admission_ids=None, raw_sh
     """admissions: DataFrame from grid.raw_csv.load_admissions() (or a filtered subset) --
     must still carry admittime/year_of_birth/gender/admission_type/admission_location/race,
     i.e. called before any column-narrowing. Returns one row per admission: admissionid, age,
-    weight, height, sex, adm, ethnic -- real nulls where genuinely missing, no imputation."""
+    weight, height, sex, adm_urgency, adm_origin, ethnic -- real nulls where genuinely missing, no
+    imputation. admission_type is a small closed enum in practice, so the default="emergency"
+    fallback below is not expected to ever fire; kept for parity with the original mapping."""
     urgency = pl.col("admission_type").replace_strict(URGENCY_LABEL, default="emergency", return_dtype=pl.Utf8)
-    origin = pl.col("admission_location").replace_strict(ORIGIN_COLLAPSED, default="missing", return_dtype=pl.Utf8)
+    origin = pl.col("admission_location").replace_strict(ORIGIN_COLLAPSED, default=None, return_dtype=pl.Utf8)
     df = admissions.with_columns(
         (pl.col("admittime").dt.year() - pl.col("year_of_birth").cast(pl.Int64, strict=False)).alias("age"),
         pl.when(pl.col("gender") == "").then(None).otherwise(pl.col("gender")).alias("sex"),
-        (urgency + "_" + origin).alias("adm"),
+        urgency.alias("adm_urgency"),
+        origin.alias("adm_origin"),
         pl.col("race").replace_strict(
             RACE_GROUP_BY_SOURCE_LABEL, return_dtype=pl.String
         ).alias("ethnic"),
@@ -164,7 +175,7 @@ def extract_static_features(raw_data_dir, admissions, admission_ids=None, raw_sh
     else:
         df = df.with_columns(pl.lit(None, dtype=pl.Float64).alias("weight"), pl.lit(None, dtype=pl.Float64).alias("height"))
 
-    out = df.select(["admissionid", "age", "weight", "height", "sex", "adm", "ethnic"])
-    for col in ["age", "weight", "height", "sex", "adm", "ethnic"]:
+    out = df.select(["admissionid", "age", "weight", "height", "sex", "adm_urgency", "adm_origin", "ethnic"])
+    for col in ["age", "weight", "height", "sex", "adm_urgency", "adm_origin", "ethnic"]:
         log.info(f"static feature {col}: {out[col].null_count()} nulls out of {out.height}")
     return out

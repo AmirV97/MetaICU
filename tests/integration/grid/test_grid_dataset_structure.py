@@ -18,14 +18,16 @@ from metaicu.aumcdb.grid.build.build_workflow import (
 )
 from metaicu.aumcdb.grid.build.encode import one_hot_encode_columns
 from metaicu.aumcdb.grid.build.extract_static import (
-    ADM_CATEGORIES,
+    ADM_ORIGIN_CATEGORIES,
+    ADM_URGENCY_CATEGORIES,
     ORIGIN_TOP4,
     STATIC_CATEGORICAL_VOCAB,
     extract_static_features,
 )
 from metaicu.aumcdb.grid.build.extract_numeric import _derive_direct_bilirubin
 from metaicu.mimiciv.grid.build.extract_static import (
-    ADM_CATEGORIES as MIMIC_ADM_CATEGORIES,
+    ADM_ORIGIN_CATEGORIES as MIMIC_ADM_ORIGIN_CATEGORIES,
+    ADM_URGENCY_CATEGORIES as MIMIC_ADM_URGENCY_CATEGORIES,
     ORIGIN_COLLAPSED as MIMIC_ORIGIN_COLLAPSED,
 )
 from metaicu.aumcdb.grid.cli.grid_build_dataset import _build_config
@@ -33,66 +35,65 @@ from metaicu.aumcdb.grid.build.manifest_parser import DEFAULT_REVIEWED_MANIFEST,
 
 
 class GridDatasetStructureTests(unittest.TestCase):
-    def test_adm_uses_shared_union_schema_without_merging_ward_and_transfer(self) -> None:
-        expected = sorted(
-            f"{urgency}_{origin}"
-            for urgency in ("elective", "emergency")
-            for origin in ("ed", "icu_ccu", "missing", "other", "transfer", "ward_same_hospital")
-        )
-        self.assertEqual(ADM_CATEGORIES, expected)
-        self.assertEqual(MIMIC_ADM_CATEGORIES, expected)
+    def test_adm_splits_into_urgency_and_origin_with_transfer_merged(self) -> None:
+        expected_urgency = ["elective", "emergency"]
+        expected_origin = ["ed", "icu_ccu", "other", "transferred"]
+        self.assertEqual(ADM_URGENCY_CATEGORIES, expected_urgency)
+        self.assertEqual(MIMIC_ADM_URGENCY_CATEGORIES, expected_urgency)
+        self.assertEqual(ADM_ORIGIN_CATEGORIES, expected_origin)
+        self.assertEqual(MIMIC_ADM_ORIGIN_CATEGORIES, expected_origin)
         self.assertEqual(ORIGIN_TOP4["Eerste Hulp afdeling zelfde ziekenhuis"], "ed")
         self.assertEqual(ORIGIN_TOP4["CCU/IC zelfde ziekenhuis"], "icu_ccu")
-        self.assertEqual(
-            ORIGIN_TOP4["Verpleegafdeling zelfde ziekenhuis"], "ward_same_hospital"
-        )
-        self.assertEqual(MIMIC_ORIGIN_COLLAPSED["TRANSFER FROM HOSPITAL"], "transfer")
+        # AUMC's intra-hospital ward transfer and MIMIC's inter-facility transfer are deliberately
+        # merged into one shared "transferred" bucket -- not the same clinical concept, but merged
+        # specifically to avoid a perfectly cohort-exclusive category.
+        self.assertEqual(ORIGIN_TOP4["Verpleegafdeling zelfde ziekenhuis"], "transferred")
+        self.assertEqual(MIMIC_ORIGIN_COLLAPSED["TRANSFER FROM HOSPITAL"], "transferred")
         self.assertEqual(MIMIC_ORIGIN_COLLAPSED["PACU"], "icu_ccu")
 
         admissions = pl.DataFrame({
-            "admissionid": [1, 2, 3],
-            "agegroup": ["18-39"] * 3,
-            "weightgroup": ["70-79"] * 3,
-            "heightgroup": ["170-179"] * 3,
-            "gender": ["Man"] * 3,
-            "urgency": [0, 1, 1],
+            "admissionid": [1, 2, 3, 4],
+            "agegroup": ["18-39"] * 4,
+            "weightgroup": ["70-79"] * 4,
+            "heightgroup": ["170-179"] * 4,
+            "gender": ["Man"] * 4,
+            "urgency": [0, 1, 1, None],
             "origin": [
                 "Eerste Hulp afdeling zelfde ziekenhuis",
                 "CCU/IC zelfde ziekenhuis",
                 "Verpleegafdeling zelfde ziekenhuis",
+                None,
             ],
         })
         static = extract_static_features(admissions)
-        encoded, schema, _ = one_hot_encode_columns(
-            static.select(["admissionid", "adm"]), {"adm": ADM_CATEGORIES}
+        urgency_encoded, urgency_schema, _ = one_hot_encode_columns(
+            static.select(["admissionid", "adm_urgency"]), {"adm_urgency": ADM_URGENCY_CATEGORIES}
         )
-        columns = [row["column_name"] for row in schema]
+        origin_encoded, origin_schema, _ = one_hot_encode_columns(
+            static.select(["admissionid", "adm_origin"]), {"adm_origin": ADM_ORIGIN_CATEGORIES}
+        )
+        urgency_columns = [row["column_name"] for row in urgency_schema]
+        origin_columns = [row["column_name"] for row in origin_schema]
 
+        self.assertEqual(static["adm_urgency"].to_list(), ["elective", "emergency", "emergency", None])
+        self.assertEqual(static["adm_origin"].to_list(), ["ed", "icu_ccu", "transferred", None])
+        self.assertEqual(urgency_columns, ["adm_urgency__elective", "adm_urgency__emergency", "adm_urgency__missing"])
         self.assertEqual(
-            static["adm"].to_list(),
-            ["elective_ed", "emergency_icu_ccu", "emergency_ward_same_hospital"],
+            origin_columns,
+            ["adm_origin__ed", "adm_origin__icu_ccu", "adm_origin__other", "adm_origin__transferred", "adm_origin__missing"],
         )
-        self.assertEqual(columns, [f"adm__{category}" for category in expected] + ["adm__missing"])
-        self.assertEqual(
-            encoded.select(pl.sum_horizontal(columns).alias("sum"))["sum"].to_list(),
-            [1, 1, 1],
-        )
-        self.assertEqual(encoded["adm__elective_transfer"].to_list(), [0, 0, 0])
-        self.assertEqual(encoded["adm__emergency_transfer"].to_list(), [0, 0, 0])
+        # every row has exactly one urgency bit and one origin bit set
+        self.assertEqual(urgency_encoded.select(pl.sum_horizontal(urgency_columns)).to_series().to_list(), [1, 1, 1, 1])
+        self.assertEqual(origin_encoded.select(pl.sum_horizontal(origin_columns)).to_series().to_list(), [1, 1, 1, 1])
+        self.assertEqual(urgency_encoded["adm_urgency__missing"].to_list(), [0, 0, 0, 1])
+        self.assertEqual(origin_encoded["adm_origin__missing"].to_list(), [0, 0, 0, 1])
 
-        mimic_adm = pl.DataFrame({
-            "admissionid": [10, 11],
-            "adm": ["emergency_transfer", "elective_icu_ccu"],
-        })
+        mimic_adm_origin = pl.DataFrame({"admissionid": [10, 11], "adm_origin": ["transferred", "icu_ccu"]})
         mimic_encoded, mimic_schema, _ = one_hot_encode_columns(
-            mimic_adm, {"adm": MIMIC_ADM_CATEGORIES}
+            mimic_adm_origin, {"adm_origin": MIMIC_ADM_ORIGIN_CATEGORIES}
         )
-        self.assertEqual(
-            [row["column_name"] for row in mimic_schema],
-            columns,
-        )
-        self.assertEqual(mimic_encoded["adm__elective_ward_same_hospital"].to_list(), [0, 0])
-        self.assertEqual(mimic_encoded["adm__emergency_ward_same_hospital"].to_list(), [0, 0])
+        self.assertEqual([row["column_name"] for row in mimic_schema], origin_columns)
+        self.assertEqual(mimic_encoded["adm_origin__transferred"].to_list(), [1, 0])
 
     def test_aumc_sex_is_normalized_to_shared_f_m_schema(self) -> None:
         admissions = pl.DataFrame({
@@ -246,7 +247,8 @@ class GridDatasetStructureTests(unittest.TestCase):
             "weight": [70.0, 60.0, 80.0],
             "height": [170.0, 160.0, 180.0],
             "sex": ["Man", "Vrouw", "Man"],
-            "adm": ["emergency", "elective", "elective"],
+            "adm_urgency": ["emergency", "elective", "elective"],
+            "adm_origin": ["other", "other", "other"],
             "ethnic": pl.Series([None, None, None], dtype=pl.String),
             "split": ["train", "train", "val"],
         })

@@ -134,8 +134,10 @@ def _write_metadata(admissions: pl.DataFrame, shard_info: dict[int, dict[str, in
     """age/weight/height are written in raw units (metadata.csv's whole point is human-readable
     filtering, e.g. "age > 65") plus, if grid.scale.scale_static_features ran (config.scale), a
     f"{tag}_scaled" column alongside each. outcome = hospital_expire_flag (died during THIS
-    hospitalization) -- MIMIC's closest admission-scoped analog to AUMC's patient-level
-    dateofdeath. ethnic is the reviewed five-group collapse of admissions.race plus missing."""
+    admission) -- matches AUMCdb's own admission-scoped outcome (see
+    aumcdb/grid/build/build_workflow.py's _assign_admission_scoped_death), not AUMCdb's raw
+    patient-level dateofdeath. ethnic is the reviewed five-group collapse of admissions.race plus
+    missing."""
     scaled_cols = [c for c in ("age_scaled", "weight_scaled", "height_scaled") if c in admissions.columns]
     rows = []
     for row in admissions.iter_rows(named=True):
@@ -148,12 +150,18 @@ def _write_metadata(admissions: pl.DataFrame, shard_info: dict[int, dict[str, in
             "shard_file": info["shard_file"],
             "los_hours": row["true_los_hours"],
             "outcome": "died" if row["hospital_expire_flag"] == 1 else "alive",
+            "outcome_scope": "admission",  # always "admission" -- MIMIC-IV's grid is unconditionally
+            # admission-grain, no subject-level mode exists here. Present for a uniform contract
+            # with AUMCdb's metadata.csv, which can carry "any_time" instead (see its
+            # _write_metadata_by_subject) -- consumers should assert this column before trusting
+            # `outcome` for a per-admission label.
             "n_rows": info["n_rows"],
             "age": row["age"],
             "weight": row["weight"],
             "height": row["height"],
             "sex": row["sex"],
-            "adm": row["adm"],
+            "adm_urgency": row["adm_urgency"],
+            "adm_origin": row["adm_origin"],
             "ethnic": row["ethnic"],
         }
         for column in scaled_cols:
@@ -240,9 +248,10 @@ def build_pre_scale_grid(config: GridDatasetConfig) -> PreScaleGrid:
     )
     train_ids = admissions.filter(pl.col("split") == "train")["admissionid"].to_list()
 
-    # sex/adm/ethnic one-hot encoded on a side copy (demo_source), never on `admissions` itself --
-    # metadata.csv (via _write_metadata) still needs the human-readable collapsed values.
-    demo_source = admissions.select(["admissionid", "sex", "adm", "ethnic"])
+    # sex/adm_urgency/adm_origin/ethnic one-hot encoded on a side copy (demo_source), never on
+    # `admissions` itself -- metadata.csv (via _write_metadata) still needs the human-readable
+    # collapsed values.
+    demo_source = admissions.select(["admissionid", "sex", "adm_urgency", "adm_origin", "ethnic"])
     static_categorical_encoding: list[dict] = []
     next_categorical_pos = 0
     if config.one_hot:
@@ -345,7 +354,7 @@ def finish_grid_dataset(
     ]
     categorical_static_cols = (
         [row["column_name"] for row in static_categorical_encoding]
-        if config.one_hot else ["sex", "adm", "ethnic"]
+        if config.one_hot else ["sex", "adm_urgency", "adm_origin", "ethnic"]
     )
     demo_numeric = admissions.select(
         ["admissionid"]
@@ -390,11 +399,12 @@ def finish_grid_dataset(
         "weight": {"reconstruction_type": "static_numeric", "target_unit": "kg"},
         "height": {"reconstruction_type": "static_numeric", "target_unit": "cm"},
         "sex": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
-        "adm": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+        "adm_urgency": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+        "adm_origin": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
         "ethnic": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
     })
     static_physical = dict(zip(("age", "weight", "height"), ([column] for column in numeric_static_cols)))
-    for tag in ("sex", "adm", "ethnic"):
+    for tag in ("sex", "adm_urgency", "adm_origin", "ethnic"):
         static_physical[tag] = (
             [row["column_name"] for row in static_categorical_encoding if row["feature"] == tag]
             if config.one_hot else [tag]
@@ -404,9 +414,10 @@ def finish_grid_dataset(
         schema[tag]["physical_columns"] = [column for column in physical if column in grid.columns]
     schema_path.write_text(json.dumps(schema, indent=2, sort_keys=True))
 
-    # MIMIC's own K=35 TTE pretraining target manifest (grid.derive_targets.MIMIC_K35_TTE_TARGETS
-    # -- AUMC's K=34 list plus bili_dir, which MIMIC-IV has and AUMCdb doesn't).
-    tte_present = set(matches_with_derived) | {"age", "weight", "height", "sex", "adm", "ethnic"}
+    # MIMIC's own K=35 TTE pretraining target manifest (grid.derive_targets.MIMIC_K35_TTE_TARGETS).
+    # bili_dir is a real, shared target in both cohorts (~6% observed admissions each, not a
+    # structural zero in AUMCdb) -- kept at K=35 for both, no AUMC/MIMIC target-list asymmetry.
+    tte_present = set(matches_with_derived) | {"age", "weight", "height", "sex", "adm_urgency", "adm_origin", "ethnic"}
     tte_missing = [tag for tag in MIMIC_K35_TTE_TARGETS if tag not in tte_present or tag not in grid.columns]
     tte_targets_path = config.output_dir / "tte_targets.json"
     tte_targets_path.write_text(json.dumps({

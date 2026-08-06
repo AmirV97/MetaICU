@@ -75,12 +75,12 @@ class ExternalArtifactsPoolingTests(unittest.TestCase):
         mimic_admissions = pl.DataFrame([
             {"admissionid": 100, "subject_id": 1, "split": "train", "true_los_hours": 10.0,
              "hospital_expire_flag": 0, "age": 65.0, "weight": 85.0, "height": 180.0,
-             "sex": "M", "adm": "medical", "ethnic": "white"},
+             "sex": "M", "adm_urgency": "emergency", "adm_origin": "other", "ethnic": "white"},
         ])
         mimic_pre_scale = PreScaleGrid(
             grid=mimic_grid, matches=mimic_matches, matches_with_derived=dict(mimic_matches),
             derived_target_matches={}, admissions=mimic_admissions, train_admission_ids=[100],
-            demo_source=mimic_admissions.select(["admissionid", "sex", "adm", "ethnic"]),
+            demo_source=mimic_admissions.select(["admissionid", "sex", "adm_urgency", "adm_origin", "ethnic"]),
             static_categorical_encoding=[], next_categorical_pos=0, presence_mask_cols=[],
             manifest_report={}, raw_shard_summary={}, admissions_before_inclusion=1,
         )
@@ -112,7 +112,7 @@ class ExternalArtifactsPoolingTests(unittest.TestCase):
         aumc_admissions = pl.DataFrame([
             {"admissionid": 10, "patientid": 1, "admittedat": 0, "split": "train", "true_los_hours": 10.0,
              "dateofdeath": None, "age": 60.0, "weight": 80.0, "height": 175.0,
-             "sex": "M", "adm": "medical", "ethnic": "unknown"},
+             "sex": "M", "adm_urgency": "emergency", "adm_origin": "other", "ethnic": "unknown"},
         ])
         cls.aumc_config = AumcConfig(
             raw_data_dir=Path("/unused"), output_dir=root / "aumcdb" / "data",
@@ -133,7 +133,7 @@ class ExternalArtifactsPoolingTests(unittest.TestCase):
         aumc_pre_scale = PreScaleGrid(
             grid=aumc_grid, matches=aumc_matches, matches_with_derived=dict(aumc_matches),
             derived_target_matches={}, admissions=aumc_admissions, train_admission_ids=[10],
-            demo_source=aumc_admissions.select(["admissionid", "sex", "adm", "ethnic"]),
+            demo_source=aumc_admissions.select(["admissionid", "sex", "adm_urgency", "adm_origin", "ethnic"]),
             static_categorical_encoding=[], next_categorical_pos=0, presence_mask_cols=[],
             manifest_report={}, raw_shard_summary={}, admissions_before_inclusion=1,
         )

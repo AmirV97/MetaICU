@@ -130,13 +130,49 @@ def _write_shards(
     return shard_info
 
 
+ADMISSION_DEATH_GRACE_HOURS = 24.0  # post-discharge grace only; independently re-derived here for
+# the grid pipeline's own admissions frame (decision: a patient's recorded death is assigned to
+# their LAST admission only, if it falls either during that admission (>= admittedat) or within
+# this many hours after its discharge -- no dependency on tokenized/meds/outcomes.py's algorithm).
+
+
+def _assign_admission_scoped_death(admissions: pl.DataFrame) -> pl.DataFrame:
+    """Adds a boolean `died_this_admission` column: True only for a patient's LAST admission
+    (chronologically, by admittedat), and only if dateofdeath falls in
+    [admittedat, dischargedat + ADMISSION_DEATH_GRACE_HOURS] -- during the admission, or shortly
+    after discharge. If dischargedat can't be computed (null true_los_hours), the upper bound is
+    left open (still admittedat-or-later) since the admission may not have a recorded discharge at
+    all. Matches MIMIC-IV's hospital_expire_flag semantic (died during/around THIS admission)
+    rather than AUMCdb's raw dateofdeath (patient-level, any-time). Every earlier admission for the
+    same patient is always False -- only the last admission can ever be credited."""
+    grace_ms = int(ADMISSION_DEATH_GRACE_HOURS * 3_600_000)
+    dischargedat = pl.col("admittedat") + (pl.col("true_los_hours") * 3_600_000).round(0).cast(pl.Int64)
+    last_admission = (
+        admissions.select(["admissionid", "patientid", "admittedat", "true_los_hours", "dateofdeath"])
+        .with_columns(dischargedat.alias("_dischargedat"))
+        .sort(["patientid", "admittedat"])
+        .unique(subset=["patientid"], keep="last")
+    )
+    assigned = last_admission.filter(
+        pl.col("dateofdeath").is_not_null()
+        & (pl.col("dateofdeath") >= pl.col("admittedat"))
+        & (pl.col("_dischargedat").is_null() | (pl.col("dateofdeath") <= pl.col("_dischargedat") + grace_ms))
+    ).select("admissionid").with_columns(pl.lit(True).alias("died_this_admission"))
+    return admissions.join(assigned, on="admissionid", how="left").with_columns(
+        pl.col("died_this_admission").fill_null(False)
+    )
+
+
 def _write_metadata_by_admission(
     admissions: pl.DataFrame,
     shard_info: dict[int, dict[str, int | str]],
     output_path: Path,
 ) -> None:
-    """Write one row per included ICU admission, each with its own static features."""
+    """Write one row per included ICU admission, each with its own static features. `outcome` is
+    admission-scoped (died during THIS admission, matching MIMIC-IV's hospital_expire_flag), not
+    AUMCdb's raw patient-level dateofdeath -- see _assign_admission_scoped_death."""
 
+    admissions = _assign_admission_scoped_death(admissions)
     scaled_columns = [column for column in ("age_scaled", "weight_scaled", "height_scaled") if column in admissions]
     records = []
     for row in admissions.iter_rows(named=True):
@@ -148,13 +184,17 @@ def _write_metadata_by_admission(
             "split": row["split"],
             "shard_file": info["shard_file"],
             "los_hours": row["true_los_hours"],
-            "outcome": "died" if row["dateofdeath"] is not None else "alive",
+            "outcome": "died" if row["died_this_admission"] else "alive",
+            "outcome_scope": "admission",  # self-documenting: consumers should assert this before
+            # trusting `outcome` for a per-admission label -- see _write_metadata_by_subject for
+            # the other value ("any_time") this same column name can carry.
             "n_rows": info["n_rows"],
             "age": row["age"],
             "weight": row["weight"],
             "height": row["height"],
             "sex": row["sex"],
-            "adm": row["adm"],
+            "adm_urgency": row["adm_urgency"],
+            "adm_origin": row["adm_origin"],
             "ethnic": row["ethnic"],
         }
         for column in scaled_columns:
@@ -171,7 +211,10 @@ def _write_metadata_by_subject(
 ) -> None:
     """Write one row per patient: demographics from the earliest admission, outcome
     (died/alive) from the latest admission, admission-specific fields (adm, admission_ids)
-    as chronologically ordered lists."""
+    as chronologically ordered lists. Unlike _write_metadata_by_admission, outcome here is
+    deliberately patient-level any-time death (raw dateofdeath, not _assign_admission_scoped_death)
+    -- a per-subject row's natural "outcome" is whether the patient ever died, not whether they
+    died during one specific admission in their list."""
 
     scaled_columns = [column for column in ("age_scaled", "weight_scaled", "height_scaled") if column in admissions]
     ordered = admissions.sort(["patientid", "admittedat"])
@@ -189,12 +232,16 @@ def _write_metadata_by_subject(
             "shard_file": shard_info.get(admission_ids[0], {"shard_file": None})["shard_file"],
             "los_hours": group["true_los_hours"].sum(),
             "outcome": "died" if last["dateofdeath"] is not None else "alive",
+            "outcome_scope": "any_time",  # patient-level, not this-admission -- see
+            # _write_metadata_by_admission's "admission" value for the other semantic this same
+            # column name can carry; consumers must check this before trusting `outcome`.
             "n_rows": n_rows,
             "age": first["age"],
             "weight": first["weight"],
             "height": first["height"],
             "sex": first["sex"],
-            "adm": ",".join(str(a) for a in group["adm"].to_list()),
+            "adm_urgency": ",".join(str(a) for a in group["adm_urgency"].to_list()),
+            "adm_origin": ",".join(str(a) for a in group["adm_origin"].to_list()),
             "ethnic": first["ethnic"],
         }
         for column in scaled_columns:
@@ -307,10 +354,10 @@ def build_pre_scale_grid(config: GridDatasetConfig) -> PreScaleGrid:
     admissions = admissions.join(extract_static_features(admissions), on="admissionid")
     train_ids = admissions.filter(pl.col("split") == "train")["admissionid"].to_list()
 
-    # sex/adm/ethnic one-hot encoded on a side copy (demo_source), never on `admissions` itself --
-    # metadata.csv (via _write_metadata_by_admission/_write_metadata_by_subject) still needs the
-    # original human-readable categorical values.
-    demo_source = admissions.select(["admissionid", "sex", "adm", "ethnic"])
+    # sex/adm_urgency/adm_origin/ethnic one-hot encoded on a side copy (demo_source), never on
+    # `admissions` itself -- metadata.csv (via _write_metadata_by_admission/_write_metadata_by_subject)
+    # still needs the original human-readable categorical values.
+    demo_source = admissions.select(["admissionid", "sex", "adm_urgency", "adm_origin", "ethnic"])
     static_categorical_encoding: list[dict] = []
     next_categorical_pos = 0
     if config.one_hot:
@@ -425,7 +472,7 @@ def finish_grid_dataset(
     ]
     categorical_static_cols = (
         [row["column_name"] for row in static_categorical_encoding]
-        if config.one_hot else ["sex", "adm", "ethnic"]
+        if config.one_hot else ["sex", "adm_urgency", "adm_origin", "ethnic"]
     )
     demo_numeric = admissions.select(
         ["admissionid"]
@@ -481,11 +528,12 @@ def finish_grid_dataset(
         "weight": {"reconstruction_type": "static_numeric", "target_unit": "kg"},
         "height": {"reconstruction_type": "static_numeric", "target_unit": "cm"},
         "sex": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
-        "adm": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+        "adm_urgency": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
+        "adm_origin": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
         "ethnic": {"reconstruction_type": "static_categorical", "target_unit": "categorical"},
     })
     static_physical = dict(zip(("age", "weight", "height"), ([column] for column in numeric_static_cols)))
-    for tag in ("sex", "adm", "ethnic"):
+    for tag in ("sex", "adm_urgency", "adm_origin", "ethnic"):
         static_physical[tag] = (
             [row["column_name"] for row in static_categorical_encoding if row["feature"] == tag]
             if config.one_hot else [tag]

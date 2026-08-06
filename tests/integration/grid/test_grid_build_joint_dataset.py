@@ -75,14 +75,16 @@ class GridBuildJointDatasetOrchestrationTests(unittest.TestCase):
         })
         aumc_admissions = _admissions_frame([
             {"admissionid": 10, "subject": 1, "split": "train", "admittedat": 0, "true_los_hours": 10.0,
-             "dateofdeath": None, "age": 60.0, "weight": 80.0, "height": 175.0, "sex": "M", "adm": "medical", "ethnic": "unknown"},
+             "dateofdeath": None, "age": 60.0, "weight": 80.0, "height": 175.0, "sex": "M",
+             "adm_urgency": "emergency", "adm_origin": "other", "ethnic": "unknown"},
             {"admissionid": 20, "subject": 2, "split": "val", "admittedat": 0, "true_los_hours": 5.0,
-             "dateofdeath": None, "age": 55.0, "weight": 70.0, "height": 165.0, "sex": "F", "adm": "surgical", "ethnic": "unknown"},
+             "dateofdeath": None, "age": 55.0, "weight": 70.0, "height": 165.0, "sex": "F",
+             "adm_urgency": "elective", "adm_origin": "other", "ethnic": "unknown"},
         ], subject_col="patientid")
         aumc_pre_scale = PreScaleGrid(
             grid=aumc_grid, matches=aumc_matches, matches_with_derived=dict(aumc_matches),
             derived_target_matches={}, admissions=aumc_admissions, train_admission_ids=[10],
-            demo_source=aumc_admissions.select(["admissionid", "sex", "adm", "ethnic"]),
+            demo_source=aumc_admissions.select(["admissionid", "sex", "adm_urgency", "adm_origin", "ethnic"]),
             static_categorical_encoding=[], next_categorical_pos=0, presence_mask_cols=[],
             manifest_report={}, raw_shard_summary={}, admissions_before_inclusion=2,
         )
@@ -104,14 +106,16 @@ class GridBuildJointDatasetOrchestrationTests(unittest.TestCase):
         })
         mimic_admissions = _admissions_frame([
             {"admissionid": 100, "subject": 1, "split": "train", "true_los_hours": 10.0,
-             "hospital_expire_flag": 0, "age": 65.0, "weight": 85.0, "height": 180.0, "sex": "M", "adm": "medical", "ethnic": "white"},
+             "hospital_expire_flag": 0, "age": 65.0, "weight": 85.0, "height": 180.0, "sex": "M",
+             "adm_urgency": "emergency", "adm_origin": "other", "ethnic": "white"},
             {"admissionid": 200, "subject": 3, "split": "val", "true_los_hours": 6.0,
-             "hospital_expire_flag": 0, "age": 50.0, "weight": 75.0, "height": 170.0, "sex": "F", "adm": "surgical", "ethnic": "black"},
+             "hospital_expire_flag": 0, "age": 50.0, "weight": 75.0, "height": 170.0, "sex": "F",
+             "adm_urgency": "elective", "adm_origin": "other", "ethnic": "black"},
         ], subject_col="subject_id")
         mimic_pre_scale = PreScaleGrid(
             grid=mimic_grid, matches=mimic_matches, matches_with_derived=dict(mimic_matches),
             derived_target_matches={}, admissions=mimic_admissions, train_admission_ids=[100],
-            demo_source=mimic_admissions.select(["admissionid", "sex", "adm", "ethnic"]),
+            demo_source=mimic_admissions.select(["admissionid", "sex", "adm_urgency", "adm_origin", "ethnic"]),
             static_categorical_encoding=[], next_categorical_pos=0, presence_mask_cols=[],
             manifest_report={}, raw_shard_summary={}, admissions_before_inclusion=2,
         )

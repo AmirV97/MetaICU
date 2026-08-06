@@ -100,12 +100,14 @@ def one_hot_encode_columns(df, vocab, start_pos=0):
     return df, encoding_schema, global_pos
 
 
-def one_hot_encode_categorical(grid, matches, start_pos=0):
+def one_hot_encode_categorical(grid, matches, start_pos=0, external_vocab=None):
     """grid: wide DataFrame from grid.impute.impute_grid (categorical columns still single
     string-label columns; real nulls = pre-first-observation gaps). matches: tag -> info dict
-    from grid.build.manifest_parser.parse_manifest(). See one_hot_encode_columns for the shared
-    mechanics and return shape."""
-    vocab = get_categorical_vocab(matches)
+    from grid.build.manifest_parser.parse_manifest(). external_vocab: optional {tag: [categories]}
+    override (e.g. a cross-dataset union from metaicu.grid.external_artifacts.build_external_vocab)
+    used in place of get_categorical_vocab(matches) when supplied. See one_hot_encode_columns for
+    the shared mechanics and return shape."""
+    vocab = external_vocab if external_vocab is not None else get_categorical_vocab(matches)
     return one_hot_encode_columns(grid, vocab, start_pos=start_pos)
 
 

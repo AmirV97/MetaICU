@@ -6,9 +6,15 @@ the results into scale_grid/scale_static_features's `external_scalers` param
 (metaicu.{aumcdb,mimiciv}.grid.build.scale) so pooled statistics are applied instead of each
 cohort fitting its own train split independently. Not wired into either build_workflow.py yet.
 
-compute_cohort_weights implements the SAME 1/sqrt(n_train_admissions) weighting the training repo
-(iCareFM_replicate) uses for its per-cohort loss -- one formula, reused for both purposes, so the
-two weightings can never drift apart.
+compute_cohort_weights returns each cohort's total MASS for pooling, not the training repo's
+PER-ADMISSION loss weight. iCareFM_replicate/HANDOFF.md ("Cohort weighting -- the sqrt(n) rule")
+gives each admission a per-admission weight w_c = 1/sqrt(n_cohort); a cohort's total mass is then
+n_cohort * w_c = n_cohort / sqrt(n_cohort) = sqrt(n_cohort) -- e.g. AUMC 22,774 / MIMIC 87,513 is a
+33.8%/66.2% split (HANDOFF.md's own worked example), NOT the ~66%/34% you'd get by normalizing
+1/sqrt(n) directly, which was this function's bug before 2026-08-06 -- it returned the
+per-admission weight where every caller (pooled_mean_std, pooled_fit_treatment) actually needed
+the cohort-level mass to combine two cohorts' statistics correctly (larger cohort's own fit is
+more reliable and should dominate the pooled fit, not be diluted by it).
 
 pooled_mean_std uses the proper two-term pooled-variance formula (weighted average of the
 per-cohort variances PLUS the weighted average of each cohort's squared deviation from the pooled
@@ -41,10 +47,11 @@ MIN_TRAIN_VALUES = 10  # mirrors each pipeline's own scale.py::MIN_TRAIN_VALUES,
 
 def compute_cohort_weights(n_train_admissions_by_cohort):
     """n_train_admissions_by_cohort: {cohort: n_train_admissions}. Returns {cohort: weight},
-    weight = 1/sqrt(n) normalized to sum to 1."""
-    inverse_sqrt = {cohort: 1.0 / math.sqrt(n) for cohort, n in n_train_admissions_by_cohort.items()}
-    total = sum(inverse_sqrt.values())
-    return {cohort: w / total for cohort, w in inverse_sqrt.items()}
+    weight = sqrt(n) normalized to sum to 1 -- a cohort's total MASS (see module docstring), so
+    the larger cohort's own fit dominates the pooled result, proportionally to sqrt(n)."""
+    sqrt_n = {cohort: math.sqrt(n) for cohort, n in n_train_admissions_by_cohort.items()}
+    total = sum(sqrt_n.values())
+    return {cohort: s / total for cohort, s in sqrt_n.items()}
 
 
 def pooled_mean_std(per_cohort, weights):
@@ -77,11 +84,13 @@ def _replication_counts(sizes, weights):
     return {c: max(1, round(scale * per_unit[c])) for c in sizes}
 
 
-def pooled_fit_treatment(train_values_by_cohort, weights, tag):
+def pooled_fit_treatment(train_values_by_cohort, weights, tag, random_seed=42):
     """train_values_by_cohort: {cohort: 1D numpy array of raw, non-null TRAIN-split values for
     this tag}. weights: cohort -> weight (e.g. the full run-wide dict from
     compute_cohort_weights); renormalized here over whichever cohorts actually have strictly-
-    positive values for this tag, same rationale as pooled_mean_std.
+    positive values for this tag, same rationale as pooled_mean_std. random_seed: passed to
+    QuantileTransformer -- see scale.py::_fit_treatment_scaler's own docstring for why this must
+    be fixed rather than left at sklearn's default.
 
     Returns a QuantileTransformer fit on a pooled sample built by replicating each contributing
     cohort's own strictly-positive values (see _replication_counts) and concatenating -- or None
@@ -108,6 +117,6 @@ def pooled_fit_treatment(train_values_by_cohort, weights, tag):
     # sample is built deterministically above, but QuantileTransformer itself still subsamples
     # internally above its own `subsample` threshold and needs a fixed seed to be reproducible.
     qt = QuantileTransformer(output_distribution="uniform",
-                              n_quantiles=min(1000, len(pooled_values)), random_state=42)
+                              n_quantiles=min(1000, len(pooled_values)), random_state=random_seed)
     qt.fit(pooled_values.reshape(-1, 1))
     return qt

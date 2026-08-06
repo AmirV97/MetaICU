@@ -17,12 +17,15 @@ import polars as pl
 
 from metaicu.aumcdb.common.raw_shards import build_raw_shards_for_tables
 from metaicu.aumcdb.common.raw_tables import raw_table_input_mode
+from metaicu.grid.external_artifacts import build_external_vocab, build_pooled_external_scalers, load_external_artifacts
 from metaicu.grid.integrity import audit_grid_dataset
+from metaicu.grid.pool_scale import compute_cohort_weights
 from metaicu.grid.pre_scale import PreScaleGrid
+from metaicu.grid.schema_union import compute_union_matches, pad_matches_for_cohort
 
 from .assemble import assemble_grid, canonical_column_order
 from .derive_targets import K35_TTE_TARGETS, DERIVED_TARGET_SOURCES, add_derived_tte_targets
-from .encode import one_hot_encode_categorical, one_hot_encode_columns, save_categorical_encoding
+from .encode import get_categorical_vocab, one_hot_encode_categorical, one_hot_encode_columns, save_categorical_encoding
 from .extract_indicator import extract_treatment_indicator
 from .extract_numeric import extract_numeric_categorical
 from .extract_rate import extract_treatment_rate
@@ -51,14 +54,16 @@ class GridDatasetConfig:
     raw_shard_rows: int = 5_000_000
     manifest_path: Path | None = None
     admission_ids_file: Path | None = None
+    external_artifacts_dir: Path | None = None
     sample_size: int | None = None
     patients_per_file: int = 1_000
-    seed: int = 42
     unit_of_analysis: str = "admission"
     train_frac: float = 0.8
     val_frac: float = 0.1
     test_frac: float = 0.1
-    split_seed: int = 42
+    random_seed: int = 42  # drives admission subsampling, split assignment, and treatment
+                            # (QuantileTransformer) scaler fitting -- one knob for every random
+                            # component in this pipeline
     features: tuple[str, ...] = ()
     reconstruction_types: tuple[str, ...] = ()
     apply_inclusion_criteria: bool = True
@@ -264,7 +269,7 @@ def build_pre_scale_grid(config: GridDatasetConfig) -> PreScaleGrid:
     admission_ids = get_admission_ids(
         config.raw_data_dir,
         sample_size=config.sample_size,
-        seed=config.seed,
+        seed=config.random_seed,
         admission_ids_file=config.admission_ids_file,
     )
     admissions = load_valid_admissions(config.raw_data_dir)
@@ -296,7 +301,7 @@ def build_pre_scale_grid(config: GridDatasetConfig) -> PreScaleGrid:
         config.train_frac,
         config.val_frac,
         config.test_frac,
-        config.split_seed,
+        config.random_seed,
     )
     admissions = admissions.join(assignments, on="admissionid")
     admissions = admissions.join(extract_static_features(admissions), on="admissionid")
@@ -353,12 +358,14 @@ def build_pre_scale_grid(config: GridDatasetConfig) -> PreScaleGrid:
 
 
 def finish_grid_dataset(
-    config: GridDatasetConfig, pre_scale_grid: PreScaleGrid, external_scalers: dict | None = None
+    config: GridDatasetConfig, pre_scale_grid: PreScaleGrid,
+    external_scalers: dict | None = None, external_vocab: dict | None = None,
 ) -> dict[str, Path]:
     """Scale (using external_scalers per tag when supplied -- e.g. a pooled cross-cohort fit from
     metaicu.grid.pool_scale -- instead of fitting on this cohort's own train split), impute,
-    one-hot, and write every output artifact. external_scalers=None reproduces exactly what
-    write_grid_dataset_outputs always did.
+    one-hot (using external_vocab in place of this cohort's own categorical vocab when supplied),
+    and write every output artifact. external_scalers=None/external_vocab=None reproduces exactly
+    what write_grid_dataset_outputs always did.
 
     config.output_dir is (re-)ensured here rather than assumed from build_pre_scale_grid's own
     _prepare_output_dir call -- callers may build a PreScaleGrid some other way (e.g. a hand-built
@@ -382,7 +389,9 @@ def finish_grid_dataset(
         admissions, static_scalers = scale_static_features(admissions, train_ids, external_scalers=external_scalers)
         scalers.update(static_scalers)
     if config.scale:
-        grid, grid_scalers = scale_grid(grid, matches_with_derived, train_ids, external_scalers=external_scalers)
+        grid, grid_scalers = scale_grid(
+            grid, matches_with_derived, train_ids, external_scalers=external_scalers, random_seed=config.random_seed
+        )
         scalers.update(grid_scalers)
         save_scalers(scalers, config.output_dir / "scalers.pkl")
     if config.impute:
@@ -392,7 +401,9 @@ def finish_grid_dataset(
         grid = impute_grid(grid, matches_with_derived, scaled_numeric_tags=scaled_numeric_tags)
     encoding_schema = list(static_categorical_encoding)
     if config.one_hot:
-        grid, grid_encoding, _ = one_hot_encode_categorical(grid, matches_with_derived, start_pos=next_categorical_pos)
+        grid, grid_encoding, _ = one_hot_encode_categorical(
+            grid, matches_with_derived, start_pos=next_categorical_pos, external_vocab=external_vocab
+        )
         encoding_schema += grid_encoding
         save_categorical_encoding(
             encoding_schema, config.output_dir / "categorical_encoding.csv"
@@ -533,5 +544,38 @@ def finish_grid_dataset(
 
 
 def write_grid_dataset_outputs(config: GridDatasetConfig) -> dict[str, Path]:
-    """Build a split-aware hourly grid and write data, metadata, and audit summaries."""
-    return finish_grid_dataset(config, build_pre_scale_grid(config))
+    """Build a split-aware hourly grid and write data, metadata, and audit summaries.
+
+    config.external_artifacts_dir=None reproduces exactly what this function always did. When
+    set, it points at a PREVIOUSLY-completed single-dataset grid build's output_dir (own or
+    another cohort's) -- this run's own per-tag statistics are pooled with that build's saved
+    scalers.pkl/categorical_encoding.csv/feature_schema.json via the same 1/sqrt(n_train_admissions)
+    weighting metaicu.grid.pool_scale uses for a joint build, rather than fitting solely on this
+    run's own train split. Mirrors grid_build_joint_dataset.py's own pad-then-pool sequencing:
+    pad this cohort's matches to the union of its own tags and the external schema's (re-running
+    materialize_structural_zero_columns/capture_presence_mask on the padded dict, since the grid
+    was already assembled from the UNPADDED dict), then pool statistics, then finish."""
+    pre_scale_grid = build_pre_scale_grid(config)
+    external_scalers = None
+    external_vocab = None
+    if config.external_artifacts_dir is not None:
+        external = load_external_artifacts(config.external_artifacts_dir)
+        union_registry = compute_union_matches({"external": external.schema_registry, "own": pre_scale_grid.matches})
+        padded_matches = pad_matches_for_cohort(pre_scale_grid.matches, union_registry)
+        padded_matches_with_derived = {**padded_matches, **pre_scale_grid.derived_target_matches}
+        pre_scale_grid.grid = materialize_structural_zero_columns(pre_scale_grid.grid, padded_matches_with_derived)
+        pre_scale_grid.grid, pre_scale_grid.presence_mask_cols = capture_presence_mask(
+            pre_scale_grid.grid, padded_matches_with_derived
+        )
+        pre_scale_grid.matches = padded_matches
+        pre_scale_grid.matches_with_derived = padded_matches_with_derived
+
+        weights = compute_cohort_weights(
+            {"external": external.n_train_admissions, "own": len(pre_scale_grid.train_admission_ids)}
+        )
+        external_scalers = build_pooled_external_scalers(pre_scale_grid, external, weights, random_seed=config.random_seed)
+        external_vocab = build_external_vocab(external, get_categorical_vocab(pre_scale_grid.matches_with_derived))
+        log.info(f"External artifacts from {config.external_artifacts_dir}: "
+                 f"pooled {len(external_scalers)} scaler tags, weights={weights}")
+
+    return finish_grid_dataset(config, pre_scale_grid, external_scalers=external_scalers, external_vocab=external_vocab)

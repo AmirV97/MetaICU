@@ -32,14 +32,13 @@ dataset_configs:
       train_frac: 0.8
       val_frac: 0.1
       test_frac: 0.1
-      seed: 42
     run:
       build_raw_shards: true
       rebuild_raw_shards: false
       raw_shard_rows: 5000000
       sample_size: null
       patients_per_file: 1000
-      seed: 42
+      random_seed: 42
       features: null
       reconstruction_types: null
       apply_inclusion_criteria: true
@@ -62,14 +61,13 @@ dataset_configs:
       train_frac: 0.8
       val_frac: 0.1
       test_frac: 0.1
-      seed: 42
     run:
       build_raw_shards: true
       rebuild_raw_shards: false
       raw_shard_rows: 5000000
       sample_size: null
       patients_per_file: 1000
-      seed: 42
+      random_seed: 42
       features: null
       reconstruction_types: null
       apply_inclusion_criteria: true
@@ -82,6 +80,8 @@ joint:
   output_dir: null   # required -- final flat train/val/test + metadata.csv (source column) + sidecars
   audit_dir: null    # required -- joint_grid_build_summary.json + grid_integrity_summary.json
   patients_per_file: 1000
+  random_seed: 42  # for the pooled treatment-tag QuantileTransformer fit -- independent of either
+                    # cohort's own dataset_configs.<name>.run.random_seed
   log_level: INFO
 
 hydra:

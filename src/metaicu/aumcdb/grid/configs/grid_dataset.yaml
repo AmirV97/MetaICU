@@ -10,6 +10,10 @@ paths:
   audit_dir: null           # defaults to parent_dir/audits/grid_dataset
   manifest_path: null       # defaults to the packaged reviewed AUMC feature manifest
   admission_ids_file: null  # optional one-admissionid-per-line bounded cohort
+  external_artifacts_dir: null  # optional: another (or this same) dataset's already-built grid
+                                 # output_dir -- pools this run's own per-tag stats with that
+                                 # build's saved scalers.pkl/categorical_encoding.csv, weighted by
+                                 # each side's sqrt(n_train_admissions) mass, instead of fitting solo
 
 split:
   unit_of_analysis: admission  # admission (one sample per admission) or subject (one sample per
@@ -18,7 +22,6 @@ split:
   train_frac: 0.8
   val_frac: 0.1
   test_frac: 0.1
-  seed: 42
 
 run:
   build_raw_shards: true
@@ -26,7 +29,8 @@ run:
   raw_shard_rows: 5000000
   sample_size: null
   patients_per_file: 1000
-  seed: 42
+  random_seed: 42  # drives admission subsampling, split assignment, and treatment
+                    # (QuantileTransformer) scaler fitting -- one knob for every random component
   features: null
   reconstruction_types: null
   apply_inclusion_criteria: true

@@ -38,7 +38,6 @@ from typing import Any
 
 import hydra
 import numpy as np
-import polars as pl
 from omegaconf import DictConfig, OmegaConf
 
 from metaicu.aumcdb.grid.build.build_workflow import build_pre_scale_grid as _build_aumcdb_pre_scale_grid
@@ -56,6 +55,7 @@ from metaicu.mimiciv.grid.build.impute import (
     materialize_structural_zero_columns as _mimiciv_materialize_structural_zero,
 )
 from metaicu.mimiciv.grid.cli.grid_build_dataset import _build_config as _build_mimiciv_config
+from metaicu.grid.external_artifacts import train_values as _train_values
 from metaicu.grid.joint_assemble import write_joint_outputs
 from metaicu.grid.pool_scale import MIN_TRAIN_VALUES, compute_cohort_weights, pooled_fit_treatment, pooled_mean_std
 from metaicu.grid.schema_union import compute_union_matches, pad_matches_for_cohort
@@ -104,13 +104,6 @@ def _pad_pre_scale_grid(name, pre_scale_grid, union_registry, materialize_fn, pr
              f"({len(union_registry) - n_before} newly added)")
 
 
-def _train_values(df, train_admission_ids, tag):
-    if tag not in df.columns:
-        return np.array([])
-    mask = pl.col("admissionid").is_in(list(train_admission_ids))
-    return df.filter(mask)[tag].drop_nulls().to_numpy()
-
-
 def _pooled_observation_scaler(per_cohort_values, weights, log_kind=None):
     """per_cohort_values: {cohort: 1D raw non-null train values}, already restricted to
     contributing cohorts (non-empty, non-structural-zero). Returns a scaler entry shaped like
@@ -124,11 +117,13 @@ def _pooled_observation_scaler(per_cohort_values, weights, log_kind=None):
     return {"type": "observation", "log": log_kind, "mean": mean, "std": std if std != 0.0 else 1.0}
 
 
-def _compute_pooled_scalers(pre_scale_by_cohort, weights):
+def _compute_pooled_scalers(pre_scale_by_cohort, weights, random_seed=42):
     """Returns one external_scalers dict (tag -> scaler entry) covering static (age/weight/
     height) and grid (direct_numeric/derived_output_rate/treatment_rate) tags, pooled across
     every cohort with real (non-structural-zero) train-split values for that tag -- passed
-    identically to every cohort's finish_grid_dataset call. Only called when len(datasets) > 1."""
+    identically to every cohort's finish_grid_dataset call. Only called when len(datasets) > 1.
+    random_seed: passed to pooled_fit_treatment's QuantileTransformer -- a joint-level seed,
+    independent of either cohort's own random_seed (this fit isn't tied to one cohort)."""
     pooled = {}
 
     for tag in STATIC_NUMERIC_TAGS:
@@ -160,7 +155,7 @@ def _compute_pooled_scalers(pre_scale_by_cohort, weights):
             continue
 
         if rt == "treatment_rate":
-            qt = pooled_fit_treatment(per_cohort_values, weights, tag)
+            qt = pooled_fit_treatment(per_cohort_values, weights, tag, random_seed=random_seed)
             if qt is not None:
                 pooled[tag] = {"type": "treatment", "transformer": qt}
         else:
@@ -186,6 +181,7 @@ def main(cfg: DictConfig) -> None:
     if joint_output_dir is None or joint_audit_dir is None:
         raise ValueError("joint.output_dir and joint.audit_dir are required")
     patients_per_file = int(OmegaConf.select(cfg, "joint.patients_per_file", default=1_000))
+    joint_random_seed = int(OmegaConf.select(cfg, "joint.random_seed", default=42))
 
     joint_audit_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
@@ -227,7 +223,7 @@ def main(cfg: DictConfig) -> None:
 
     external_scalers = None
     if len(datasets) > 1:
-        external_scalers = _compute_pooled_scalers(pre_scale_by_cohort, weights)
+        external_scalers = _compute_pooled_scalers(pre_scale_by_cohort, weights, random_seed=joint_random_seed)
         log.info(f"Pooled statistics fit for {len(external_scalers)} tags")
 
     cohort_output_dirs = {}

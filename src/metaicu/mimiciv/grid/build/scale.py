@@ -91,7 +91,7 @@ def _apply_observation_scaler(col, log_kind, mean, std):
     return pl.Series(col.name, out).fill_nan(None)
 
 
-def _fit_treatment_scaler(train_values, tag):
+def _fit_treatment_scaler(train_values, tag, random_seed=42):
     """train_values: 1D numpy array, non-null raw values from the TRAIN split only. Returns a
     QuantileTransformer fit on the strictly-positive subset, or None if there are too few
     positive training values to fit meaningfully (tag left as raw 0/1 pass-through)."""
@@ -106,7 +106,7 @@ def _fit_treatment_scaler(train_values, tag):
     # reproducible across pipeline re-runs; it does not affect train/test leakage (train_values
     # passed in here is already train-only, see scale_grid).
     qt = QuantileTransformer(output_distribution="uniform",
-                              n_quantiles=min(1000, len(positive)), random_state=42)
+                              n_quantiles=min(1000, len(positive)), random_state=random_seed)
     qt.fit(positive.reshape(-1, 1))
     return qt
 
@@ -124,7 +124,7 @@ def _apply_treatment_scaler(col, qt):
     return pl.Series(col.name, out).fill_nan(None)
 
 
-def scale_grid(grid, matches, train_admission_ids, external_scalers=None):
+def scale_grid(grid, matches, train_admission_ids, external_scalers=None, random_seed=42):
     """grid: wide DataFrame from grid.assemble_grid (pre-imputation -- still has true nulls
     where an hour was never observed). matches: tag -> feature info dict from
     grid.manifest.parse_manifest(). train_admission_ids: iterable of admissionids in the train
@@ -132,7 +132,8 @@ def scale_grid(grid, matches, train_admission_ids, external_scalers=None):
     optional {tag: scaler_entry} (same shape as this function's own return value's `scalers`,
     e.g. from a pooled cross-cohort fit in metaicu.grid.pool_scale) -- when a tag has an entry
     here, its own fit is skipped and this scaler is applied instead, via the same
-    _apply_observation_scaler/_apply_treatment_scaler used for a locally-fit tag.
+    _apply_observation_scaler/_apply_treatment_scaler used for a locally-fit tag. random_seed:
+    passed to _fit_treatment_scaler (unused when a tag's fit is skipped via external_scalers).
 
     Returns (grid, scalers): grid with every direct_numeric/derived_output_rate/treatment_rate
     column transformed in place (nulls left as null, for grid.impute to resolve next); scalers
@@ -176,7 +177,7 @@ def scale_grid(grid, matches, train_admission_ids, external_scalers=None):
                 qt = external["transformer"]
             else:
                 train_values = grid.filter(train_mask)[tag].drop_nulls().to_numpy()
-                qt = _fit_treatment_scaler(train_values, tag)
+                qt = _fit_treatment_scaler(train_values, tag, random_seed=random_seed)
             grid = grid.with_columns(_apply_treatment_scaler(col, qt))
             scalers[tag] = {"type": "treatment", "transformer": qt}
             log.info(f"{tag}: treatment quantile-transform ("

@@ -19,10 +19,10 @@ from metaicu.grid.pool_scale import (
 
 
 class ComputeCohortWeightsTests(unittest.TestCase):
-    def test_weights_are_inverse_sqrt_normalized_to_one(self) -> None:
+    def test_weights_are_sqrt_normalized_to_one_larger_cohort_dominates(self) -> None:
         weights = compute_cohort_weights({"a": 100, "b": 400})
-        self.assertAlmostEqual(weights["a"], 2 / 3)
-        self.assertAlmostEqual(weights["b"], 1 / 3)
+        self.assertAlmostEqual(weights["a"], 1 / 3)
+        self.assertAlmostEqual(weights["b"], 2 / 3)
         self.assertAlmostEqual(sum(weights.values()), 1.0)
 
     def test_equal_n_gives_equal_weights(self) -> None:

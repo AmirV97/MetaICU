@@ -117,15 +117,18 @@ def one_hot_encode_columns(df, vocab, start_pos=0):
     return df, encoding_schema, global_pos
 
 
-def one_hot_encode_categorical(grid, matches, start_pos=0):
+def one_hot_encode_categorical(grid, matches, start_pos=0, external_vocab=None):
     """grid: wide DataFrame from grid.impute.impute_grid (categorical columns still single
     string-label columns; real nulls = pre-first-observation gaps). matches: tag -> info dict
-    from grid.manifest.parse_manifest(). start_pos: see one_hot_encode_columns.
+    from grid.manifest.parse_manifest(). start_pos: see one_hot_encode_columns. external_vocab:
+    optional {tag: [categories]} override (e.g. a cross-dataset union from
+    metaicu.grid.external_artifacts.build_external_vocab) used in place of
+    get_categorical_vocab(matches) when supplied.
 
     Thin wrapper: builds vocab from the manifest's categorical tags, delegates to
     one_hot_encode_columns. Returns (grid, encoding_schema) -- see save_categorical_encoding for
     how encoding_schema is persisted."""
-    vocab = get_categorical_vocab(matches)
+    vocab = external_vocab if external_vocab is not None else get_categorical_vocab(matches)
     for tag, collapse in CATEGORY_COLLAPSE.items():
         if tag in grid.columns:
             grid = grid.with_columns(pl.col(tag).replace(collapse).alias(tag))
